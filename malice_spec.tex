@@ -42,11 +42,13 @@ There are two primative types in the MAlice language:
 The following table shows the list of keywords that cannot be used within a 
 program, as they are keywords in the MAlice language.
 
-\begin{tabular}{l l l l}
-was    & a   & number                                   & and\\
-became & but & \textquoteleft said Alice\textquoteright & too\\
-drank  & ate & letter                                   & then\\
-\end{tabular}
+\begin{center}
+  \begin{tabular}{l l l l}
+  was    & a   & number                                   & and \\
+  became & but & \textquoteleft said Alice\textquoteright & too \\
+  drank  & ate & letter                                   & then \\
+  \end{tabular}
+\end{center}
 
 \subsection*{White Space}
 White space is completely ignored and spacing is not important. Lines of MAlice 
@@ -57,26 +59,28 @@ information on this.
 This table shows the operators that can be used in the language. It also shows 
 the level of precedence of the operator.
 
-\begin{tabular}{| c | c | c |}
-\hline
-\textbf{Operation}&\textbf{Symbol}&\textbf{Precedence Level}\\
-\hline
-Addition         & +                     & 2 \\
-Bitwise AND      & \&                    & 3 \\
-Bitwise NOT      & \textasciitilde       & 0 \\
-Bitwise OR       & \textbar              & 4 \\
-Bitwise XOR      & \textasciicircum      & 5 \\
-Integer Division & /                     & 1 \\
-Modulus          & \%                    & 1 \\
-Multiplication   & \textasteriskcentered & 1 \\
-Subtraction      & \textendash           & 2 \\
-\hline
-\end{tabular}
+\begin{center}
+  \begin{tabular}{| c | c | c |}
+  \hline
+  \textbf{Operation}&\textbf{Symbol}&\textbf{Precedence Level}\\
+  \hline
+  Addition         & +                     & 2 \\
+  Bitwise AND      & \&                    & 3 \\
+  Bitwise NOT      & $\sim$                & 0 \\
+  Bitwise OR       & \textbar              & 4 \\
+  Bitwise XOR      & \textasciicircum      & 5 \\
+  Integer Division & /                     & 1 \\
+  Modulus          & \%                    & 1 \\
+  Multiplication   & \textasteriskcentered & 1 \\
+  Subtraction      & \textendash           & 2 \\
+  \hline
+  \end{tabular}
+\end{center}
 
 \section*{Semantic Decisions}
 \subsection*{Delimiters}
 \subsection*{Variable Name Constraints}
 
-\section*{Backaus-Naur Form Grammar} 
+\section*{Backaus-Naur Form Grammar}
 
 \end{document}
