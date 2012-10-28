@@ -1,14 +1,16 @@
 \documentclass[a4, 11pt]{article}
 
 \usepackage{a4, fullpage}
-\usepackage[tmargin=1cm, lmargin=2.5cm, rmargin=2.5cm, bmargin=3cm]{geometry}
+\usepackage[tmargin=2.5cm, lmargin=2.5cm, rmargin=2.5cm, bmargin=2.5cm]{geometry}
 \usepackage{titlesec}
+\usepackage{enumitem}
 
 \titlespacing\section{0pt}{11pt}{-2pt}
-\titlespacing\subsection{0pt}{11pt}{-2pt}
+\titlespacing\subsection{0pt}{2pt}{-2pt}
 
 \setlength{\parskip}{0.3cm}
 \setlength{\parindent}{0cm}
+\setlist{nolistsep}
 
 \begin{document}
 
@@ -27,12 +29,54 @@ any semantic decisions we have made about the language.
 
 \section*{Lexical Structure}
 \subsection*{Types}
+There are two primative types in the MAlice language:
+
+\begin{itemize}
+  \item \textbf{number} - a number is a two's complement 32 bit integer 
+  primative, with a range of \( -(2^{31}) \) to \( +(2^{31} - 1) \). 
+  \item \textbf{letter} - a letter is an 8 bit character primative, which 
+  allows scope for any character from the ASCII set.
+\end{itemize}
+
 \subsection*{Reserved Keywords}
+The following table shows the list of keywords that cannot be used within a 
+program, as they are keywords in the MAlice language.
+
+\begin{tabular}{l l l l}
+was    & a   & number                                   & and\\
+became & but & \textquoteleft said Alice\textquoteright & too\\
+drank  & ate & letter                                   & then\\
+\end{tabular}
+
 \subsection*{White Space}
+White space is completely ignored and spacing is not important. Lines of MAlice 
+code are seperated by delimitors - see the \textbf{Delimiters} section for more 
+information on this.
+
+\subsection*{Operators}
+This table shows the operators that can be used in the language. It also shows 
+the level of precedence of the operator.
+
+\begin{tabular}{| c | c | c |}
+\hline
+\textbf{Operation}&\textbf{Symbol}&\textbf{Precedence Level}\\
+\hline
+Addition         & +                     & 2 \\
+Bitwise AND      & \&                    & 3 \\
+Bitwise NOT      & \textasciitilde       & 0 \\
+Bitwise OR       & \textbar              & 4 \\
+Bitwise XOR      & \textasciicircum      & 5 \\
+Integer Division & /                     & 1 \\
+Modulus          & \%                    & 1 \\
+Multiplication   & \textasteriskcentered & 1 \\
+Subtraction      & \textendash           & 2 \\
+\hline
+\end{tabular}
 
 \section*{Semantic Decisions}
+\subsection*{Delimiters}
+\subsection*{Variable Name Constraints}
 
 \section*{Backaus-Naur Form Grammar} 
-
 
 \end{document}
