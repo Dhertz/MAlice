@@ -4,12 +4,13 @@
 \usepackage[tmargin=2.5cm, lmargin=2.5cm, rmargin=2.5cm, bmargin=2.5cm]{geometry}
 \usepackage{titlesec}
 \usepackage{enumitem}
+\usepackage{textcomp}
 
 \titlespacing\section{0pt}{11pt}{-2pt}
 \titlespacing\subsection{0pt}{2pt}{-2pt}
 
-\setlength{\parskip}{0.3cm}
-\setlength{\parindent}{0cm}
+\setlength{\parskip}{8pt}
+\setlength{\parindent}{0pt}
 \setlist{nolistsep}
 
 \begin{document}
@@ -21,11 +22,7 @@
 \maketitle
 
 \section*{Introduction}
-This document outlines the specification of the MAlice language, which we have 
-written based on the sample programs and their corresponding output which we 
-were given. We will look at the lexical structure of the language, give a 
-somewhat formal defenition of the lanugage in Backaus-Naur Form, and discuss 
-any semantic decisions we have made about the language.
+This document outlines the specification of the MAlice language, which we have written based on the sample programs and their corresponding output which we were given. We will look at the lexical structure of the language, give a somewhat formal defenition of the lanugage in Backaus-Naur Form, and discuss any semantic decisions we have made about the language.
 
 \section*{Lexical Structure}
 \subsection*{Types}
@@ -39,25 +36,28 @@ There are two primative types in the MAlice language:
 \end{itemize}
 
 \subsection*{Reserved Keywords}
-The following table shows the list of keywords that cannot be used within a 
-program, as they are keywords in the MAlice language.
+The following table shows the list of keywords that cannot be used within a program, as they are keywords in the MAlice language.
 
-\begin{center}
-  \begin{tabular}{l l l l}
-  was    & a   & number                                   & and \\
-  became & but & \textquoteleft said Alice\textquoteright & too \\
-  drank  & ate & letter                                   & then \\
-  \end{tabular}
-\end{center}
+\begin{itemize}
+  \item \textbf{was} - this keyword is used along with \textquoteleft a\textquoteright (and a type) to declare variables.
+  \item \textbf{number} - this is a primative. See the \textbf{Types} section above.
+  \item \textbf{and} - this keyword is a statement seperator. See the \textbf{Delimeters} section.
+  \item \textbf{became} - this keyword allows assignment to a declared variable.
+  \item \textbf{but} - see \textbf{and}.
+  \item \textbf{said} - this is used along with \textquoteleft Alice
+  \textquoteright to output values.
+  \item \textbf{too} - this keyword can follow a variable declaration as long as a variable has been declared directly before it and that variable was of the same type as the variable currently being declared.
+  \item \textbf{drank} - this keyword decrements a previously declared variable.
+  \item \textbf{ate} - this keyword increments a previously declared variable.
+  \item \textbf{letter} - this is a primative. See the \textbf{Types} section above.
+  \item \textbf{then} - see \textbf{and}.
+\end{itemize}
 
 \subsection*{White Space}
-White space is completely ignored and spacing is not important. Lines of MAlice 
-code are seperated by delimitors - see the \textbf{Delimiters} section for more 
-information on this.
+White space is completely ignored and spacing is not important. Lines of MAlice code are seperated by delimitors - see the \textbf{Delimiters} section for more information on this.
 
 \subsection*{Operators}
-This table shows the operators that can be used in the language. It also shows 
-the level of precedence of the operator.
+This table shows the operators that can be used in the language. It also shows the level of precedence of the operator. All operators are binary, apart from \textbf{Bitwise NOT} which is unary (and written before the operand).
 
 \begin{center}
   \begin{tabular}{| c | c | c |}
@@ -66,13 +66,13 @@ the level of precedence of the operator.
   \hline
   Addition         & +                     & 2 \\
   Bitwise AND      & \&                    & 3 \\
-  Bitwise NOT      & $\sim$                & 0 \\
+  Bitwise NOT      & \( \sim \)            & 0 \\
   Bitwise OR       & \textbar              & 4 \\
-  Bitwise XOR      & \textasciicircum      & 5 \\
-  Integer Division & /                     & 1 \\
+  Bitwise XOR      & \( \wedge \)          & 5 \\
+  Integer Division & \textfractionsolidus  & 1 \\
   Modulus          & \%                    & 1 \\
   Multiplication   & \textasteriskcentered & 1 \\
-  Subtraction      & \textendash           & 2 \\
+  Subtraction      & \textminus            & 2 \\
   \hline
   \end{tabular}
 \end{center}
