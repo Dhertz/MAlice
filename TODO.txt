@@ -2,7 +2,8 @@ TODO list:
 	- BNF definition
 	- Semantics
 	- Extend/proof/re-word sections already done
-	- Think about:
+   - Think about:
 		-- The looking-glass hatta ()
 		-- opened
 		-- closed
+   - Associativity of operators
