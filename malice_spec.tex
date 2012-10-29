@@ -5,6 +5,7 @@
 \usepackage{titlesec}
 \usepackage{enumitem}
 \usepackage{textcomp}
+\usepackage{underscore}
 
 \titlespacing\section{0pt}{11pt}{-2pt}
 \titlespacing\subsection{0pt}{2pt}{-2pt}
@@ -15,18 +16,18 @@
 
 \begin{document}
 
-\title{\huge{MAlice Language Specification}}
+\title{\huge{\emph{MAlice} Language Specification}}
 \author{Owen Davies\\Daniel Hertz\\Charlie Hothersall-Thomas}
 \date{\today}
 
 \maketitle
 
 \section*{Introduction}
-This document outlines the specification of the MAlice language, which we have written based on the provided sample programs and their corresponding outputs. We will look at the lexical structure of the language, give a somewhat formal definition of the language in Backaus-Naur Form, and discuss any semantic decisions we have made about the language.
+This document outlines the specification of the \emph{MAlice} language, which we have written based on the provided sample programs and their corresponding outputs. We will look at the lexical structure of the language, give a somewhat formal definition of the language in Backaus-Naur Form, and discuss any semantic decisions we have made about the language.
 
 \section*{Lexical Structure}
 \subsection*{Types}
-There are two primitive types in the MAlice language:
+There are two primitive types in the \emph{MAlice} language:
 
 \begin{itemize}
   \item \textbf{number} - a number is a two's complement 32-bit integer 
@@ -36,7 +37,7 @@ There are two primitive types in the MAlice language:
 \end{itemize}
 
 \subsection*{Reserved Keywords}
-The following table shows the list of keywords that cannot be used within a program, as they are keywords in the MAlice language:
+The following table shows the list of keywords that cannot be used within a program, as they are keywords in the \emph{MAlice} language:
 
 \begin{itemize}
   \item \textbf{and} - this keyword is a statement separator. See the \textbf{Delimiters} section.
@@ -53,7 +54,7 @@ The following table shows the list of keywords that cannot be used within a prog
 \end{itemize}
 
 \subsection*{White Space}
-White space is completely ignored and spacing is not important. Lines of MAlice code are separated by delimiters - see the \textbf{Delimiters} section for more information on this.
+White space is completely ignored and spacing is not important. Lines of \emph{MAlice} code are separated by delimiters - see the \textbf{Delimiters} section for more information on this.
 
 \subsection*{Operators}
 This table shows the operators that can be used in the language. It also shows the level of precedence of the operator. All operators are binary, apart from \textbf{Bitwise NOT} which is unary (and written before the operand).
@@ -78,13 +79,13 @@ This table shows the operators that can be used in the language. It also shows t
 
 \section*{Semantic Decisions}
 \subsection*{Delimiters}
-There are 2 main categories of delimiters in MAlice - ones that end lines, and ones that combine multiple lines into one. Full stops and commas separate lines, while the keywords \textquoteleft \textbf{and}\textquoteright , \textquoteleft \textbf{but}\textquoteright{} and \textquoteleft \textbf{then}\textquoteright{} connect two lines together. As whitespace is removed at compile time, there can be as many delimiters as necessary on a single line in the source file.
+There are 2 main categories of delimiters in \emph{MAlice} - ones that end lines, and ones that combine multiple lines into one. Full stops and commas separate lines, while the keywords \textquoteleft \textbf{and}\textquoteright , \textquoteleft \textbf{but}\textquoteright{} and \textquoteleft \textbf{then}\textquoteright{} connect two lines together. As whitespace is removed at compile time, there can be as many delimiters as necessary on a single line in the source file.
 
 \subsection*{Variable Name Constraints}
-Variable names must begin with either a lower- or upper-case letter. Underscores are allowed, provided that they are in the middle of the variable name (i.e. not the first or last character). Capital letters can follow an underscore character, but all other characters must be lower case. These constraints have been modelled on the English language, and can be represented with the below regular expression:
+Variable names must begin with either a lower- or upper-case letter. Underscores are allowed, provided that they are not the first or last chacter of the variable name. Capital letters can follow an underscore character, but all other characters must be lower case. These constraints have been modelled on the English language, whcih matches the overall aim of \emph{MAlice} to read like a natural language. These constraints can be represented by the below regular expression:
 
 \begin{center}
-  \texttt{[A-Za-z](\_[A-Za-z]\textbar [a-z])*}
+  \texttt{[A-Za-z](_[A-Za-z]|[a-z])*}
 \end{center}
 
 \section*{Backaus-Naur Form Grammar}
