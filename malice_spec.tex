@@ -57,7 +57,7 @@ The following table shows the list of keywords that cannot be used within a prog
 White space is completely ignored and spacing is not important. Lines of \emph{MAlice} code are separated by delimiters - see the \textbf{Delimiters} section for more information on this.
 
 \subsection*{Operators}
-This table shows the operators that can be used in the language. It also shows the level of precedence of the operator. All operators are binary, apart from \textbf{Bitwise NOT} which is unary (and written before the operand).
+This table shows the operators that can be used in the language. It also shows the level of precedence of the operator.
 
 \begin{center}
   \begin{tabular}{| c | c | c |}
@@ -69,20 +69,23 @@ This table shows the operators that can be used in the language. It also shows t
   Bitwise NOT      & \( \sim \)            & 0 \\
   Bitwise OR       & \textbar              & 4 \\
   Bitwise XOR      & \( \wedge \)          & 5 \\
+  Decrement        & \texttt{drank}        & 0 \\
+  Increment        & \texttt{ate}          & 0 \\
   Integer Division & \textfractionsolidus  & 1 \\
-  Modulus          & \%                    & 1 \\
+  Modulo           & \%                    & 1 \\
   Multiplication   & \textasteriskcentered & 1 \\
-  Subtraction      & \textminus            & 2 \\
   \hline
   \end{tabular}
 \end{center}
+
+All operators are binary, apart from \textbf{Bitwise NOT}, \textbf{Increment} and \textbf{Decrement} which are unary. The \textbf{Bitwise NOT} opertor is used on the left-hand side of the operand; the other two are used on the right (and require a space after the operand).
 
 \section*{Semantic Decisions}
 \subsection*{Delimiters}
 There are 2 main categories of delimiters in \emph{MAlice} - ones that end lines, and ones that combine multiple lines into one. Full stops and commas separate lines, while the keywords \textquoteleft \textbf{and}\textquoteright , \textquoteleft \textbf{but}\textquoteright{} and \textquoteleft \textbf{then}\textquoteright{} connect two lines together. As whitespace is removed at compile time, there can be as many delimiters as necessary on a single line in the source file.
 
 \subsection*{Variable Name Constraints}
-Variable names must begin with either a lower- or upper-case letter. Underscores are allowed, provided that they are not the first or last chacter of the variable name. Capital letters can follow an underscore character, but all other characters must be lower case. These constraints have been modelled on the English language, whcih matches the overall aim of \emph{MAlice} to read like a natural language. These constraints can be represented by the below regular expression:
+Variable names must begin with either a lower- or upper-case letter. Underscores are allowed, provided that they are not the first or last chacter of the variable name. Capital letters can follow an underscore character, but all other characters must be lower case. These constraints have been modelled on the English language, which matches the overall aim of \emph{MAlice} to read like a natural language. These constraints can be represented by the below regular expression:
 
 \begin{center}
   \texttt{[A-Za-z](_[A-Za-z]|[a-z])*}
