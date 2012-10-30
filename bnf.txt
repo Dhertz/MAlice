@@ -1,24 +1,20 @@
-<program> ::= "The" "looking-glass" "hatta" "()" "opened" <statement-list> <print-return> "closed"
+program : "The" "looking-glass" "hatta" "()" "opened" statementList printReturn "closed"
 
-<statement-list> ::= <statement> <delimiter> <statement-list> | <statement> <delimiter>
-<print-return> ::= <expression> "said" "Alice."
+statementList : statement delimiter statementList | statement delimiter
+printReturn : expression "said" "Alice."
 
-<statement> ::= <declaration> | <assignment> | <step>
+statement : declaration | assignment | step
 
-<declaration> ::= <ident> "was a" <type> <delimitor> |
-		  <ident> "was a" <type> <delimitor> "too"
+declaration : ident "was a" type |
+		  ident "was a" type "too"
 
-<assignment> ::= <ident> "became" <expression> <delimiter> |
-		 <ident> "became" <char> <seperator>
+assignment : ident "became" expression |
+		 ident "became" char seperator
 
-<step> ::= <ident> "drank" | <ident> "ate"
+step : ident "drank" | ident "ate"
 
-<expression> ::= <expression> <operator> <expression> | <term>
-<operator> = "+" | "&" | "~" | "|" | "^" | "/" | "%" | "*"
-<term> = <ident> | <const>
+expression : expression operator expression | term
+operator = "+" | "&" | "~" | "|" | "^" | "/" | "%" | "*"
+term = ident | const
 
-<delimiter> ::= "and" | "but" | "then" | "," | "."
-<const> ::= a number
-<type> ::= number | letter
-<ident> ::= that regex shiz
-<char> ::= any ASCII character
+delimiter : "and" | "but" | "then" | "," | "."
