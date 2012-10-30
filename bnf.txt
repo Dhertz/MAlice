@@ -1,0 +1,26 @@
+<program> ::= "The" "looking-glass" "hatta" "()" "opened" <statement-list> "." "closed"
+
+<statement-list> ::= <statement> <delimiter> <statement-list> | <statement>
+
+<statement> ::= <declaration> | <assignment> | <step>
+
+<declaration> ::= <ident> "was a" <type> <delimitor> |
+		  <ident> "was a" <type> <delimitor> "too"
+
+<assignment> ::= <ident> "became" <expression> <delimiter> |
+		 <ident> "became" <char> <seperator>
+
+<step> ::= <ident> "drank" | <ident> "ate"
+
+<expression> ::= <expression> <operator> <expression> | <term>
+<operator> = "+" | "&" | "~" | "|" | "^" | "/" | "%" | "*"
+<term> = <ident> | <const>
+
+<subtract> ::= <divide
+
+<delimiter> ::= "and" | "but" | "then" | "," | "."
+
+<const> ::= a number
+<type> ::= number | letter
+<ident> ::= that regex shiz
+<char> ::= any ASCII character

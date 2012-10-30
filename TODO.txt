@@ -2,8 +2,10 @@ TODO list:
 	- BNF definition
 	- Semantics
 	- Extend/proof/re-word sections already done
-   - Think about:
+   	- Think about:
 		-- The looking-glass hatta ()
 		-- opened
 		-- closed
-   - Associativity of operators
+   	- Associativity of operators
+   	- Re-do delimiters
+   	- Does said Alice return?
