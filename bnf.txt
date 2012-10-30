@@ -1,6 +1,7 @@
-<program> ::= "The" "looking-glass" "hatta" "()" "opened" <statement-list> "." "closed"
+<program> ::= "The" "looking-glass" "hatta" "()" "opened" <statement-list> <print-return> "closed"
 
-<statement-list> ::= <statement> <delimiter> <statement-list> | <statement>
+<statement-list> ::= <statement> <delimiter> <statement-list> | <statement> <delimiter>
+<print-return> ::= <expression> "said" "Alice."
 
 <statement> ::= <declaration> | <assignment> | <step>
 
@@ -16,10 +17,7 @@
 <operator> = "+" | "&" | "~" | "|" | "^" | "/" | "%" | "*"
 <term> = <ident> | <const>
 
-<subtract> ::= <divide
-
 <delimiter> ::= "and" | "but" | "then" | "," | "."
-
 <const> ::= a number
 <type> ::= number | letter
 <ident> ::= that regex shiz
