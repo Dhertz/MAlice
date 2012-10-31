@@ -44,8 +44,10 @@ The following table shows the list of keywords that cannot be used within a prog
   \item \textbf{ate} - this keyword increments a previously declared variable.
   \item \textbf{became} - this keyword allows assignment to a declared variable.
   \item \textbf{but} - see \textbf{and}.
+  \item \textbf{closed} - this keyword marks the end of a program.
   \item \textbf{drank} - this keyword decrements a previously declared variable.
   \item \textbf{letter} - this is a primitive. See the \textbf{Types} section above.
+  \item \textbf{opened} - this keyword marks the opening of a program.
   \item \textbf{number} - this is a primitive. See the \textbf{Types} section above.
   \item \textbf{said} - this is used along with \textquoteleft Alice\textquoteright{} to output values.
   \item \textbf{then} - see \textbf{and}.
@@ -92,10 +94,28 @@ Variable names must begin with either a lower- or upper-case letter. Underscores
 \end{center}
 
 \section*{Backaus-Naur Form Grammar}
+The following grammar gives the grammar for a valid \emph{MAlice} program. We have used the Extended BNF syntax, as this allows us to express the grammar for expressions, declarations and assignments much more succinctly.\\
 \begin{verbatim}
-         <program> ::= "The" "looking-glass" "hatta" "()" "opened" 
-                       <statement-list> "." "closed"
-  <statement-list> ::= <statement> <delimiter> <statement-list> | <statement>
-\end{verbatim}
+      <program> ::= "The" "looking-glass" "hatta" "()" "opened" 
+                    <statementList> "closed"
+<statementList> ::= <statement> <delimiter> <statement-list> | <printReturn>
+  <printReturn> ::= <expression> "said" "Alice."
+    <statement> ::= <declaration> | <assignment> | <step>
+  <declaration> ::= (<ID> "was" "a" <TYPE>) ("too"?)
+   <assignment> ::= <ID> "became" (<expression> | <CHAR>)
+         <step> ::= <ID> ("drank" | "ate")
+   <expression> ::= <or> ("^" <or>)*
+           <or> ::= <and> ("|" <and>)*
+          <and> ::= <add> ("&" <add>)*
+          <add> ::= <ones> ("+" <ones>)*
+         <ones> ::= <term> (("/" | "*" | "%") <term>)*
+         <term> ::= ("~" term) | <ID> | <INT>
+         
+           <ID> ::= see regular expression in section above
+         <CHAR> ::= '("a".."z")'
+          <INT> ::= "0".."9"+
+         <TYPE> ::= "letter" | "number"
+\end{verbatim}\\
+We have removed the left recursion from the \texttt{<expression>} rule by breaking the rule up into several sub rules. We have one rule for each level of operator precedence, which allows us to easily define the precedence rules within the grammar (the higher precedence operators are \textquoteleft closer\textquoteright{} to the \texttt{<term>} in the expression, with the \textbf{Binary NOT} rule being the closest as it has a precedence of 0). The \textbf{drank} and \textbf{ate} operators have been broken away into a seperate \texttt{<step>} rule, since they must be on their own in a statement and come after the operand. 
 
 \end{document}
