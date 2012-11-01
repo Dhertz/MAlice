@@ -1,4 +1,4 @@
-\documentclass[a4, 11pt]{article}
+\documentclass[11pt]{article}
 
 \usepackage{a4, fullpage}
 \usepackage[tmargin=2.5cm, lmargin=2.5cm, rmargin=2.5cm, bmargin=2.5cm]{geometry}
@@ -23,9 +23,38 @@
 \maketitle
 
 \section*{Introduction}
-This document outlines the specification of the \emph{MAlice} language, which we have written based on the provided sample programs and their corresponding outputs. We will look at the lexical structure of the language, give a somewhat formal definition of the language in Backaus-Naur Form, and discuss any semantic decisions we have made about the language.
+This document outlines the specification of the \emph{MAlice} language, which we have written based on the provided sample programs and their corresponding outputs. We will look at the syntactic structure of the language, give a formal definition of the language syntax using Backaus-Naur Form, and discuss any semantic decisions we have made about the language.
 
-\section*{Lexical Structure}
+\section*{Language Syntax}
+A \emph{MAlice} program must always begin with \texttt{The looking-glass hatta ()}, followed by a statement list, which is bookended by the \texttt{opened} and \texttt{closed} statements. Inside the statment list, variables can be declared and assigned to. Lines must always begin with a variable name, which is followed by a declaration, assignment or step statement, involving any number of operators (read more about these in the \textbf{Operators} section). Each statement must be ended by a delimiter (see the \textbf{Delimiters} section), and the final statement in the list must end with \texttt{said Alice} and a full stop.
+
+\subsection*{Backaus-Naur Form Grammar}
+The following grammar gives the complete syntax for a valid \emph{MAlice} program described briefly in the paragraph above. We have used the Extended BNF syntax, as this allows us to express the grammar for expressions, declarations and assignments much more succinctly.
+\begin{verbatim}
+      <program> ::= "The" "looking-glass" "hatta" "()" "opened" 
+                    <statementList> "closed"
+<statementList> ::= <statement> <delimiter> <statement-list> | <printReturn>
+  <printReturn> ::= <expression> "said" "Alice."
+    <statement> ::= <declaration> | <assignment> | <step>
+  <declaration> ::= (<ID> "was" "a" <TYPE>) ("too"?)
+   <assignment> ::= <ID> "became" (<expression> | <CHAR>)
+         <step> ::= <ID> ("drank" | "ate")
+   <expression> ::= <or> ("^" <or>)*
+           <or> ::= <and> ("|" <and>)*
+          <and> ::= <add> ("&" <add>)*
+          <add> ::= <ones> ("+" <ones>)*
+         <ones> ::= <term> (("/" | "*" | "%") <term>)*
+         <term> ::= ("~" term) | <ID> | <INT>
+         
+           <ID> ::= see regular expression in section below
+         <CHAR> ::= '("a".."z")'
+          <INT> ::= "0".."9"+
+         <TYPE> ::= "letter" | "number"
+\end{verbatim}
+
+We have removed the left recursion from the \texttt{<expression>} rule by breaking the rule up into several sub rules. We have one rule for each level of operator precedence, which allows us to easily define the precedence rules within the grammar (the higher precedence operators are \textquoteleft closer\textquoteright{} to the \texttt{<term>} in the expression, with the \textbf{Binary NOT} rule being the closest as it has a precedence of 0). The \textbf{drank} and \textbf{ate} operators have been broken away into a seperate \texttt{<step>} rule, since they must be on their own in a statement and come after the operand. 
+
+\section*{Semantic Decisions}
 \subsection*{Types}
 There are two primitive types in the \emph{MAlice} language:
 
@@ -49,7 +78,7 @@ The following table shows the list of keywords that cannot be used within a prog
   \item \textbf{letter} - this is a primitive. See the \textbf{Types} section above.
   \item \textbf{opened} - this keyword marks the opening of a program.
   \item \textbf{number} - this is a primitive. See the \textbf{Types} section above.
-  \item \textbf{said} - this is used along with \textquoteleft Alice\textquoteright{} to output values.
+  \item \textbf{said} - this is used along with \textquoteleft Alice\textquoteright{} to return from the program and output a variable.
   \item \textbf{then} - see \textbf{and}.
   \item \textbf{too} - this keyword can follow a variable declaration as long as a variable has been declared directly before it and that variable was of the same type as the variable currently being declared.
   \item \textbf{was} - this keyword is used along with \textquoteleft \textbf{a}\textquoteright{} (and a type) to declare variables.
@@ -82,40 +111,14 @@ This table shows the operators that can be used in the language. It also shows t
 
 All operators are binary, apart from \textbf{Bitwise NOT}, \textbf{Increment} and \textbf{Decrement} which are unary. The \textbf{Bitwise NOT} opertor is used on the left-hand side of the operand; the other two are used on the right (and require a space after the operand).
 
-\section*{Semantic Decisions}
 \subsection*{Delimiters}
-There are 2 main categories of delimiters in \emph{MAlice} - ones that end lines, and ones that combine multiple lines into one. Full stops and commas separate lines, while the keywords \textquoteleft \textbf{and}\textquoteright , \textquoteleft \textbf{but}\textquoteright{} and \textquoteleft \textbf{then}\textquoteright{} connect two lines together. As whitespace is removed at compile time, there can be as many delimiters as necessary on a single line in the source file.
+There are five delimiters in \emph{MAlice}: \texttt{and}, \texttt{but}, \texttt{then}, \texttt{,} (comma) and \texttt{.} (full stop). These can all be used in the same way to end statements; since we are disregarding newlines we don't care about \texttt{and} or another word being at the end of a line. However, the \texttt{said Alice} statement that ends a program must be followed by a full stop.
 
 \subsection*{Variable Name Constraints}
-Variable names must begin with either a lower- or upper-case letter. Underscores are allowed, provided that they are not the first or last chacter of the variable name. Capital letters can follow an underscore character, but all other characters must be lower case. These constraints have been modelled on the English language, which matches the overall aim of \emph{MAlice} to read like a natural language. These constraints can be represented by the below regular expression:
+Variable names must begin with either an upper- or lower-case letter. Underscores are allowed, provided that they are not the first or last chacter of the variable name. Capital letters can follow an underscore character, but all other characters apart from the first character must be lower case. These constraints have been modelled on the English language, which matches the overall aim of \emph{MAlice} to read like a natural language. These constraints can be represented by the below regular expression:
 
 \begin{center}
   \texttt{[A-Za-z](_[A-Za-z]|[a-z])*}
 \end{center}
-
-\section*{Backaus-Naur Form Grammar}
-The following grammar gives the grammar for a valid \emph{MAlice} program. We have used the Extended BNF syntax, as this allows us to express the grammar for expressions, declarations and assignments much more succinctly.\\
-\begin{verbatim}
-      <program> ::= "The" "looking-glass" "hatta" "()" "opened" 
-                    <statementList> "closed"
-<statementList> ::= <statement> <delimiter> <statement-list> | <printReturn>
-  <printReturn> ::= <expression> "said" "Alice."
-    <statement> ::= <declaration> | <assignment> | <step>
-  <declaration> ::= (<ID> "was" "a" <TYPE>) ("too"?)
-   <assignment> ::= <ID> "became" (<expression> | <CHAR>)
-         <step> ::= <ID> ("drank" | "ate")
-   <expression> ::= <or> ("^" <or>)*
-           <or> ::= <and> ("|" <and>)*
-          <and> ::= <add> ("&" <add>)*
-          <add> ::= <ones> ("+" <ones>)*
-         <ones> ::= <term> (("/" | "*" | "%") <term>)*
-         <term> ::= ("~" term) | <ID> | <INT>
-         
-           <ID> ::= see regular expression in section above
-         <CHAR> ::= '("a".."z")'
-          <INT> ::= "0".."9"+
-         <TYPE> ::= "letter" | "number"
-\end{verbatim}\\
-We have removed the left recursion from the \texttt{<expression>} rule by breaking the rule up into several sub rules. We have one rule for each level of operator precedence, which allows us to easily define the precedence rules within the grammar (the higher precedence operators are \textquoteleft closer\textquoteright{} to the \texttt{<term>} in the expression, with the \textbf{Binary NOT} rule being the closest as it has a precedence of 0). The \textbf{drank} and \textbf{ate} operators have been broken away into a seperate \texttt{<step>} rule, since they must be on their own in a statement and come after the operand. 
 
 \end{document}
