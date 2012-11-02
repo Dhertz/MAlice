@@ -25,3 +25,5 @@
 #ignore OS X indexing files 
 .DS_Store
 
+#ignore ANTLR3 jar
+*.jar
