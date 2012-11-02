@@ -1,6 +1,6 @@
 grammar MAlice;
 
-program:	'The' 'looking-glass' 'hatta ()' 'opened' statementList 'closed' EOF;
+program:	'The' 'looking-glass' 'hatta' '()' 'opened' statementList 'closed' EOF;
 
 statementList:	statement ('and' | 'but' | 'then' | ',' | '.') statementList | printReturn;
 	

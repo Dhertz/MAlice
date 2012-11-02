@@ -1,4 +1,4 @@
-// $ANTLR !Unknown version! MAlice.g 2012-11-01 15:12:18
+// $ANTLR !Unknown version! MAlice.g 2012-11-02 10:56:58
 
 import org.antlr.runtime.*;
 import java.util.Stack;
@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 public class MAliceParser extends Parser {
     public static final String[] tokenNames = new String[] {
-        "<invalid>", "<EOR>", "<DOWN>", "<UP>", "ID", "CHAR", "INT", "'The'", "'looking-glass'", "'hatta ()'", "'opened'", "'closed'", "'and'", "'but'", "'then'", "','", "'.'", "'said'", "'Alice.'", "'was a'", "'number'", "'letter'", "'too'", "'became'", "'drank'", "'ate'", "'^'", "'|'", "'&'", "'+'", "'/'", "'*'", "'%'", "'~'"
+        "<invalid>", "<EOR>", "<DOWN>", "<UP>", "ID", "CHAR", "INT", "'The'", "'looking-glass'", "'hatta'", "'()'", "'opened'", "'closed'", "'and'", "'but'", "'then'", "','", "'.'", "'said'", "'Alice.'", "'was a'", "'number'", "'letter'", "'too'", "'became'", "'drank'", "'ate'", "'^'", "'|'", "'&'", "'+'", "'/'", "'*'", "'%'", "'~'"
     };
     public static final int T__29=29;
     public static final int T__28=28;
@@ -32,6 +32,7 @@ public class MAliceParser extends Parser {
     public static final int T__32=32;
     public static final int T__33=33;
     public static final int T__16=16;
+    public static final int T__34=34;
     public static final int T__15=15;
     public static final int T__18=18;
     public static final int T__17=17;
@@ -60,23 +61,24 @@ public class MAliceParser extends Parser {
 
 
     // $ANTLR start "program"
-    // MAlice.g:3:1: program : 'The' 'looking-glass' 'hatta ()' 'opened' statementList 'closed' EOF ;
+    // MAlice.g:3:1: program : 'The' 'looking-glass' 'hatta' '()' 'opened' statementList 'closed' EOF ;
     public final void program() throws RecognitionException {
         try {
-            // MAlice.g:3:8: ( 'The' 'looking-glass' 'hatta ()' 'opened' statementList 'closed' EOF )
-            // MAlice.g:3:10: 'The' 'looking-glass' 'hatta ()' 'opened' statementList 'closed' EOF
+            // MAlice.g:3:8: ( 'The' 'looking-glass' 'hatta' '()' 'opened' statementList 'closed' EOF )
+            // MAlice.g:3:10: 'The' 'looking-glass' 'hatta' '()' 'opened' statementList 'closed' EOF
             {
             match(input,7,FOLLOW_7_in_program9); 
             match(input,8,FOLLOW_8_in_program11); 
             match(input,9,FOLLOW_9_in_program13); 
             match(input,10,FOLLOW_10_in_program15); 
-            pushFollow(FOLLOW_statementList_in_program17);
+            match(input,11,FOLLOW_11_in_program17); 
+            pushFollow(FOLLOW_statementList_in_program19);
             statementList();
 
             state._fsp--;
 
-            match(input,11,FOLLOW_11_in_program19); 
-            match(input,EOF,FOLLOW_EOF_in_program21); 
+            match(input,12,FOLLOW_12_in_program21); 
+            match(input,EOF,FOLLOW_EOF_in_program23); 
 
             }
 
@@ -103,10 +105,10 @@ public class MAliceParser extends Parser {
             if ( (LA1_0==ID) ) {
                 int LA1_1 = input.LA(2);
 
-                if ( (LA1_1==19||(LA1_1>=23 && LA1_1<=25)) ) {
+                if ( (LA1_1==20||(LA1_1>=24 && LA1_1<=26)) ) {
                     alt1=1;
                 }
-                else if ( (LA1_1==17||(LA1_1>=26 && LA1_1<=32)) ) {
+                else if ( (LA1_1==18||(LA1_1>=27 && LA1_1<=33)) ) {
                     alt1=2;
                 }
                 else {
@@ -116,7 +118,7 @@ public class MAliceParser extends Parser {
                     throw nvae;
                 }
             }
-            else if ( (LA1_0==INT||LA1_0==33) ) {
+            else if ( (LA1_0==INT||LA1_0==34) ) {
                 alt1=2;
             }
             else {
@@ -129,12 +131,12 @@ public class MAliceParser extends Parser {
                 case 1 :
                     // MAlice.g:5:16: statement ( 'and' | 'but' | 'then' | ',' | '.' ) statementList
                     {
-                    pushFollow(FOLLOW_statement_in_statementList28);
+                    pushFollow(FOLLOW_statement_in_statementList30);
                     statement();
 
                     state._fsp--;
 
-                    if ( (input.LA(1)>=12 && input.LA(1)<=16) ) {
+                    if ( (input.LA(1)>=13 && input.LA(1)<=17) ) {
                         input.consume();
                         state.errorRecovery=false;
                     }
@@ -143,7 +145,7 @@ public class MAliceParser extends Parser {
                         throw mse;
                     }
 
-                    pushFollow(FOLLOW_statementList_in_statementList50);
+                    pushFollow(FOLLOW_statementList_in_statementList52);
                     statementList();
 
                     state._fsp--;
@@ -154,7 +156,7 @@ public class MAliceParser extends Parser {
                 case 2 :
                     // MAlice.g:5:79: printReturn
                     {
-                    pushFollow(FOLLOW_printReturn_in_statementList54);
+                    pushFollow(FOLLOW_printReturn_in_statementList56);
                     printReturn();
 
                     state._fsp--;
@@ -183,13 +185,13 @@ public class MAliceParser extends Parser {
             // MAlice.g:7:12: ( expression 'said' 'Alice.' )
             // MAlice.g:7:14: expression 'said' 'Alice.'
             {
-            pushFollow(FOLLOW_expression_in_printReturn62);
+            pushFollow(FOLLOW_expression_in_printReturn64);
             expression();
 
             state._fsp--;
 
-            match(input,17,FOLLOW_17_in_printReturn64); 
             match(input,18,FOLLOW_18_in_printReturn66); 
+            match(input,19,FOLLOW_19_in_printReturn68); 
 
             }
 
@@ -215,18 +217,18 @@ public class MAliceParser extends Parser {
 
             if ( (LA2_0==ID) ) {
                 switch ( input.LA(2) ) {
-                case 19:
+                case 20:
                     {
                     alt2=1;
                     }
                     break;
-                case 23:
+                case 24:
                     {
                     alt2=2;
                     }
                     break;
-                case 24:
                 case 25:
+                case 26:
                     {
                     alt2=3;
                     }
@@ -249,7 +251,7 @@ public class MAliceParser extends Parser {
                 case 1 :
                     // MAlice.g:9:12: declaration
                     {
-                    pushFollow(FOLLOW_declaration_in_statement73);
+                    pushFollow(FOLLOW_declaration_in_statement75);
                     declaration();
 
                     state._fsp--;
@@ -260,7 +262,7 @@ public class MAliceParser extends Parser {
                 case 2 :
                     // MAlice.g:9:26: assignment
                     {
-                    pushFollow(FOLLOW_assignment_in_statement77);
+                    pushFollow(FOLLOW_assignment_in_statement79);
                     assignment();
 
                     state._fsp--;
@@ -271,7 +273,7 @@ public class MAliceParser extends Parser {
                 case 3 :
                     // MAlice.g:9:39: step
                     {
-                    pushFollow(FOLLOW_step_in_statement81);
+                    pushFollow(FOLLOW_step_in_statement83);
                     step();
 
                     state._fsp--;
@@ -303,9 +305,9 @@ public class MAliceParser extends Parser {
             // MAlice.g:11:14: ( ID 'was a' ( 'number' | 'letter' ) )
             // MAlice.g:11:15: ID 'was a' ( 'number' | 'letter' )
             {
-            match(input,ID,FOLLOW_ID_in_declaration89); 
-            match(input,19,FOLLOW_19_in_declaration91); 
-            if ( (input.LA(1)>=20 && input.LA(1)<=21) ) {
+            match(input,ID,FOLLOW_ID_in_declaration91); 
+            match(input,20,FOLLOW_20_in_declaration93); 
+            if ( (input.LA(1)>=21 && input.LA(1)<=22) ) {
                 input.consume();
                 state.errorRecovery=false;
             }
@@ -324,14 +326,14 @@ public class MAliceParser extends Parser {
             int alt3=2;
             int LA3_0 = input.LA(1);
 
-            if ( (LA3_0==22) ) {
+            if ( (LA3_0==23) ) {
                 alt3=1;
             }
             switch (alt3) {
                 case 1 :
                     // MAlice.g:11:50: 'too'
                     {
-                    match(input,22,FOLLOW_22_in_declaration103); 
+                    match(input,23,FOLLOW_23_in_declaration105); 
 
                     }
                     break;
@@ -367,13 +369,13 @@ public class MAliceParser extends Parser {
             if ( (LA4_0==ID) ) {
                 int LA4_1 = input.LA(2);
 
-                if ( (LA4_1==23) ) {
+                if ( (LA4_1==24) ) {
                     int LA4_2 = input.LA(3);
 
                     if ( (LA4_2==CHAR) ) {
                         alt4=2;
                     }
-                    else if ( (LA4_2==ID||LA4_2==INT||LA4_2==33) ) {
+                    else if ( (LA4_2==ID||LA4_2==INT||LA4_2==34) ) {
                         alt4=1;
                     }
                     else {
@@ -400,9 +402,9 @@ public class MAliceParser extends Parser {
                 case 1 :
                     // MAlice.g:13:13: ID 'became' expression
                     {
-                    match(input,ID,FOLLOW_ID_in_assignment112); 
-                    match(input,23,FOLLOW_23_in_assignment114); 
-                    pushFollow(FOLLOW_expression_in_assignment116);
+                    match(input,ID,FOLLOW_ID_in_assignment114); 
+                    match(input,24,FOLLOW_24_in_assignment116); 
+                    pushFollow(FOLLOW_expression_in_assignment118);
                     expression();
 
                     state._fsp--;
@@ -413,9 +415,9 @@ public class MAliceParser extends Parser {
                 case 2 :
                     // MAlice.g:13:38: ID 'became' CHAR
                     {
-                    match(input,ID,FOLLOW_ID_in_assignment120); 
-                    match(input,23,FOLLOW_23_in_assignment122); 
-                    match(input,CHAR,FOLLOW_CHAR_in_assignment124); 
+                    match(input,ID,FOLLOW_ID_in_assignment122); 
+                    match(input,24,FOLLOW_24_in_assignment124); 
+                    match(input,CHAR,FOLLOW_CHAR_in_assignment126); 
 
                     }
                     break;
@@ -440,8 +442,8 @@ public class MAliceParser extends Parser {
             // MAlice.g:15:5: ( ID ( 'drank' | 'ate' ) )
             // MAlice.g:15:8: ID ( 'drank' | 'ate' )
             {
-            match(input,ID,FOLLOW_ID_in_step132); 
-            if ( (input.LA(1)>=24 && input.LA(1)<=25) ) {
+            match(input,ID,FOLLOW_ID_in_step134); 
+            if ( (input.LA(1)>=25 && input.LA(1)<=26) ) {
                 input.consume();
                 state.errorRecovery=false;
             }
@@ -472,7 +474,7 @@ public class MAliceParser extends Parser {
             // MAlice.g:17:11: ( or ( '^' or )* )
             // MAlice.g:17:13: or ( '^' or )*
             {
-            pushFollow(FOLLOW_or_in_expression147);
+            pushFollow(FOLLOW_or_in_expression149);
             or();
 
             state._fsp--;
@@ -483,7 +485,7 @@ public class MAliceParser extends Parser {
                 int alt5=2;
                 int LA5_0 = input.LA(1);
 
-                if ( (LA5_0==26) ) {
+                if ( (LA5_0==27) ) {
                     alt5=1;
                 }
 
@@ -492,8 +494,8 @@ public class MAliceParser extends Parser {
             	case 1 :
             	    // MAlice.g:17:17: '^' or
             	    {
-            	    match(input,26,FOLLOW_26_in_expression150); 
-            	    pushFollow(FOLLOW_or_in_expression152);
+            	    match(input,27,FOLLOW_27_in_expression152); 
+            	    pushFollow(FOLLOW_or_in_expression154);
             	    or();
 
             	    state._fsp--;
@@ -529,7 +531,7 @@ public class MAliceParser extends Parser {
             // MAlice.g:19:3: ( and ( '|' and )* )
             // MAlice.g:19:6: and ( '|' and )*
             {
-            pushFollow(FOLLOW_and_in_or162);
+            pushFollow(FOLLOW_and_in_or164);
             and();
 
             state._fsp--;
@@ -540,7 +542,7 @@ public class MAliceParser extends Parser {
                 int alt6=2;
                 int LA6_0 = input.LA(1);
 
-                if ( (LA6_0==27) ) {
+                if ( (LA6_0==28) ) {
                     alt6=1;
                 }
 
@@ -549,8 +551,8 @@ public class MAliceParser extends Parser {
             	case 1 :
             	    // MAlice.g:19:11: '|' and
             	    {
-            	    match(input,27,FOLLOW_27_in_or165); 
-            	    pushFollow(FOLLOW_and_in_or167);
+            	    match(input,28,FOLLOW_28_in_or167); 
+            	    pushFollow(FOLLOW_and_in_or169);
             	    and();
 
             	    state._fsp--;
@@ -586,7 +588,7 @@ public class MAliceParser extends Parser {
             // MAlice.g:21:4: ( add ( '&' add )* )
             // MAlice.g:21:7: add ( '&' add )*
             {
-            pushFollow(FOLLOW_add_in_and178);
+            pushFollow(FOLLOW_add_in_and180);
             add();
 
             state._fsp--;
@@ -597,7 +599,7 @@ public class MAliceParser extends Parser {
                 int alt7=2;
                 int LA7_0 = input.LA(1);
 
-                if ( (LA7_0==28) ) {
+                if ( (LA7_0==29) ) {
                     alt7=1;
                 }
 
@@ -606,8 +608,8 @@ public class MAliceParser extends Parser {
             	case 1 :
             	    // MAlice.g:21:12: '&' add
             	    {
-            	    match(input,28,FOLLOW_28_in_and181); 
-            	    pushFollow(FOLLOW_add_in_and183);
+            	    match(input,29,FOLLOW_29_in_and183); 
+            	    pushFollow(FOLLOW_add_in_and185);
             	    add();
 
             	    state._fsp--;
@@ -643,7 +645,7 @@ public class MAliceParser extends Parser {
             // MAlice.g:23:4: ( ones ( '+' ones )* )
             // MAlice.g:23:7: ones ( '+' ones )*
             {
-            pushFollow(FOLLOW_ones_in_add193);
+            pushFollow(FOLLOW_ones_in_add195);
             ones();
 
             state._fsp--;
@@ -654,7 +656,7 @@ public class MAliceParser extends Parser {
                 int alt8=2;
                 int LA8_0 = input.LA(1);
 
-                if ( (LA8_0==29) ) {
+                if ( (LA8_0==30) ) {
                     alt8=1;
                 }
 
@@ -663,8 +665,8 @@ public class MAliceParser extends Parser {
             	case 1 :
             	    // MAlice.g:23:13: '+' ones
             	    {
-            	    match(input,29,FOLLOW_29_in_add196); 
-            	    pushFollow(FOLLOW_ones_in_add198);
+            	    match(input,30,FOLLOW_30_in_add198); 
+            	    pushFollow(FOLLOW_ones_in_add200);
             	    ones();
 
             	    state._fsp--;
@@ -700,7 +702,7 @@ public class MAliceParser extends Parser {
             // MAlice.g:25:5: ( term ( ( '/' | '*' | '%' ) term )* )
             // MAlice.g:25:8: term ( ( '/' | '*' | '%' ) term )*
             {
-            pushFollow(FOLLOW_term_in_ones208);
+            pushFollow(FOLLOW_term_in_ones210);
             term();
 
             state._fsp--;
@@ -711,7 +713,7 @@ public class MAliceParser extends Parser {
                 int alt9=2;
                 int LA9_0 = input.LA(1);
 
-                if ( ((LA9_0>=30 && LA9_0<=32)) ) {
+                if ( ((LA9_0>=31 && LA9_0<=33)) ) {
                     alt9=1;
                 }
 
@@ -720,7 +722,7 @@ public class MAliceParser extends Parser {
             	case 1 :
             	    // MAlice.g:25:14: ( '/' | '*' | '%' ) term
             	    {
-            	    if ( (input.LA(1)>=30 && input.LA(1)<=32) ) {
+            	    if ( (input.LA(1)>=31 && input.LA(1)<=33) ) {
             	        input.consume();
             	        state.errorRecovery=false;
             	    }
@@ -729,7 +731,7 @@ public class MAliceParser extends Parser {
             	        throw mse;
             	    }
 
-            	    pushFollow(FOLLOW_term_in_ones223);
+            	    pushFollow(FOLLOW_term_in_ones225);
             	    term();
 
             	    state._fsp--;
@@ -765,7 +767,7 @@ public class MAliceParser extends Parser {
             // MAlice.g:27:5: ( ( '~' term ) | ID | INT )
             int alt10=3;
             switch ( input.LA(1) ) {
-            case 33:
+            case 34:
                 {
                 alt10=1;
                 }
@@ -794,8 +796,8 @@ public class MAliceParser extends Parser {
                     // MAlice.g:27:8: ( '~' term )
                     // MAlice.g:27:9: '~' term
                     {
-                    match(input,33,FOLLOW_33_in_term234); 
-                    pushFollow(FOLLOW_term_in_term236);
+                    match(input,34,FOLLOW_34_in_term236); 
+                    pushFollow(FOLLOW_term_in_term238);
                     term();
 
                     state._fsp--;
@@ -809,14 +811,14 @@ public class MAliceParser extends Parser {
                 case 2 :
                     // MAlice.g:27:21: ID
                     {
-                    match(input,ID,FOLLOW_ID_in_term241); 
+                    match(input,ID,FOLLOW_ID_in_term243); 
 
                     }
                     break;
                 case 3 :
                     // MAlice.g:27:26: INT
                     {
-                    match(input,INT,FOLLOW_INT_in_term245); 
+                    match(input,INT,FOLLOW_INT_in_term247); 
 
                     }
                     break;
@@ -841,50 +843,51 @@ public class MAliceParser extends Parser {
     public static final BitSet FOLLOW_7_in_program9 = new BitSet(new long[]{0x0000000000000100L});
     public static final BitSet FOLLOW_8_in_program11 = new BitSet(new long[]{0x0000000000000200L});
     public static final BitSet FOLLOW_9_in_program13 = new BitSet(new long[]{0x0000000000000400L});
-    public static final BitSet FOLLOW_10_in_program15 = new BitSet(new long[]{0x0000000200000050L});
-    public static final BitSet FOLLOW_statementList_in_program17 = new BitSet(new long[]{0x0000000000000800L});
-    public static final BitSet FOLLOW_11_in_program19 = new BitSet(new long[]{0x0000000000000000L});
-    public static final BitSet FOLLOW_EOF_in_program21 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_statement_in_statementList28 = new BitSet(new long[]{0x000000000001F000L});
-    public static final BitSet FOLLOW_set_in_statementList30 = new BitSet(new long[]{0x0000000200000050L});
-    public static final BitSet FOLLOW_statementList_in_statementList50 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_printReturn_in_statementList54 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_expression_in_printReturn62 = new BitSet(new long[]{0x0000000000020000L});
-    public static final BitSet FOLLOW_17_in_printReturn64 = new BitSet(new long[]{0x0000000000040000L});
-    public static final BitSet FOLLOW_18_in_printReturn66 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_declaration_in_statement73 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_assignment_in_statement77 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_step_in_statement81 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_ID_in_declaration89 = new BitSet(new long[]{0x0000000000080000L});
-    public static final BitSet FOLLOW_19_in_declaration91 = new BitSet(new long[]{0x0000000000300000L});
-    public static final BitSet FOLLOW_set_in_declaration93 = new BitSet(new long[]{0x0000000000400002L});
-    public static final BitSet FOLLOW_22_in_declaration103 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_ID_in_assignment112 = new BitSet(new long[]{0x0000000000800000L});
-    public static final BitSet FOLLOW_23_in_assignment114 = new BitSet(new long[]{0x0000000200000050L});
-    public static final BitSet FOLLOW_expression_in_assignment116 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_ID_in_assignment120 = new BitSet(new long[]{0x0000000000800000L});
-    public static final BitSet FOLLOW_23_in_assignment122 = new BitSet(new long[]{0x0000000000000020L});
-    public static final BitSet FOLLOW_CHAR_in_assignment124 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_ID_in_step132 = new BitSet(new long[]{0x0000000003000000L});
-    public static final BitSet FOLLOW_set_in_step134 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_or_in_expression147 = new BitSet(new long[]{0x0000000004000002L});
-    public static final BitSet FOLLOW_26_in_expression150 = new BitSet(new long[]{0x0000000200000050L});
-    public static final BitSet FOLLOW_or_in_expression152 = new BitSet(new long[]{0x0000000004000002L});
-    public static final BitSet FOLLOW_and_in_or162 = new BitSet(new long[]{0x0000000008000002L});
-    public static final BitSet FOLLOW_27_in_or165 = new BitSet(new long[]{0x0000000200000050L});
-    public static final BitSet FOLLOW_and_in_or167 = new BitSet(new long[]{0x0000000008000002L});
-    public static final BitSet FOLLOW_add_in_and178 = new BitSet(new long[]{0x0000000010000002L});
-    public static final BitSet FOLLOW_28_in_and181 = new BitSet(new long[]{0x0000000200000050L});
-    public static final BitSet FOLLOW_add_in_and183 = new BitSet(new long[]{0x0000000010000002L});
-    public static final BitSet FOLLOW_ones_in_add193 = new BitSet(new long[]{0x0000000020000002L});
-    public static final BitSet FOLLOW_29_in_add196 = new BitSet(new long[]{0x0000000200000050L});
-    public static final BitSet FOLLOW_ones_in_add198 = new BitSet(new long[]{0x0000000020000002L});
-    public static final BitSet FOLLOW_term_in_ones208 = new BitSet(new long[]{0x00000001C0000002L});
-    public static final BitSet FOLLOW_set_in_ones211 = new BitSet(new long[]{0x0000000200000050L});
-    public static final BitSet FOLLOW_term_in_ones223 = new BitSet(new long[]{0x00000001C0000002L});
-    public static final BitSet FOLLOW_33_in_term234 = new BitSet(new long[]{0x0000000200000050L});
-    public static final BitSet FOLLOW_term_in_term236 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_ID_in_term241 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_INT_in_term245 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_10_in_program15 = new BitSet(new long[]{0x0000000000000800L});
+    public static final BitSet FOLLOW_11_in_program17 = new BitSet(new long[]{0x0000000400000050L});
+    public static final BitSet FOLLOW_statementList_in_program19 = new BitSet(new long[]{0x0000000000001000L});
+    public static final BitSet FOLLOW_12_in_program21 = new BitSet(new long[]{0x0000000000000000L});
+    public static final BitSet FOLLOW_EOF_in_program23 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_statement_in_statementList30 = new BitSet(new long[]{0x000000000003E000L});
+    public static final BitSet FOLLOW_set_in_statementList32 = new BitSet(new long[]{0x0000000400000050L});
+    public static final BitSet FOLLOW_statementList_in_statementList52 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_printReturn_in_statementList56 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_expression_in_printReturn64 = new BitSet(new long[]{0x0000000000040000L});
+    public static final BitSet FOLLOW_18_in_printReturn66 = new BitSet(new long[]{0x0000000000080000L});
+    public static final BitSet FOLLOW_19_in_printReturn68 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_declaration_in_statement75 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_assignment_in_statement79 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_step_in_statement83 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_ID_in_declaration91 = new BitSet(new long[]{0x0000000000100000L});
+    public static final BitSet FOLLOW_20_in_declaration93 = new BitSet(new long[]{0x0000000000600000L});
+    public static final BitSet FOLLOW_set_in_declaration95 = new BitSet(new long[]{0x0000000000800002L});
+    public static final BitSet FOLLOW_23_in_declaration105 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_ID_in_assignment114 = new BitSet(new long[]{0x0000000001000000L});
+    public static final BitSet FOLLOW_24_in_assignment116 = new BitSet(new long[]{0x0000000400000050L});
+    public static final BitSet FOLLOW_expression_in_assignment118 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_ID_in_assignment122 = new BitSet(new long[]{0x0000000001000000L});
+    public static final BitSet FOLLOW_24_in_assignment124 = new BitSet(new long[]{0x0000000000000020L});
+    public static final BitSet FOLLOW_CHAR_in_assignment126 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_ID_in_step134 = new BitSet(new long[]{0x0000000006000000L});
+    public static final BitSet FOLLOW_set_in_step136 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_or_in_expression149 = new BitSet(new long[]{0x0000000008000002L});
+    public static final BitSet FOLLOW_27_in_expression152 = new BitSet(new long[]{0x0000000400000050L});
+    public static final BitSet FOLLOW_or_in_expression154 = new BitSet(new long[]{0x0000000008000002L});
+    public static final BitSet FOLLOW_and_in_or164 = new BitSet(new long[]{0x0000000010000002L});
+    public static final BitSet FOLLOW_28_in_or167 = new BitSet(new long[]{0x0000000400000050L});
+    public static final BitSet FOLLOW_and_in_or169 = new BitSet(new long[]{0x0000000010000002L});
+    public static final BitSet FOLLOW_add_in_and180 = new BitSet(new long[]{0x0000000020000002L});
+    public static final BitSet FOLLOW_29_in_and183 = new BitSet(new long[]{0x0000000400000050L});
+    public static final BitSet FOLLOW_add_in_and185 = new BitSet(new long[]{0x0000000020000002L});
+    public static final BitSet FOLLOW_ones_in_add195 = new BitSet(new long[]{0x0000000040000002L});
+    public static final BitSet FOLLOW_30_in_add198 = new BitSet(new long[]{0x0000000400000050L});
+    public static final BitSet FOLLOW_ones_in_add200 = new BitSet(new long[]{0x0000000040000002L});
+    public static final BitSet FOLLOW_term_in_ones210 = new BitSet(new long[]{0x0000000380000002L});
+    public static final BitSet FOLLOW_set_in_ones213 = new BitSet(new long[]{0x0000000400000050L});
+    public static final BitSet FOLLOW_term_in_ones225 = new BitSet(new long[]{0x0000000380000002L});
+    public static final BitSet FOLLOW_34_in_term236 = new BitSet(new long[]{0x0000000400000050L});
+    public static final BitSet FOLLOW_term_in_term238 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_ID_in_term243 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_INT_in_term247 = new BitSet(new long[]{0x0000000000000002L});
 
 }
