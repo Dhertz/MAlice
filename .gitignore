@@ -22,8 +22,7 @@
 *.kate-swp
 *.swp
 
-#ignore OS X indexing files 
+#ignore OS X indexing files and eclipse files
 .DS_Store
-
-#ignore ANTLR3 jar
-*.jar
+.project
+.settings
