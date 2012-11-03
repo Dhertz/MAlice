@@ -2,5 +2,5 @@ TODO list:
 Part 1:
 	- Extend/proof/re-word sections already done
 Part 2:
-    - Work on Lexer and Parser
-    - Pick/write tool for semantic analysis
+	- Work on Lexer and Parser
+	- Pick/write tool for semantic analysis
