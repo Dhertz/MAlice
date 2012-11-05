@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>fileTypes</key>
+	<array>
+		<string>alice</string>
+	</array>
+	<key>name</key>
+	<string>Alice</string>
+	<key>patterns</key>
+	<array>
+		<dict>
+			<key>comment</key>
+			<string>Function declaration.</string>
+			<key>match</key>
+			<string>(The room|The looking-glass) \w+</string>
+			<key>name</key>
+			<string>entity.name.function.Alice</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>It's the main funtion!</string>
+			<key>match</key>
+			<string>hatta</string>
+			<key>name</key>
+			<string>entity.name.function.Alice</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>starting or ending a function.</string>
+			<key>match</key>
+			<string>(opened|closed)</string>
+			<key>name</key>
+			<string>keyword.control.Alice</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>types</string>
+			<key>match</key>
+			<string>(number|character)</string>
+			<key>name</key>
+			<string>storage.type.Alice</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>assigning a value.</string>
+			<key>match</key>
+			<string>became</string>
+			<key>name</key>
+			<string>keyword.operator.Alice</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>declaring a type.</string>
+			<key>match</key>
+			<string>\swas a\s</string>
+			<key>name</key>
+			<string>keyword.control.Alice</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>returning from a statement/function</string>
+			<key>match</key>
+			<string>(said Alice|Alice found)</string>
+			<key>name</key>
+			<string>keyword.control.Alice</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>things that end lines</string>
+			<key>match</key>
+			<string>\s(spoke|enough times|because Alice was unsure which)</string>
+			<key>name</key>
+			<string>keyword.control.Alice</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>things that don't end lines</string>
+			<key>match</key>
+			<string>\s(had|either|eventually|perhaps|or maybe|so|found|because|piece)\s</string>
+			<key>name</key>
+			<string>keyword.control.Alice</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>output type</string>
+			<key>match</key>
+			<string> contained a\s</string>
+			<key>name</key>
+			<string>entity.name.function.Alice</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>numbers</string>
+			<key>match</key>
+			<string>\s\d+\s</string>
+			<key>name</key>
+			<string>constant.numeric.Alice</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>comments</string>
+			<key>match</key>
+			<string>###.+</string>
+			<key>name</key>
+			<string>comment.line.number-sign</string>
+		</dict>
+		<dict>
+			<key>begin</key>
+			<string>"</string>
+			<key>comment</key>
+			<string>string</string>
+			<key>end</key>
+			<string>"</string>
+			<key>name</key>
+			<string>string.quoted.double.Alice</string>
+		</dict>
+	</array>
+	<key>scopeName</key>
+	<string>source.Alice</string>
+	<key>uuid</key>
+	<string>a0c2f6c0-06cc-41b4-9913-cadae4bf8715</string>
+</dict>
+</plist>

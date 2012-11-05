@@ -1,0 +1,85 @@
+{ "name": "Alice",
+  "scopeName": "source.Alice",
+  "fileTypes": ["alice"],
+  "patterns": [
+   {
+      "match": "(The room|The looking-glass) \\w+",
+      "name": "entity.name.function.Alice",
+      "comment":"Function declaration."
+    },
+
+   {
+     "match": "hatta",
+     "name": "entity.name.function.Alice",
+     "comment": "It's the main funtion!"
+   },
+
+   {
+     "match": "(opened|closed)",
+     "name": "keyword.control.Alice",
+     "comment": "starting or ending a function."
+   },
+
+   {
+     "match": "(number|character)",
+     "name": "storage.type.Alice",
+     "comment": "types"
+   },
+
+   {
+     "match": "became",
+     "name": "keyword.operator.Alice",
+     "comment": "assigning a value."
+   },
+
+   {
+     "match": "\\swas a\\s",
+     "name": "keyword.control.Alice",
+     "comment": "declaring a type."
+   },
+
+   {
+     "match": "(said Alice|Alice found)",
+     "name": "keyword.control.Alice",
+     "comment": "returning from a statement/function"
+   },
+
+   {
+     "match": "\\s(spoke|enough times|because Alice was unsure which)",
+     "name": "keyword.control.Alice",
+     "comment": "things that end lines"
+   },
+   
+   {
+     "match": "\\s(had|either|eventually|perhaps|or maybe|so|found|because|piece)\\s",
+     "name": "keyword.control.Alice",
+     "comment": "things that don't end lines"
+   },
+   
+   {
+     "match": " contained a\\s",
+     "name": "entity.name.function.Alice",
+     "comment": "output type"
+   },
+
+   {
+     "match": "\\s\\d+\\s",
+     "name": "constant.numeric.Alice",
+     "comment": "numbers"
+   },
+
+   {
+     "match": "###.+",
+     "name": "comment.line.number-sign",
+     "comment": "comments"
+   },
+
+   {
+     "name": "string.quoted.double.Alice",
+     "begin": "\"",
+     "end": "\"",
+     "comment": "string"
+   }
+  ],
+  "uuid": "a0c2f6c0-06cc-41b4-9913-cadae4bf8715"
+}
