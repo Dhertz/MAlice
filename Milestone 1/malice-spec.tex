@@ -31,9 +31,9 @@ A \emph{MAlice} program must always begin with \texttt{The looking-glass hatta (
 \subsection*{Backaus-Naur Form Grammar}
 The following grammar gives the complete syntax for a valid \emph{MAlice} program described briefly in the paragraph above. We have used the Extended BNF syntax, as this allows us to express the grammar for expressions, declarations and assignments much more succinctly.
 \begin{verbatim}
-      <program> ::= "The" "looking-glass" "hatta" "()" "opened" 
+      <program> ::= "The" "looking-glass" "hatta" "(" ")" "opened" 
                     <statementList> "closed"
-<statementList> ::= <statement> <delimiter> <statement-list> | <printReturn>
+<statementList> ::= <statement> <delimiter> <statementList> | <printReturn>
   <printReturn> ::= <expression> "said" "Alice."
     <statement> ::= <declaration> | <assignment> | <step>
   <declaration> ::= (<ID> "was" "a" <TYPE>) ("too"?)
@@ -52,7 +52,7 @@ The following grammar gives the complete syntax for a valid \emph{MAlice} progra
          <TYPE> ::= "letter" | "number"
 \end{verbatim}
 
-We have removed the left recursion from the \texttt{<expression>} rule by breaking the rule up into several sub rules. We have one rule for each level of operator precedence, which allows us to easily define the precedence rules within the grammar (the higher precedence operators are \textquoteleft closer\textquoteright{} to the \texttt{<term>} in the expression, with the \textbf{Binary NOT} rule being the closest as it has a precedence of 0). The \textbf{drank} and \textbf{ate} operators have been broken away into a seperate \texttt{<step>} rule, since they must be on their own in a statement and come after the operand. 
+We have removed the left recursion from the \texttt{<expression>} rule by breaking the rule up into several sub-rules. We have one rule for each level of operator precedence, which allows us to easily define the precedence rules within the grammar (the higher precedence operators are \textquoteleft closer\textquoteright{} to the \texttt{<term>} in the expression, with the \textbf{Binary NOT} rule being the closest as it has a precedence of 0). The \textbf{drank} and \textbf{ate} operators have been broken away into a seperate \texttt{<step>} rule, since they must be on their own in a statement and come after the operand. 
 
 \section*{Semantic Decisions}
 \subsection*{Types}
@@ -61,7 +61,7 @@ There are two primitive types in the \emph{MAlice} language:
 \begin{itemize}
   \item \textbf{number} - a number is a two's complement 32-bit integer 
   primitive, with a range of \( -(2^{31}) \) to \( +(2^{31} - 1) \). 
-  \item \textbf{letter} - a letter is an 8 bit character primitive, which 
+  \item \textbf{letter} - a letter is an 8-bit character primitive, which 
   allows scope for any character from the ASCII set.
 \end{itemize}
 
@@ -78,14 +78,14 @@ The following table shows the list of keywords that cannot be used within a prog
   \item \textbf{letter} - this is a primitive. See the \textbf{Types} section above.
   \item \textbf{opened} - this keyword marks the opening of a program.
   \item \textbf{number} - this is a primitive. See the \textbf{Types} section above.
-  \item \textbf{said} - this is used along with \textquoteleft Alice\textquoteright{} to return from the program and output a variable.
+  \item \textbf{said} - this is used along with \textquoteleft \textbf{Alice}\textquoteright{} to return from the program and output a variable.
   \item \textbf{then} - see \textbf{and}.
   \item \textbf{too} - this keyword can follow a variable declaration as long as a variable has been declared directly before it and that variable was of the same type as the variable currently being declared.
   \item \textbf{was} - this keyword is used along with \textquoteleft \textbf{a}\textquoteright{} (and a type) to declare variables.
 \end{itemize}
 
-\subsection*{White Space}
-White space is completely ignored and spacing is not important. Lines of \emph{MAlice} code are separated by delimiters - see the \textbf{Delimiters} section for more information on this.
+\subsection*{Whitespace}
+Whitespace is completely ignored and spacing is not important. Lines of \emph{MAlice} code are separated by delimiters - see the \textbf{Delimiters} section for more information on this.
 
 \subsection*{Operators}
 This table shows the operators that can be used in the language. It also shows the level of precedence of the operator.
@@ -109,7 +109,7 @@ This table shows the operators that can be used in the language. It also shows t
   \end{tabular}
 \end{center}
 
-All operators are binary, apart from \textbf{Bitwise NOT}, \textbf{Increment} and \textbf{Decrement} which are unary. The \textbf{Bitwise NOT} opertor is used on the left-hand side of the operand; the other two are used on the right (and require a space after the operand).
+All operators are binary, apart from \textbf{Bitwise NOT}, \textbf{Increment} and \textbf{Decrement} which are unary. The \textbf{Bitwise NOT} operator is used on the left-hand side of the operand; the other two are used on the right (and require a space after the operand).
 
 \subsection*{Delimiters}
 There are five delimiters in \emph{MAlice}: \texttt{and}, \texttt{but}, \texttt{then}, \texttt{,} (comma) and \texttt{.} (full stop). These can all be used in the same way to end statements; since we are disregarding newlines we don't care about \texttt{and} or another word being at the end of a line. However, the \texttt{said Alice} statement that ends a program must be followed by a full stop.
