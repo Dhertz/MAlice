@@ -2,7 +2,7 @@ grammar MAlice;
 
 options
 {
-  language= C;
+  language= Cpp;
 }
 
 program:	'The' 'looking-glass' 'hatta' '()' 'opened' statementList 'closed' EOF;
