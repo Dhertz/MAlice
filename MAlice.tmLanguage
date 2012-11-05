@@ -110,7 +110,7 @@
 			<key>begin</key>
 			<string>"</string>
 			<key>comment</key>
-			<string>string</string>
+			<string>string highlighting</string>
 			<key>end</key>
 			<string>"</string>
 			<key>name</key>
