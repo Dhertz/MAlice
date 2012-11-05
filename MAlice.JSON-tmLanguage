@@ -78,7 +78,7 @@
      "name": "string.quoted.double.Alice",
      "begin": "\"",
      "end": "\"",
-     "comment": "string"
+     "comment": "string highlighting"
    }
   ],
   "uuid": "a0c2f6c0-06cc-41b4-9913-cadae4bf8715"
