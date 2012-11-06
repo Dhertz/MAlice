@@ -41,8 +41,8 @@ statement: body |
            '.' |
            ID ('\'' 's' expression 'piece')? (('said' 'Alice' | 'spoke') | callParams | subRule) delimiter |
            (STRING | CHAR | INT) ('said' 'Alice' | 'spoke') delimiter |
-           //expression ('said' 'Alice' | 'spoke') delimiter | 
-           //ID settable delimiter |
+           // expression ('said' 'Alice' | 'spoke') delimiter | 
+           // ID settable delimiter |
            'Alice' 'found' expression '.' |
            'what' 'was' expression '?' delimiter |
            'eventually' '(' expression ')' 'because' statementList 'enough' 'times' delimiter |
@@ -66,11 +66,13 @@ prec3: prec2 (('*' | '/' | '%') prec2)*;
 prec2: ('!' | '~' | '+' | '-')? atom;
 
 atom: ID ('\'' 's' expression 'piece' | callParams | ) |
-      STRING | CHAR | INT | '(' expression ')';
+      STRING | '\'' CHAR '\'' | INT | '(' expression ')';
 
 ID: ('a'..'z'|'A'..'Z') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*;
-STRING:	'"'(~'"')*'"';
+STRING:	'"' (~'"')* '"';
 INT: ('0'..'9')+;
-CHAR: '\'' . '\'';
+
+// Maybe add in more characters later
+CHAR: ('a'..'z'|'A'..'Z');
 
 delimiter: '.' | ',' | 'and' | 'but' | 'then';
