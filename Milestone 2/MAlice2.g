@@ -44,10 +44,10 @@ statement: body |
            // expression ('said' 'Alice' | 'spoke') delimiter | 
            // ID settable delimiter |
            'Alice' 'found' expression '.' |
-           'what' 'was' expression '?' delimiter |
-           'eventually' '(' expression ')' 'because' statementList 'enough' 'times' delimiter |
-           'either' '(' expression ')' 'so' statementList 'or' statementList 'because' 'Alice' 'was' 'unsure' 'which' delimiter |
-           conditionalStatement ('or' statementList)? 'because' 'Alice' 'was' 'unsure' 'which' delimiter;
+           'what' 'was' expression '?' |
+           'eventually' '(' expression ')' 'because' statementList 'enough' 'times' |
+           'either' '(' expression ')' 'so' statementList 'or' statementList 'because' 'Alice' 'was' 'unsure' 'which' (delimiter?) |
+           conditionalStatement ('or' statementList)? 'because' 'Alice' 'was' 'unsure' 'which' (delimiter?);
 
 conditionalStatement: ('perhaps' '(' expression ')' 'so' statementList) ('or' 'maybe' '(' expression ')' 'so' statementList)*;
 
@@ -73,6 +73,6 @@ STRING:	'"' (~'"')* '"';
 INT: ('0'..'9')+;
 
 // Maybe add in more characters later
-CHAR: ('a'..'z'|'A'..'Z');
+CHAR: ('a'..'z'|'A'..'Z'|'_');
 
 delimiter: '.' | ',' | 'and' | 'but' | 'then';
