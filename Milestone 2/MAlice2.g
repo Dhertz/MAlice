@@ -8,14 +8,14 @@ options
 program: declarationList EOF;
 declarationList : (declaration)+;
 
-declaration: varDeclaration | funcDeclaration | procDeclaration | COMMENT ;
+declaration: varDeclaration | funcDeclaration | procDeclaration;// | COMMENT;
 
 varDeclaration: (ID 'was' 'a' type (('too' | 'of' expression)?) delimiter) |
                 (ID 'had' expression type delimiter);
 
 funcDeclaration: 'The' 'room' ID headerParams 'contained' 'a' type body;
 
-procDeclaration: 'The' 'looking-glass' ID headerParams (COMMENT?) body;
+procDeclaration: 'The' 'looking-glass' ID headerParams /*(COMMENT?)*/ body;
 
 headerParams: '(' (headerParamsList)? ')';
 headerParamsList: (headerParam) (',' headerParam)*;
@@ -32,15 +32,14 @@ statementList: (statement)+;
 idOperations: 'became' expression | 'ate' | 'drank';
 
 statement: body |
-           '.' |
            ID ('\'' 's' expression 'piece')? (('said' 'Alice' | 'spoke') | callParams (('said' 'Alice')?) | idOperations) delimiter |
            (STRING | CHAR | INT) ('said' 'Alice' | 'spoke') delimiter |
            'Alice' 'found' expression '.' |
-           'what' 'was' expression '?' |
-           'eventually' '(' expression ')' 'because' statementList 'enough' 'times' |
+           'what' 'was' expression '?' (delimiter?) |
+           'eventually' '(' expression ')' 'because' statementList 'enough' 'times' (delimiter?) |
            'either' '(' expression ')' 'so' statementList 'or' statementList 'because' 'Alice' 'was' 'unsure' 'which' (delimiter?) |
-           conditionalStatement ('or' statementList)? 'because' 'Alice' 'was' 'unsure' 'which' (delimiter?) |
-           COMMENT;
+           conditionalStatement ('or' statementList)? 'because' 'Alice' 'was' 'unsure' 'which' (delimiter?);/* |
+           COMMENT;*/
            
 conditionalStatement: ('perhaps' '(' expression ')' 'so' statementList) ('or' 'maybe' '(' expression ')' 'so' statementList)*;
 
@@ -61,6 +60,7 @@ prec2: ('!' | '~' | '+' | '-')? atom;
 atom: ID ('\'' 's' expression 'piece' | callParams | ) |
       STRING | '\'' CHAR '\'' | INT | '(' expression ')';
 
+delimiter: '.' | ',' | 'and' | 'but' | 'then';
 ID: ('a'..'z'|'A'..'Z') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*;
 STRING:	'"' (~'"')* '"';
 INT: ('0'..'9')+;
@@ -68,6 +68,4 @@ INT: ('0'..'9')+;
 // Maybe add in more characters later
 CHAR: ('a'..'z'|'A'..'Z'|'_');
 
-COMMENT	: '###' ~( '\r' | '\n')*;
-
-delimiter: '.' | ',' | 'and' | 'but' | 'then';
+// COMMENT: '###' ~( '\r' | '\n')*;
