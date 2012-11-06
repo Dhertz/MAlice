@@ -5,17 +5,17 @@ options
   language = Cpp;
 }
 
-program: declarationList;
+program: declarationList EOF;
 declarationList : (declaration)+;
 
-declaration: varDeclaration | funcDeclaration | procDeclaration;
+declaration: varDeclaration | funcDeclaration | procDeclaration | COMMENT ;
 
 varDeclaration: (ID 'was' 'a' type (('too' | 'of' expression)?) delimiter) |
                 (ID 'had' expression type delimiter);
 
 funcDeclaration: 'The' 'room' ID headerParams 'contained' 'a' type body;
 
-procDeclaration: 'The' 'looking-glass' ID headerParams body;
+procDeclaration: 'The' 'looking-glass' ID headerParams (COMMENT?) body;
 
 headerParams: '(' (headerParamsList)? ')';
 headerParamsList: (headerParam) (',' headerParam)*;
@@ -25,30 +25,23 @@ headerParam: (type | refType) ID;
 callParams: '(' (callParamsList?) ')';
 callParamsList: expression (',' expression)*;
 
-// Check epsilon works
 body: 'opened' ((declarationList?) statementList | ) 'closed';
 
 statementList: (statement)+;
 
-subRule2:  expression ('said' 'Alice' | 'spoke') delimiter; 
-          
-
-subRule: 'became' expression | 'ate' | 'drank';
-
-//settable: (subRule | '\'' 's' expression 'piece' subRule | callParams);
+idOperations: 'became' expression | 'ate' | 'drank';
 
 statement: body |
            '.' |
-           ID ('\'' 's' expression 'piece')? (('said' 'Alice' | 'spoke') | callParams | subRule) delimiter |
+           ID ('\'' 's' expression 'piece')? (('said' 'Alice' | 'spoke') | callParams (('said' 'Alice')?) | idOperations) delimiter |
            (STRING | CHAR | INT) ('said' 'Alice' | 'spoke') delimiter |
-           // expression ('said' 'Alice' | 'spoke') delimiter | 
-           // ID settable delimiter |
            'Alice' 'found' expression '.' |
            'what' 'was' expression '?' |
            'eventually' '(' expression ')' 'because' statementList 'enough' 'times' |
            'either' '(' expression ')' 'so' statementList 'or' statementList 'because' 'Alice' 'was' 'unsure' 'which' (delimiter?) |
-           conditionalStatement ('or' statementList)? 'because' 'Alice' 'was' 'unsure' 'which' (delimiter?);
-
+           conditionalStatement ('or' statementList)? 'because' 'Alice' 'was' 'unsure' 'which' (delimiter?) |
+           COMMENT;
+           
 conditionalStatement: ('perhaps' '(' expression ')' 'so' statementList) ('or' 'maybe' '(' expression ')' 'so' statementList)*;
 
 type: 'number' | 'letter' | 'sentence';
@@ -74,5 +67,7 @@ INT: ('0'..'9')+;
 
 // Maybe add in more characters later
 CHAR: ('a'..'z'|'A'..'Z'|'_');
+
+COMMENT	: '###' ~( '\r' | '\n')*;
 
 delimiter: '.' | ',' | 'and' | 'but' | 'then';
