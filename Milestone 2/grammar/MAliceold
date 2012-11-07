@@ -1,9 +1,31 @@
-grammar MAlice2;
+grammar MAliceold;
 
 options
 {
   language = Cpp;
 }
+
+
+// Turns out we need these things to actually build C++ properly:
+// The Parser requires the Lexer as an include
+@parser::includes
+{
+   #include "MAliceoldLexer.hpp"
+}
+
+// This is namespace that is generated, for use in everything
+@lexer::namespace { MAliceold }
+@parser::namespace{ MAliceold }
+
+// This is needed but I've left it as default because I don't know what it does!
+@lexer::traits
+{
+  class MAliceoldLexer;
+  class MAliceoldParser;
+  typedef antlr3::Traits< MAliceoldLexer, MAliceoldParser > MAliceoldLexerTraits;
+  typedef MAliceoldLexerTraits MAliceoldParserTraits;
+}
+
 
 program: declarationList EOF;
 declarationList : (declaration)+;
@@ -57,8 +79,8 @@ prec4: prec3 (('+' | '-') prec3)*;
 prec3: prec2 (('*' | '/' | '%') prec2)*;
 prec2: ('!' | '~' | '+' | '-')? atom;
 
-atom: ID ('\'' 's' expression 'piece' | callParams | ) |
-      STRING | '\'' CHAR '\'' | INT | '(' expression ')';
+atom: ID ('\'' 's' expression 'piece' | callParams | ) | '\'' CHAR '\'' |
+      STRING | INT | '(' expression ')';
 
 delimiter: '.' | ',' | 'and' | 'but' | 'then';
 ID: ('a'..'z'|'A'..'Z') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*;
