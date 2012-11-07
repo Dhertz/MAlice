@@ -1,5 +1,3 @@
-#This the the canonical lab .gitignore file
-
 #ignore temp files
 *~
 
@@ -25,6 +23,10 @@
 #ignore OS X indexing files and eclipse files
 .DS_Store
 .project
-.settings
+Milestone 2/.settings/*
+Milestone 2/.cproject
+Milestone 2/.project
+Milestone 2/Default/*
 
-backup
+#ignore ANTLR examples
+ANTLR C++ examples/*
