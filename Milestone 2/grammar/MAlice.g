@@ -32,7 +32,7 @@ program: declarationList EOF;
 declarationList: (declaration)+;
 declaration:     varDeclaration | funcDeclaration | procDeclaration;
 
-procDeclaration:  'The' 'looking' 'glass' ID headerParams body;
+procDeclaration:  'The' 'looking-glass' ID headerParams body;
 headerParams:     '(' headerParamsList? ')';
 headerParamsList: headerParam (',' headerParam)*;
 headerParam:      'spider'? TYPE ID;
@@ -45,7 +45,23 @@ funcDeclaration: 'The' 'room' ID headerParams 'contained' 'a' TYPE body;
 varDeclaration: (ID 'was' 'a' TYPE (('too' | 'of' expr)?) delimiter) |
                 (ID 'had' expr TYPE delimiter);
 
-body: 'opened' 'closed';
+body: 'opened' ((declarationList?) statementList | ) 'closed';
+
+statementList: (statement)+;
+
+idOperations: 'became' expr | 'ate' | 'drank';
+
+statement: body |
+           ID ('\'' 's' expr 'piece')? (('said' 'Alice' | 'spoke') | callParams (('said' 'Alice')?) | idOperations) delimiter |
+           (STRING | CHAR | INT) ('said' 'Alice' | 'spoke') delimiter |
+           'Alice' 'found' expr '.' |
+           'what' 'was' expr '?' (delimiter?) |
+           'eventually' '(' expr ')' 'because' statementList 'enough' 'times' (delimiter?) |
+           'either' '(' expr ')' 'so' statementList 'or' statementList 'because' 'Alice' 'was' 'unsure' 'which' (delimiter?) |
+           conditionalStatement ('or' statementList)? 'because' 'Alice' 'was' 'unsure' 'which' (delimiter?);/* |
+           COMMENT;*/
+           
+conditionalStatement: ('perhaps' '(' expr ')' 'so' statementList) ('or' 'maybe' '(' expr ')' 'so' statementList)*;
 
 
 expr:  prec8 ('||' prec8)*;
