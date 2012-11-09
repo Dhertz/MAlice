@@ -20,13 +20,11 @@ Identifier* SymbolTable::lookupCurrLevelOnly(string name) {
 }
 
 Identifier* SymbolTable::lookupCurrLevelAndEnclosingLevels(string name) {
-	SymbolTable* st = this;
-	while (st != NULL) {
+	for (SymbolTable* st = this; st != NULL; st = st->_encSymTable) {
 		Identifier* id = st->lookupCurrLevelOnly(name);
 		if (id != NULL) {
 			return id;
 		}
-		st = st->_encSymTable;
 	}
 	return NULL;
 }
