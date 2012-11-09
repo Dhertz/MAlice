@@ -22,6 +22,8 @@ void printTree(pANTLR3_BASE_TREE ast) {
 }
 
 void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
+	cout << "Parsing File " << filename << "..." << endl;
+
 	pANTLR3_INPUT_STREAM input;
 	pMAliceLexer lex;
 	pANTLR3_COMMON_TOKEN_STREAM tokens;
@@ -42,11 +44,13 @@ void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
 	tokens->free(tokens);
 	lex->free(lex);
 	input->close(input);
+
+	cout << "Done." << endl;
 }
 
 int main(int argc, char* argv[]) {
 	for (int i = 1; i < argc; i++) {
-		parseFile((pANTLR3_UINT8) argv[i], true);
+		parseFile((pANTLR3_UINT8) argv[i], false);
 		cout << endl;
 	}
 

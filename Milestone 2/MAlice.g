@@ -43,10 +43,9 @@ tokens {
 */
 program: declarationList EOF;
 
-declarationList: (declaration)+ 
-                 -> ^(PROG declaration+);
+declarationList: (declaration)+;
                  
-declaration: varDeclaration | funcDeclaration | procDeclaration;
+declaration: varDeclaration | procDeclaration | funcDeclaration;	
 
 procDeclaration: 'The' 'looking-glass' ID headerParams body
                  -> ^(PROCDEC 'The' 'looking-glass' ID headerParams body);
@@ -71,12 +70,12 @@ funcDeclaration: 'The' 'room' ID headerParams 'contained' 'a' TYPE body
 varDeclaration: ID varOptions delimiter
                 -> ^(VARDEC ID varOptions);
 
-varOptions: (('was' 'a' TYPE ('too' | 'of' expr)?) | 'had' TYPE);
+varOptions: (('was' 'a' TYPE ('too' | 'of' expr)?) | 'had' expr TYPE);
 
-body: 'opened' ((declarationList?) statementList | ) 'closed'
-      -> ^(BODY 'opened' declarationList* statementList* 'closed');
+body: 'opened' (declarationList? statementList | ) 'closed'
+      -> ^(BODY 'opened' statementList* 'closed');
 
-statementList: (statement)+;
+statementList: statement+;
 
 idOperations: 'became' expr | 'ate' | 'drank';
 
@@ -87,7 +86,8 @@ statement: body |
            'what' 'was' expr '?' (delimiter?) |
            'eventually' '(' expr ')' 'because' statementList 'enough' 'times' (delimiter?) |
            'either' '(' expr ')' 'so' statementList 'or' statementList 'because' 'Alice' 'was' 'unsure' 'which' (delimiter?) |
-           conditionalStatement ('or' statementList)? 'because' 'Alice' 'was' 'unsure' 'which' (delimiter?);
+           conditionalStatement ('or' statementList)? 'because' 'Alice' 'was' 'unsure' 'which' (delimiter?) |
+           '.';
 
 conditionalStatement: ('perhaps' '(' expr ')' 'so' statementList) ('or' 'maybe' '(' expr ')' 'so' statementList)*;
 
@@ -103,7 +103,7 @@ prec1: prec0 (('*' | '/' | '%')^ prec0)*;
 prec0: (('!' | '~' | '+' | '-')?)^ atom;
 
 atom: ID ('\'' 's' expr 'piece' | callParams)? |
-      CHAR | //NEEDS WORK
+      '\'' CHAR '\'' | //NEEDS WORK
       STRING |
       INT |
       '(' expr ')';
@@ -116,8 +116,8 @@ delimiter: '.' | ',' | 'and' | 'but' | 'then';
 */
 TYPE:   'number' | 'letter' | 'sentence';
 INT:    ('0'..'9')+;
+CHAR:   'a'..'z'; //NEEDS WORK
 ID:     ('a'..'z'|'A'..'Z') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*;
-CHAR:   '\'' 'a'..'z' '\''; //NEEDS WORK
 STRING: '"' ~('"')* '"';
 
 WS:      (' ' | '\t' | '\r' | '\n')+ {$channel = HIDDEN;};
