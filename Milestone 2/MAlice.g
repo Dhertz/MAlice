@@ -54,8 +54,6 @@ body: 'opened' ((declarationList?) statementList | ) 'closed'
 
 statementList: (statement)+;
 
-subRule: 'became' expression | 'ate' | 'drank';
-
 idOptions: '\'' 's' expression 'piece' ('said' 'Alice' | 'spoke' | 'became' expression | 'ate' | 'drank')? |
            callParams ('said' 'Alice' | 'spoke')? |
            ('said' 'Alice' | 'spoke') |
