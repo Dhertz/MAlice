@@ -30,3 +30,6 @@ Milestone 2/Default/*
 
 #ignore ANTLR examples
 ANTLR C++ examples/*
+
+Milestone 2/libantlr3c/antlr3config.h
+Milestone 2/compile

@@ -1,4 +1,3 @@
-#include <antlr3.h>
 #include "MAliceLexer.h"
 #include "MAliceParser.h"
 #include <iostream>
