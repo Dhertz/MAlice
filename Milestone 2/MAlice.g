@@ -19,8 +19,10 @@ tokens {
 /*
   PARSER RULES: These rules have non-terminals on the LHS
 */
-program: declarationList;
-declarationList : (declaration)+;
+program: declarationList EOF
+         -> ^(PROG declarationList);
+
+declarationList: (declaration)+;
 
 declaration: varDeclaration | funcDeclaration | procDeclaration;
 
@@ -54,7 +56,7 @@ body: 'opened' ((declarationList?) statementList | ) 'closed'
 
 statementList: (statement)+;
 
-idOptions: '\'' 's' expression 'piece' ('said' 'Alice' | 'spoke' | 'became' expression | 'ate' | 'drank')? |
+idOptions: APOSTROPHE 's' expression 'piece' ('said' 'Alice' | 'spoke' | 'became' expression | 'ate' | 'drank')? |
            callParams ('said' 'Alice' | 'spoke')? |
            ('said' 'Alice' | 'spoke') |
            'became' expression |
@@ -64,10 +66,10 @@ idOptions: '\'' 's' expression 'piece' ('said' 'Alice' | 'spoke' | 'became' expr
 
 statement: body |
            '.' |
-           ID idOptions delimiter |
-           (STRING | CHAR | INT) ('said' 'Alice' | 'spoke') delimiter |
+           (ID idOptions) => ID idOptions delimiter |
+           expression ('said' 'Alice' | 'spoke') delimiter |
            'Alice' 'found' expression '.' |
-           'what' 'was' expression '?' |
+           'what' 'was' expression '?' (delimiter?) |
            'eventually' '(' expression ')' 'because' statementList 'enough' 'times' |
            'either' '(' expression ')' 'so' statementList 'or' statementList 'because' 'Alice' 'was' 'unsure' 'which' (delimiter?) |
            conditionalStatement ('or' statementList)? 'because' 'Alice' 'was' 'unsure' 'which' (delimiter?);
@@ -88,21 +90,22 @@ prec4: prec3 (('+' | '-')^ prec3)*;
 prec3: prec2 (('*' | '/' | '%')^ prec2)*;
 prec2: (('!' | '~' | '+' | '-')?)^ atom;
 
-atom: ID ('\'' 's' expression 'piece' | callParams | ) |
-      STRING | 
-      '\'' CHAR '\'' | 
+atom: ID (APOSTROPHE 's' expression 'piece' | callParams)? | 
       INT | 
+      APOSTROPHE (.) APOSTROPHE | 
+      STRING | 
       '(' expression ')';
-
+           
 delimiter: '.' | ',' | 'and' | 'but' | 'then';
 
 ID: ('a'..'z'|'A'..'Z') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*;
-STRING: '"' (~'"')* '"';
-INT: ('0'..'9')+;
 
-// Maybe add in more characters later
-CHAR: ('a'..'z'|'A'..'Z'|'_');
+INT: '0'..'9'+;
 
+COMMENT: '###' ~('\n'|'\r')* '\r'? '\n' {$channel=HIDDEN;};
 
-WS:      (' ' | '\t' | '\r' | '\n')+ {$channel = HIDDEN;};
-COMMENT: '###' ~( '\r' | '\n')* {$channel = HIDDEN;};
+WS: (' ' | '\t' | '\r' | '\n') {$channel=HIDDEN;};
+
+STRING: '"' ( ~('"') )* '"';
+
+APOSTROPHE: '\'';
