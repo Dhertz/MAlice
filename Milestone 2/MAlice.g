@@ -2,7 +2,7 @@ grammar MAlice;
 
 options {
   language = C;
-  ASTLabelType=pANTLR3_BASE_TREE;
+  ASTLabelType = pANTLR3_BASE_TREE;
   output = AST;
 }
 
@@ -54,19 +54,20 @@ body: 'opened' ((declarationList?) statementList | ) 'closed'
 
 statementList: (statement)+;
 
-subRule2:  expression ('said' 'Alice' | 'spoke') delimiter;
-
-
 subRule: 'became' expression | 'ate' | 'drank';
 
-//settable: (subRule | '\'' 's' expression 'piece' subRule | callParams);
+idOptions: '\'' 's' expression 'piece' ('said' 'Alice' | 'spoke' | 'became' expression | 'ate' | 'drank')? |
+           callParams ('said' 'Alice' | 'spoke')? |
+           ('said' 'Alice' | 'spoke') |
+           'became' expression |
+           'ate' |
+           'drank' |
+           /*nothing*/;
 
 statement: body |
            '.' |
-           ID ('\'' 's' expression 'piece')? (('said' 'Alice' | 'spoke') | callParams | subRule) delimiter |
+           ID idOptions delimiter |
            (STRING | CHAR | INT) ('said' 'Alice' | 'spoke') delimiter |
-           // expression ('said' 'Alice' | 'spoke') delimiter |
-           // ID settable delimiter |
            'Alice' 'found' expression '.' |
            'what' 'was' expression '?' |
            'eventually' '(' expression ')' 'because' statementList 'enough' 'times' |
@@ -90,7 +91,10 @@ prec3: prec2 (('*' | '/' | '%')^ prec2)*;
 prec2: (('!' | '~' | '+' | '-')?)^ atom;
 
 atom: ID ('\'' 's' expression 'piece' | callParams | ) |
-      STRING | '\'' CHAR '\'' | INT | '(' expression ')';
+      STRING | 
+      '\'' CHAR '\'' | 
+      INT | 
+      '(' expression ')';
 
 delimiter: '.' | ',' | 'and' | 'but' | 'then';
 
