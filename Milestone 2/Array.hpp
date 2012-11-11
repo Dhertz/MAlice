@@ -3,9 +3,14 @@
 
 #include "Type.hpp"
 
-class Scalar : public Type {
-	Type elemType;
-	int elems;
+class Array : Type {
+	Type _elemType;
+	int _elems;
+
+public:
+	Array(Type elemType, int elems);
+	int getSize();
+	Type getType();
 };
 
 #endif

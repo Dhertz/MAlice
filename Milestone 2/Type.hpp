@@ -2,9 +2,13 @@
 #define TYPE_H
 
 #include "Identifier.hpp"
+#include "string"
+
+using namespace std;
 
 class Type : public Identifier {
-	// general type attributes?
+public:
+	virtual string getID();
 };
 
 #endif
