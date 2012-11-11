@@ -15,6 +15,8 @@ tokens {
     FUNCDEC;
       HPL;
     VARDEC;
+      NEWVAR;
+      NEWARR;
     VARSTAT;
       ARRMEMBER;
       FUNC;
@@ -199,7 +201,8 @@ declaration: varDeclaration | funcDeclaration | procDeclaration;
 varDeclaration: ID varOptions delimiter
                 -> ^(VARDEC ID varOptions);
 
-varOptions: (('was' 'a' type ('too' | 'of' expression)?) | 'had' expression type);
+varOptions: ('was' 'a' type ('too' | 'of' expression)?) -> ^(NEWVAR type expression)| 
+            'had' expression type -> ^(NEWARR type expression);
 
 funcDeclaration: 'The' 'room' ID headerParams 'contained' 'a' type body
                  -> ^(FUNCDEC ID headerParams type body);
@@ -210,7 +213,8 @@ procDeclaration: 'The' 'looking-glass' ID headerParams body
 headerParams: '(' (headerParamsList)? ')'
               -> ^(HPL headerParamsList?);
 
-headerParamsList: (headerParam) (',' headerParam)*;
+headerParamsList: (headerParam) (',' headerParam)*
+                  -> headerParam+;
 
 headerParam: (type | refType) ID;
 
@@ -244,6 +248,7 @@ idOptions: APOSTROPHE 's' elem=expression 'piece' (print | 'became' val=expressi
 print: ('said' 'Alice' | 'spoke');
 
 statement: body |
+
            '.' |
 
            (ID idOptions) => ID idOptions delimiter 
@@ -255,16 +260,27 @@ statement: body |
            'Alice' 'found' expression '.' 
            -> ^(RETURN expression) |
 
-           'what' 'was' expression '?' (delimiter?) 
+           ('what' 'was' expression '?' delimiter) => 'what' 'was' expression '?' delimiter
+           -> ^(STDIN expression) |
+
+           'what' 'was' expression '?' 
            -> ^(STDIN expression) |
 
            'eventually' '(' expression ')' 'because' statementList 'enough' 'times' 
            -> ^(WHILE expression statementList) |
 
-           'either' '(' expression ')' 'so' trueS=statementList 'or' falseS=statementList 'because' 'Alice' 'was' 'unsure' 'which' (delimiter?) 
+           ('either' '(' expression ')' 'so' trueS=statementList 'or' falseS=statementList 'because' 'Alice' 'was' 'unsure' 'which' delimiter) =>
+           'either' '(' expression ')' 'so' trueS=statementList 'or' falseS=statementList 'because' 'Alice' 'was' 'unsure' 'which' delimiter 
            -> ^(CHOICE expression $trueS $falseS) |
 
-           conditionalStatement ('or' statementList)? 'because' 'Alice' 'was' 'unsure' 'which' (delimiter?)
+           'either' '(' expression ')' 'so' trueS=statementList 'or' falseS=statementList 'because' 'Alice' 'was' 'unsure' 'which' 
+           -> ^(CHOICE expression $trueS $falseS) |
+
+           (conditionalStatement ('or' statementList)? 'because' 'Alice' 'was' 'unsure' 'which' delimiter) =>
+           conditionalStatement ('or' statementList)? 'because' 'Alice' 'was' 'unsure' 'which' delimiter
+           -> ^(IF conditionalStatement statementList) |
+
+           conditionalStatement ('or' statementList)? 'because' 'Alice' 'was' 'unsure' 'which'
            -> ^(IF conditionalStatement statementList);
 
 conditionalStatement: ('perhaps' '(' e1=expression ')' 'so' sl1=statementList) ('or' 'maybe' '(' e2=expression ')' 'so' sl2=statementList)*
@@ -288,7 +304,7 @@ prec2: (('!' | '~' | '+' | '-')?)^ atom;
 
 atom: ID (APOSTROPHE 's' expression 'piece' | callParams)? | 
       INT | 
-      APOSTROPHE (.) APOSTROPHE | 
+      (APOSTROPHE!) (.) (APOSTROPHE!) | 
       STRING | 
       '(' expression ')' -> expression;
            
