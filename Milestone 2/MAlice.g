@@ -6,39 +6,215 @@ options {
   output = AST;
 }
 
+/* 
+  Imaginary tokens used for labelling sub-trees (indented in a vaguely tree-like manner)
+*/
 tokens {
   PROG;
-  PROCDEC;
-  FUNCDEC;
-  HPL;
-  CPL;
-  VARDEC;
-  BODY;
+    PROCDEC;
+    FUNCDEC;
+      HPL;
+    VARDEC;
+      NEWVAR;
+      NEWARR;
+    VARSTAT;
+      ARRMEMBER;
+      FUNC;
+        CPL;
+      ASSIGN;
+      INC;
+      DEC;
+    PRINT;
+    RETURN;
+    STDIN;
+    WHILE;
+    CHOICE;
+    IF;
+      COND;
+    EXPR;
+}
+
+@parser::postinclude {
+  static void printError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8* tokenNames);
+}
+
+@parser::apifuncs {
+  RECOGNIZER->displayRecognitionError = printError;
+}
+
+@parser::members {
+    /*
+      Overwrite the default error printing method with one written by us
+    */
+    static void printError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8* tokenNames) {
+        pANTLR3_PARSER       parser;
+        pANTLR3_EXCEPTION    exception;
+        pANTLR3_INT_STREAM   stream;
+        pANTLR3_COMMON_TOKEN currentToken;
+        pANTLR3_STRING       fileName;
+        pANTLR3_STRING       tokenString;
+
+        exception = recognizer->state->exception;
+
+        // Print the file name if possible
+        if (exception->streamName == NULL) {
+            if (((pANTLR3_COMMON_TOKEN)(exception->token))->type == ANTLR3_TOKEN_EOF) {
+                ANTLR3_FPRINTF(stderr, "End of input reached: (");
+            } else {
+                ANTLR3_FPRINTF(stderr, "Unknown file source: (");
+            }
+        } else {
+            fileName = exception->streamName->to8(exception->streamName);
+            ANTLR3_FPRINTF(stderr, "\%s(", fileName->chars);
+        }
+
+        // Print the line number next
+        ANTLR3_FPRINTF(stderr, "\%i) ", exception->line);
+        ANTLR3_FPRINTF(stderr, " - error \%i : \%s", exception->type, (pANTLR3_UINT8) exception->message);
+
+        parser       = (pANTLR3_PARSER) recognizer->super;
+        stream       = parser->tstream->istream;
+        currentToken = (pANTLR3_COMMON_TOKEN) exception->token;
+        tokenString  = currentToken->toString(currentToken);
+
+        // Print the token if we can
+        ANTLR3_FPRINTF(stderr, ", character \%i.", exception->charPositionInLine);
+        if (currentToken != NULL) {
+            if (currentToken->type == ANTLR3_TOKEN_EOF) {
+                ANTLR3_FPRINTF(stderr, "The error was at <EOF>.");
+            } else {
+                ANTLR3_FPRINTF(stderr, "\n    Error was near \%s\n    ", 
+                    tokenString == NULL ? (pANTLR3_UINT8)"a token without a textual representation." : tokenString->chars);
+            }
+        }
+
+        // Output an error message corresponding to the error type
+        switch (exception->type) {
+            case ANTLR3_UNWANTED_TOKEN_EXCEPTION:
+                // Spurious input, output expected tokens
+                if (tokenNames == NULL) {
+                    ANTLR3_FPRINTF(stderr, "This doesn't appear to be valid MAlice...");
+                } else {
+                    if  (exception->expecting == ANTLR3_TOKEN_EOF) {
+                        ANTLR3_FPRINTF(stderr, "This doesn't appear to be valid MAlice - expected <EOF>.\n");
+                    }
+                    else {
+                        ANTLR3_FPRINTF(stderr, "This doesn't appear to be valid MAlice - expected \%s.\n", tokenNames[exception->expecting]);
+                    }
+                }
+                break;
+
+            case ANTLR3_MISSING_TOKEN_EXCEPTION:
+                // This would be valid if the token before it was something else
+                if  (tokenNames == NULL) {
+                    ANTLR3_FPRINTF(stderr, "Missing something before (\%i)...\n", exception->expecting);
+                }
+                else {
+                    if  (exception->expecting == ANTLR3_TOKEN_EOF) {
+                        ANTLR3_FPRINTF(stderr, "Missing <EOF>\n");
+                    }
+                    else {
+                        ANTLR3_FPRINTF(stderr, "Missing \%s \n", tokenNames[exception->expecting]);
+                    }
+                }
+                break;
+
+            case ANTLR3_RECOGNITION_EXCEPTION:
+                // Basic syntax error - unpredicted token
+                ANTLR3_FPRINTF(stderr, "Syntax error...\n");    
+                break;
+
+            case ANTLR3_MISMATCHED_TOKEN_EXCEPTION:
+                // Expecting one token, got a different one
+                if  (tokenNames == NULL) {
+                    ANTLR3_FPRINTF(stderr, "Syntax error...\n");
+                }
+                else {
+                    if  (exception->expecting == ANTLR3_TOKEN_EOF) {
+                        ANTLR3_FPRINTF(stderr, "Expecting <EOF>\n");
+                    }
+                    else {
+                        ANTLR3_FPRINTF(stderr, "Expecting \%s ...\n", tokenNames[exception->expecting]);
+                    }
+                }
+                break;
+
+            case ANTLR3_NO_VIABLE_ALT_EXCEPTION:
+                // Reached a dead end in the DFA
+                ANTLR3_FPRINTF(stderr, "Cannot match input to any prediction...\n");
+                break;
+
+            case ANTLR3_MISMATCHED_SET_EXCEPTION: {
+                    ANTLR3_UINT32  count;
+                    ANTLR3_UINT32  bit;
+                    ANTLR3_UINT32  size;
+                    ANTLR3_UINT32  numbits;
+                    pANTLR3_BITSET errBits;
+
+                    // We ciykd have dealt with a nubmer of tokens here, but we didn't see any of them
+                    ANTLR3_FPRINTF(stderr, "Unexpected input here\n  expected one of: ");
+
+                    // Create set
+                    count   = 0;
+                    errBits = antlr3BitsetLoad(exception->expectingSet);
+                    numbits = errBits->numBits(errBits);
+                    size    = errBits->size(errBits);
+
+                    if  (size > 0) {
+                        for (bit = 1; bit < numbits && count < size; ++bit) {
+                            if  (tokenNames[bit]) {
+                                ANTLR3_FPRINTF(stderr, "\%s\%s", count > 0 ? ", " : "", tokenNames[bit]); 
+                                count++;
+                            }
+                        }
+                        ANTLR3_FPRINTF(stderr, "\n");
+                    }
+                    else {
+                        ANTLR3_FPRINTF(stderr, "The expected set was actually empty.\n");
+                    }
+                }
+                break;
+
+            case ANTLR3_EARLY_EXIT_EXCEPTION:
+                // A token sequence was started, but the end token in the sequence was hit before it should have been
+                ANTLR3_FPRINTF(stderr, "This token sequence ended before it should have...\n");
+                break;
+
+            default:
+                // This shouldn't ever be hit
+                ANTLR3_FPRINTF(stderr, "Syntax error...\n");
+                break;
+        }
+    }
 }
 
 /*
   PARSER RULES: These rules have non-terminals on the LHS
 */
-program: declarationList;
-declarationList : (declaration)+;
+program: declarationList EOF
+         -> ^(PROG declarationList);
+
+declarationList: (declaration)+;
 
 declaration: varDeclaration | funcDeclaration | procDeclaration;
 
 varDeclaration: ID varOptions delimiter
                 -> ^(VARDEC ID varOptions);
 
-varOptions: (('was' 'a' type ('too' | 'of' expression)?) | 'had' expression type);
+varOptions: ('was' 'a' type ('too' | 'of' expression)?) -> ^(NEWVAR type expression)| 
+            'had' expression type -> ^(NEWARR type expression);
 
 funcDeclaration: 'The' 'room' ID headerParams 'contained' 'a' type body
-                 -> ^(FUNCDEC 'The' 'room' ID headerParams 'contained' 'a' type body);
+                 -> ^(FUNCDEC ID headerParams type body);
 
 procDeclaration: 'The' 'looking-glass' ID headerParams body
-                 -> ^(PROCDEC 'The' 'looking-glass' ID headerParams body);
+                 -> ^(PROCDEC ID headerParams body);
 
 headerParams: '(' (headerParamsList)? ')'
               -> ^(HPL headerParamsList?);
 
-headerParamsList: (headerParam) (',' headerParam)*;
+headerParamsList: (headerParam) (',' headerParam)*
+                  -> headerParam+;
 
 headerParam: (type | refType) ID;
 
@@ -48,36 +224,74 @@ callParams: '(' (callParamsList?) ')'
 callParamsList: expression (',' expression)*
                 -> expression+;
 
-// Check epsilon works
-body: 'opened' ((declarationList?) statementList | ) 'closed'
-      -> ^(BODY 'opened' statementList* 'closed');
+body: 'opened' ((declarationList?) statementList | ) 'closed';
 
 statementList: (statement)+;
 
-idOptions: '\'' 's' expression 'piece' ('said' 'Alice' | 'spoke' | 'became' expression | 'ate' | 'drank')? |
-           callParams ('said' 'Alice' | 'spoke')? |
-           ('said' 'Alice' | 'spoke') |
-           'became' expression |
-           'ate' |
-           'drank' |
+idOptions: APOSTROPHE 's' elem=expression 'piece' (print | 'became' val=expression | 'ate' | 'drank')? 
+           -> ^(ARRMEMBER $elem print? $val? 'ate'? 'drank'?) |
+
+           callParams print? 
+           -> ^(FUNC callParams print?) |
+
+           'became' expression
+           -> ^(ASSIGN expression) |
+
+           'ate'
+           -> ^(INC) |
+
+           'drank'
+           -> ^(DEC) |
+
            /*nothing*/;
 
-statement: body |
-           '.' |
-           ID idOptions delimiter |
-           (STRING | CHAR | INT) ('said' 'Alice' | 'spoke') delimiter |
-           'Alice' 'found' expression '.' |
-           'what' 'was' expression '?' |
-           'eventually' '(' expression ')' 'because' statementList 'enough' 'times' |
-           'either' '(' expression ')' 'so' statementList 'or' statementList 'because' 'Alice' 'was' 'unsure' 'which' (delimiter?) |
-           conditionalStatement ('or' statementList)? 'because' 'Alice' 'was' 'unsure' 'which' (delimiter?);
+print: ('said' 'Alice' | 'spoke');
 
-conditionalStatement: ('perhaps' '(' expression ')' 'so' statementList) ('or' 'maybe' '(' expression ')' 'so' statementList)*;
+statement: body |
+
+           '.' |
+
+           (ID idOptions) => ID idOptions delimiter 
+           -> ^(VARSTAT ID idOptions) |
+
+           expression print delimiter 
+           -> ^(PRINT expression) |
+
+           'Alice' 'found' expression '.' 
+           -> ^(RETURN expression) |
+
+           ('what' 'was' expression '?' delimiter) => 'what' 'was' expression '?' delimiter
+           -> ^(STDIN expression) |
+
+           'what' 'was' expression '?' 
+           -> ^(STDIN expression) |
+
+           'eventually' '(' expression ')' 'because' statementList 'enough' 'times' 
+           -> ^(WHILE expression statementList) |
+
+           ('either' '(' expression ')' 'so' trueS=statementList 'or' falseS=statementList 'because' 'Alice' 'was' 'unsure' 'which' delimiter) =>
+           'either' '(' expression ')' 'so' trueS=statementList 'or' falseS=statementList 'because' 'Alice' 'was' 'unsure' 'which' delimiter 
+           -> ^(CHOICE expression $trueS $falseS) |
+
+           'either' '(' expression ')' 'so' trueS=statementList 'or' falseS=statementList 'because' 'Alice' 'was' 'unsure' 'which' 
+           -> ^(CHOICE expression $trueS $falseS) |
+
+           (conditionalStatement ('or' statementList)? 'because' 'Alice' 'was' 'unsure' 'which' delimiter) =>
+           conditionalStatement ('or' statementList)? 'because' 'Alice' 'was' 'unsure' 'which' delimiter
+           -> ^(IF conditionalStatement statementList) |
+
+           conditionalStatement ('or' statementList)? 'because' 'Alice' 'was' 'unsure' 'which'
+           -> ^(IF conditionalStatement statementList);
+
+conditionalStatement: ('perhaps' '(' e1=expression ')' 'so' sl1=statementList) ('or' 'maybe' '(' e2=expression ')' 'so' sl2=statementList)*
+                      -> ^(COND $e1 $sl1 $e2* $sl2*);
+
 
 type: 'number' | 'letter' | 'sentence';
 refType: 'spider' type;
 
-expression: (prec10 ('||'^ prec10)*);
+expression: prec11 -> ^(EXPR prec11);
+prec11: (prec10 ('||'^ prec10)*);
 prec10: prec9 ('&&'^ prec9)*;
 prec9: prec8 ('|'^ prec8)*;
 prec8: prec7 ('^'^ prec7)*;
@@ -88,21 +302,28 @@ prec4: prec3 (('+' | '-')^ prec3)*;
 prec3: prec2 (('*' | '/' | '%')^ prec2)*;
 prec2: (('!' | '~' | '+' | '-')?)^ atom;
 
-atom: ID ('\'' 's' expression 'piece' | callParams | ) |
-      STRING | 
-      '\'' CHAR '\'' | 
+atom: ID (APOSTROPHE 's' expression 'piece' | callParams)? | 
       INT | 
-      '(' expression ')';
-
+      (APOSTROPHE!) (.) (APOSTROPHE!) | 
+      STRING | 
+      '(' expression ')' -> expression;
+           
 delimiter: '.' | ',' | 'and' | 'but' | 'then';
 
+/*
+  Lexer rules
+*/
 ID: ('a'..'z'|'A'..'Z') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*;
-STRING: '"' (~'"')* '"';
-INT: ('0'..'9')+;
 
-// Maybe add in more characters later
-CHAR: ('a'..'z'|'A'..'Z'|'_');
+INT: '0'..'9'+;
 
+COMMENT: '###' ~('\n'|'\r')* '\r'? '\n' {$channel=HIDDEN;};
 
-WS:      (' ' | '\t' | '\r' | '\n')+ {$channel = HIDDEN;};
-COMMENT: '###' ~( '\r' | '\n')* {$channel = HIDDEN;};
+WS: (' ' | '\t' | '\r' | '\n') {$channel=HIDDEN;};
+
+STRING: '"' ( ~('"') )* '"';
+
+APOSTROPHE: '\'';
+
+// This prevents lexer errors, the parser should handle all errors.
+CATCHALL: .;
