@@ -7,7 +7,7 @@ options {
 }
 
 /* 
-  Imaginary tokens used for labelling sub-trees
+  Imaginary tokens used for labelling sub-trees (indented in a vaguely tree-like manner)
 */
 tokens {
   PROG;
@@ -30,6 +30,23 @@ tokens {
     IF;
       COND;
     EXPR;
+}
+
+@parser::postinclude {
+  static void printError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8* tokenNames);
+}
+
+@parser::apifuncs {
+  RECOGNIZER->displayRecognitionError = printError;
+}
+
+@parser::members {
+/*
+  Overwrite the default error printing method with one written by us
+*/
+static void printError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8* tokenNames) {
+  // TODO
+}
 }
 
 /*
@@ -154,3 +171,6 @@ WS: (' ' | '\t' | '\r' | '\n') {$channel=HIDDEN;};
 STRING: '"' ( ~('"') )* '"';
 
 APOSTROPHE: '\'';
+
+// This prevents lexer errors, the parser should handle all errors.
+CATCHALL: .;
