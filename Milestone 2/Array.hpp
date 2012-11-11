@@ -3,14 +3,14 @@
 
 #include "Type.hpp"
 
-class Array : Type {
+class Array : public Type {
 	Type _elemType;
 	int _elems;
 
 public:
 	Array(Type elemType, int elems);
-	int getSize();
 	Type getType();
+	int getSize();
 };
 
 #endif

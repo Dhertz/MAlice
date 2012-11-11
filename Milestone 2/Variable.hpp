@@ -3,16 +3,14 @@
 
 #include "Identifier.hpp"
 #include "Type.hpp"
-#include "NullType.hpp"
 
 class Variable : public Identifier {
-	Type _type;
+	Type* _type;
 
 public:
-	Variable();
-	Variable(Type type);
-	Type getType();
-	void setType(Type type);
+	Variable(Type* type);
+	Type* getType();
+	string getID();
 };
 
 #endif

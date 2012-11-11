@@ -1,14 +1,12 @@
 #ifndef EXPR_AST_H
 #define EXPR_AST_H
 
-#include "NullType.hpp"
+#include "ASTNode.hpp"
 
-class ExprAST {
-
+class ExprAST : public ASTNode {
 public:
-	ExprAST();
-	Type check();
-
+	ExprAST(SymbolTable* st);
+	void check();
 };
 
 #endif

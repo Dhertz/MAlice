@@ -1,8 +1,9 @@
 #include "ExprAST.hpp"
 
-ExprAST::ExprAST() {}
+ExprAST::ExprAST(SymbolTable* st) : ASTNode(st) {
+	
+}
 
-Type ExprAST::check() {
-	NullType null;
-	return null;
+void ExprAST::check() {
+	_st->add("lol", NULL);
 }

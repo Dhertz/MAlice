@@ -7,7 +7,7 @@ using namespace std;
 
 class Identifier {
 	public:
-		virtual string getID();
+		virtual string getID() = 0;
 };
 
 #endif

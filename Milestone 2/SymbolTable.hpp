@@ -5,8 +5,6 @@
 #include <string>
 #include "Identifier.hpp"
 
-using namespace std;
-
 class SymbolTable {
 	SymbolTable* _encSymTable;
 	boost::unordered_map<string, Identifier*> _dict;

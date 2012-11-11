@@ -5,14 +5,13 @@ Array::Array(Type elemType, int elems) {
 	_elems = elems;
 }
 
-int Array::getSize() {
-	return _elems;
-}
-
 Type Array::getType() {
 	return _elemType;
 }
 
+int Array::getSize() {
+	return _elems;
+}
 
 /*
 bool Array::check() {
