@@ -1,8 +1,13 @@
 #ifndef IDENTIFIER_H
 #define IDENTIFIER_H
 
+#include <string>
+
+using namespace std;
+
 class Identifier {
-	// reference to AST node?
+	public:
+		virtual string getID() = 0;
 };
 
 #endif

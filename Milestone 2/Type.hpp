@@ -4,7 +4,8 @@
 #include "Identifier.hpp"
 
 class Type : public Identifier {
-	// general type attributes?
+public:
+	string getID();
 };
 
 #endif

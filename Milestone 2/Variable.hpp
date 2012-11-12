@@ -5,7 +5,12 @@
 #include "Type.hpp"
 
 class Variable : public Identifier {
-	Type type;
+	Type* _type;
+
+public:
+	Variable(Type* type);
+	Type* getType();
+	string getID();
 };
 
 #endif

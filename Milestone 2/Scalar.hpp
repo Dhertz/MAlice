@@ -4,7 +4,12 @@
 #include "Type.hpp"
 
 class Scalar : public Type {
-	int min, max;
+	int _min, _max;
+
+public:
+	Scalar(int min, int max);
+	int getMin();
+	int getMax();
 };
 
 #endif
