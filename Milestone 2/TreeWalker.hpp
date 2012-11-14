@@ -18,15 +18,8 @@ class TreeWalker {
 	void processPROCDEC(pANTLR3_BASE_TREE, SymbolTable*, ASTNode* parent, int childNum);
 	void processBODY(pANTLR3_BASE_TREE, SymbolTable*, ASTNode* parent, int childNum);
 	void processFUNCDEC(pANTLR3_BASE_TREE, SymbolTable*, ASTNode* parent, int childNum);
-	void processHPL(pANTLR3_BASE_TREE, SymbolTable*, ASTNode* parent, int childNum);
 	void processVARDEC(pANTLR3_BASE_TREE, SymbolTable*, ASTNode* parent, int childNum);
-	void processNEWVAR(pANTLR3_BASE_TREE, SymbolTable*, ASTNode* parent, int childNum);
-	void processNEWARR(pANTLR3_BASE_TREE, SymbolTable*, ASTNode* parent, int childNum);
 	void processVARSTAT(pANTLR3_BASE_TREE, SymbolTable*, ASTNode* parent, int childNum);
-	void processARRMEMBER(pANTLR3_BASE_TREE, SymbolTable*, ASTNode* parent, int childNum);
-	void processFUNC(pANTLR3_BASE_TREE, SymbolTable*, ASTNode* parent, int childNum);
-	void processCPL(pANTLR3_BASE_TREE, SymbolTable*, ASTNode* parent, int childNum);
-	void processASSIGN(pANTLR3_BASE_TREE, SymbolTable*, ASTNode* parent, int childNum);
 	void processINC(pANTLR3_BASE_TREE, SymbolTable*, ASTNode* parent, int childNum);
 	void processDEC(pANTLR3_BASE_TREE, SymbolTable*, ASTNode* parent, int childNum);
 	void processPRINT(pANTLR3_BASE_TREE, SymbolTable*, ASTNode* parent, int childNum);
@@ -36,7 +29,7 @@ class TreeWalker {
 	void processCHOICE(pANTLR3_BASE_TREE, SymbolTable*, ASTNode* parent, int childNum);
 	void processIF(pANTLR3_BASE_TREE, SymbolTable*, ASTNode* parent, int childNum);
 	void processCOND(pANTLR3_BASE_TREE, SymbolTable*, ASTNode* parent, int childNum);
-	void processEXPR(pANTLR3_BASE_TREE, SymbolTable*, ASTNode* parent, int childNum);
+	void processNS(pANTLR3_BASE_TREE, SymbolTable*, ASTNode* parent, int childNum);
 	pANTLR3_BASE_TREE childByNum(pANTLR3_BASE_TREE tree, int num);
 	string createStringFromTree(pANTLR3_BASE_TREE tree);
 

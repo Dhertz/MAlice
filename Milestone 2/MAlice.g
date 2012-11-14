@@ -32,7 +32,9 @@ tokens {
     CHOICE;
     IF;
       COND;
+      ELSEIF;
     EXPR;
+    NS;
 }
 
 @parser::postinclude {
@@ -230,22 +232,20 @@ body: 'opened' ((declarationList?) statementList | ) 'closed'
 
 statementList: (statement)+;
 
-idOptions: APOSTROPHE 's' elem=expression 'piece' ('became' val=expression)? 
-           -> ^(ARRMEMBER $elem $val?) |
+idOptions: APOSTROPHE 's' elem=expression 'piece' 'became' val=expression
+           -> ^(ARRMEMBER $elem $val) |
 
            callParams
            -> ^(FUNC callParams) |
 
            'became' expression
-           -> ^(ASSIGN expression) |
-
-           /*nothing*/;
+           -> ^(ASSIGN expression);
 
 print: ('said' 'Alice' | 'spoke');
 
 statement: body |
 
-           '.' |
+           '.' -> ^(NS) |
 
            (expression 'ate') => expression 'ate' delimiter
            -> ^(INC expression) |
@@ -284,15 +284,17 @@ statement: body |
            'either' '(' expression ')' 'so' trueS=statementList 'or' falseS=statementList 'because' 'Alice' 'was' 'unsure' 'which' 
            -> ^(CHOICE expression $trueS $falseS) |
 
-           (conditionalStatement ('or' statementList)? 'because' 'Alice' 'was' 'unsure' 'which' delimiter) =>
-           conditionalStatement ('or' statementList)? 'because' 'Alice' 'was' 'unsure' 'which' delimiter
-           -> ^(IF conditionalStatement statementList) |
+           (conditionalStatement delimiter) => conditionalStatement delimiter
+           -> conditionalStatement |
 
-           conditionalStatement ('or' statementList)? 'because' 'Alice' 'was' 'unsure' 'which'
-           -> ^(IF conditionalStatement statementList);
+           conditionalStatement;
 
-conditionalStatement: ('perhaps' '(' e1=expression ')' 'so' sl1=statementList) ('or' 'maybe' '(' e2=expression ')' 'so' sl2=statementList)*
-                      -> ^(COND $e1 $sl1 $e2* $sl2*);
+
+conditionalStatement: 'perhaps' '(' e1=expression ')' 'so' sl1=statementList elseif* ('or' sl3=statementList)? 'because' 'Alice' 'was' 'unsure' 'which'
+                      -> ^(IF $e1 $sl1 elseif* $sl3?);
+
+elseif: 'or' 'maybe' '(' e=expression ')' 'so' sl=statementList
+        -> ^(IF $e $sl);
 
 
 type: 'number' | 'letter' | 'sentence';

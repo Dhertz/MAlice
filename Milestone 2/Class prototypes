@@ -26,3 +26,31 @@ CallParamsAST(SymbolTable*, pANTLR3_BASE_TREE)
 
 FuncAST(SymbolTable*, string, CallParamsAST*)
 -- basically identical to CallAST in notes
+
+ArrayAssignAST(SymbolTable*, string, ExprAST*, ExprAST*)
+-- first ExprAST is element number, second is new value
+
+IncAST(SymbolTable*, ExprAST*)
+
+DecAST(SymbolTable*, ExprAST*)
+
+PrintAST(SymbolTable*, string, ExprAST*)
+-- this constructor is for printing an array member
+
+PrintAST(SymbolTable*, string, CallParamsAST*)
+-- this is for printing a function call
+
+PrintAST(SymbolTable*, ExprAST*)
+-- this is for printing any old expression - maybe we don't need the first one?
+
+ReturnAST(SymbolTable*, ExprAST*)
+
+StdinAST(SymbolTable*, ExprAST*)
+
+WhileAST(SymbolTable*, ExprAST*)
+-- Expr is loop condition (I don't think you need anything else..?)
+
+ChoiceAST(SymbolTable*, ExprAST*)
+-- Same as while I think
+
+IfAST(SymbolTable*, ExprAST*)
