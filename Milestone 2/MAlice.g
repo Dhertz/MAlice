@@ -12,6 +12,7 @@ options {
 tokens {
   PROG;
     PROCDEC;
+      BODY;
     FUNCDEC;
       HPL;
     VARDEC;
@@ -224,24 +225,19 @@ callParams: '(' (callParamsList?) ')'
 callParamsList: expression (',' expression)*
                 -> expression+;
 
-body: 'opened' ((declarationList?) statementList | ) 'closed';
+body: 'opened' ((declarationList?) statementList | ) 'closed'
+      -> ^(BODY declarationList? statementList);
 
 statementList: (statement)+;
 
-idOptions: APOSTROPHE 's' elem=expression 'piece' (print | 'became' val=expression | 'ate' | 'drank')? 
-           -> ^(ARRMEMBER $elem print? $val? 'ate'? 'drank'?) |
+idOptions: APOSTROPHE 's' elem=expression 'piece' ('became' val=expression)? 
+           -> ^(ARRMEMBER $elem $val?) |
 
-           callParams print? 
-           -> ^(FUNC callParams print?) |
+           callParams
+           -> ^(FUNC callParams) |
 
            'became' expression
            -> ^(ASSIGN expression) |
-
-           'ate'
-           -> ^(INC) |
-
-           'drank'
-           -> ^(DEC) |
 
            /*nothing*/;
 
@@ -250,6 +246,18 @@ print: ('said' 'Alice' | 'spoke');
 statement: body |
 
            '.' |
+
+           (expression 'ate') => expression 'ate' delimiter
+           -> ^(INC expression) |
+
+           (expression 'drank') => expression 'drank' delimiter
+           -> ^(DEC expression) |
+
+           (ID APOSTROPHE 's' expression 'piece' print) => ID APOSTROPHE 's' expression 'piece' print delimiter
+           -> ^(PRINT ^(ARRMEMBER ID expression)) |
+
+           (ID callParams print) => ID callParams print delimiter 
+           -> ^(PRINT ^(FUNC ID callParams)) |
 
            (ID idOptions) => ID idOptions delimiter 
            -> ^(VARSTAT ID idOptions) |
@@ -306,7 +314,7 @@ atom: ID (APOSTROPHE 's' expression 'piece' | callParams)? |
       INT | 
       (APOSTROPHE!) (.) (APOSTROPHE!) | 
       STRING | 
-      '(' expression ')' -> expression;
+      '(' prec11 ')' -> prec11;
            
 delimiter: '.' | ',' | 'and' | 'but' | 'then';
 

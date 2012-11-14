@@ -1,0 +1,28 @@
+Class prototypes:
+
+This is a list of class constructors I have need for that don't exist yet:
+
+HeaderParamAST(SymbolTable*, pANTLR3_BASE_TREE);
+-- the tree's children are the header params, it's flat tree
+
+ProcDecAST(SymbolTable*, string, HeaderParamAST);
+-- the string is the function name
+
+FuncDecAST(SymbolTable*, string, HeaderParamAST, string)
+-- first string is name, second string is type
+
+VariableDecAST(SymbolTable*, string, string, ExprAST*)
+-- like the current one but with an ExprAST to support inline assignments
+-- keep the old one too
+
+ExprAST(SymbolTable*, pANTLR3_BASE_TREE)
+-- Need to be pased the tree to type check the expression all the way down the tree
+
+ArrayDecAST(SymbolTable*, ExprAST*, string)
+-- ExprAST is the size of the array, string is the type
+
+CallParamsAST(SymbolTable*, pANTLR3_BASE_TREE)
+-- unlike HPs this tree won't be flat; it's a list of expressions
+
+FuncAST(SymbolTable*, string, CallParamsAST*)
+-- basically identical to CallAST in notes
