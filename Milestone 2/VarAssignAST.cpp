@@ -11,27 +11,19 @@ VarAssignAST::VarAssignAST(SymbolTable* st, string varName, ExprAST* expr) : AST
 void VarAssignAST::check() {
 	Identifier* var = _st->lookupCurrLevelAndEnclosingLevels(_varName);
 
-	// expr->check() is now void!
+	_expr->check();
 
-	/* Type t = _expr->check();
-	if(t.getID() != "Expr") {
-		cout << t.getID() << "is not an expression!" << endl;
-		NullType null;
-		return null;
-	} else if(var == NULL) {
-		cout << "Variable name" << _varName << "doesn't exist!" << endl;
-		NullType null;
-		return null;
-	} else if(var->getID() != "Variable") {
-		cout << var->getID() << "is not a variable!" << endl;
-		NullType null;
-		return null;
-	} else if(typeid(((Variable&) *var).getType()) != typeid(t)) {
-		cout << "lhs and rhs not compatable" << endl;
-		NullType null;
-		return null;
+	if (var == NULL) {
+		cerr << "unknown variable " << _varName << endl;
+	} else if (var->getID() != "Variable") {
+		cerr << _varName << " is not a variable" << endl;
 	} else {
-		_varObj = ((Variable&) *var);
-		return ((Variable&) *var).getType();
-	} */
+		Variable* varCasted = (Variable*) var;
+
+		if (_expr->getType() != varCasted->getType()) {
+			cerr << "lhs and rhs not type compatible" << endl;	
+		} else {
+			_varObj = varCasted;
+		}
+	}	
 }

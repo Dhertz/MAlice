@@ -12,3 +12,7 @@ int Scalar::getMin() {
 int Scalar::getMax() {
 	return _max;
 }
+
+string Scalar::getType() {
+	return "Scalar";
+}
