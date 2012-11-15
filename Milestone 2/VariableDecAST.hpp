@@ -3,6 +3,7 @@
 
 #include "ASTNode.hpp"
 #include "Variable.hpp"
+#include "ExprAST.hpp"
 
 class VariableDecAST : public ASTNode {
 	SymbolTable* _st;
@@ -10,9 +11,11 @@ class VariableDecAST : public ASTNode {
 	string _typeName;
 	string _varName;
 	Variable* _varObj;
+	ExprAST* _expr;
 
 public:
 	VariableDecAST(SymbolTable* st, string typeName, string varName);
+	VariableDecAST(SymbolTable* st, string typeName, string varName, ExprAST* expr);
 	void check();
 };
 

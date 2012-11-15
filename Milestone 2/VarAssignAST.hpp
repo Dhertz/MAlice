@@ -5,7 +5,7 @@
 #include "ExprAST.hpp"
 #include "Variable.hpp"
 
-class VarAssignAST : ASTNode {
+class VarAssignAST : public ASTNode {
 	SymbolTable* _st;
 	string _varName;
 	ExprAST* _expr;

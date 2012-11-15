@@ -7,3 +7,5 @@ ASTNode::ASTNode(SymbolTable* st) {
 vector<ASTNode*> ASTNode::getChildren() {
 	return _children;
 }
+
+void ASTNode::check() {}

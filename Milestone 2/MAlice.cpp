@@ -69,7 +69,7 @@ void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
 
 int main(int argc, char* argv[]) {
 	for (int i = 1; i < argc; i++) {
-		parseFile((pANTLR3_UINT8) argv[i], true);
+		parseFile((pANTLR3_UINT8) argv[i], false);
 		cout << endl;
 	}
 

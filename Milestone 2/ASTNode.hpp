@@ -8,10 +8,12 @@ class ASTNode {
 	vector<ASTNode*> _children;
 protected:
 	SymbolTable* _st;
-	ASTNode(SymbolTable* st);
 public:
+	ASTNode(SymbolTable* st);
 	vector<ASTNode*> getChildren();
-	virtual void check() = 0;
+	void addChild(ASTNode* child, int position);
+	void print();
+	virtual void check();
 };
 
 #endif

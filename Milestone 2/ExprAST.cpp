@@ -1,6 +1,6 @@
 #include "ExprAST.hpp"
 
-ExprAST::ExprAST(SymbolTable* st) : ASTNode(st) {
+ExprAST::ExprAST(SymbolTable* st, pANTLR3_BASE_TREE tree) : ASTNode(st) {
 	
 }
 

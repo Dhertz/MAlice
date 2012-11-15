@@ -1,6 +1,23 @@
+// These includes are well ugly...
 #include "TreeWalker.hpp"
 #include "VariableDecAST.hpp"
 #include "ExprAST.hpp"
+#include "ArrayDecAST.hpp"
+#include "ArrayAssignAST.hpp"
+#include "VarAssignAST.hpp"
+#include "FuncAST.hpp"
+#include "CallParamsAST.hpp"
+#include "HeaderParamsAST.hpp"
+#include "ProcDecAST.hpp"
+#include "FuncDecAST.hpp"
+#include "IncAST.hpp"
+#include "DecAST.hpp"
+#include "PrintAST.hpp"
+#include "ReturnAST.hpp"
+#include "StdinAST.hpp"
+#include "WhileAST.hpp"
+#include "ChoiceAST.hpp"
+#include "IfAST.hpp"
 
 //Construct object, assign fields and start walking the input tree from the top
 TreeWalker::TreeWalker(SymbolTable* topSt, pANTLR3_BASE_TREE inputTree, 
@@ -21,7 +38,6 @@ void TreeWalker::walk(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* parent, 
 
 // Create the root of the tree and first non-static symbol table, go to children
 void TreeWalker::processPROG(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* parent, int childNum) {
-	/*
 	SymbolTable progSt(st);
 
 	ASTNode root(&progSt); // Maybe we need a different node for this?
@@ -30,23 +46,20 @@ void TreeWalker::processPROG(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* p
 	for (int i = 1; i < tree->getChildCount(tree); ++i) {
 		walk(childByNum(tree, i), &progSt, &root, i);
 	}
-	*/
 }
 
 // Create the param list, get the id, create node and walk to body
 void TreeWalker::processPROCDEC(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* parent, int childNum) {
-	/*
-	HeaderParamsAST params(st, tree->getChild(tree, 2));
+	HeaderParamsAST params(st, (pANTLR3_BASE_TREE) tree->getChild(tree, 2));
 
-	idTree = childByNum(tree, 1);
+	pANTLR3_BASE_TREE idTree = childByNum(tree, 1);
 	string procName = createStringFromTree(idTree);
 
-	ProcDecAST* dec(st, procName, params);
+	ProcDecAST dec(st, procName, &params);
 
 	parent->addChild(&dec, childNum);
 
-	walk(childByNum(tree, 3), st, dec, 3);
-	*/
+	walk(childByNum(tree, 3), st, &dec, 3);
 }
 
 // We don't need a AST node here, but we do need a new symbol table as we have a new scope
@@ -60,11 +73,10 @@ void TreeWalker::processBODY(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* p
 
 // Like PROCDEC but with a type
 void TreeWalker::processFUNCDEC(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* parent, int childNum) {
-	/*
 	HeaderParamsAST params(st, childByNum(tree, 2));
 
-	idTree = (childByNum(tree, 1));
-	typeTree = (childByNum(tree, 3));
+	pANTLR3_BASE_TREE idTree = (childByNum(tree, 1));
+	pANTLR3_BASE_TREE typeTree = (childByNum(tree, 3));
 
 	// Extract method from here
 	string funcName = createStringFromTree(idTree);
@@ -75,7 +87,6 @@ void TreeWalker::processFUNCDEC(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode
 	parent->addChild(&dec, childNum);
 
 	walk(childByNum(tree, 4), st, &dec, 4);
-	*/
 }
 
 // Work out if it's an array or not, then process accordingly
@@ -90,22 +101,18 @@ void TreeWalker::processVARDEC(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode*
 	if (createStringFromTree(varOptionsTree) == "NEWVAR") {
 		if (exprTree == NULL) {
 			VariableDecAST dec(st, typeName, varName);
-			//parent->addChild(&dec, childNum);
+			parent->addChild(&dec, childNum);
 		} else {
-			/*
 			ExprAST expr(st, exprTree);
 			VariableDecAST dec(st, typeName, varName, &expr);
 			dec.addChild(&expr, 1);
 			parent->addChild(&dec, childNum);
-			*/
 		}
 	} else {
-		/*
 		ExprAST expr(st, exprTree);
-		ArrayDecAST dec(st, expr, typeName);
+		ArrayDecAST dec(st, &expr, typeName);
 		dec.addChild(&expr, 1);
 		parent->addChild(&dec, childNum);
-		*/
 	}
 }
 
@@ -116,41 +123,31 @@ void TreeWalker::processVARSTAT(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode
 	string option = createStringFromTree(optionsTree);
 
 	if (option == "ARRMEMBER") {
-		/*
 		ExprAST elem(st, childByNum(optionsTree, 1));
 		ExprAST val(st, childByNum(optionsTree, 2));
 		ArrayAssignAST assign(st, varId, &elem, &val);
-		parent->addChild(&assign, childNum);	
-		*/
+		parent->addChild(&assign, childNum);
 	} else if (option == "FUNC") {
-		/*
 		CallParamsAST params(st, childByNum(optionsTree, 1));
 		FuncAST func(st, varId, &params);
 		parent->addChild(&func, childNum);
-		*/
 	} else if (option == "ASSIGN") {
-		/*
 		ExprAST expr(st, childByNum(optionsTree, 1));
 		VarAssignAST assign(st, varId, &expr);
 		parent->addChild(&assign, childNum);
-		*/
 	}
 }
 
 void TreeWalker::processINC(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* parent, int childNum) {
-	/*
 	ExprAST expr(st, childByNum(tree, 1));
 	IncAST inc(st, &expr);
 	parent->addChild(&inc, childNum);
-	*/
 }
 
 void TreeWalker::processDEC(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* parent, int childNum) {
-	/*
 	ExprAST expr(st, childByNum(tree, 1));
 	DecAST dec(st, &expr);
 	parent->addChild(&dec, childNum);
-	*/
 }
 
 void TreeWalker::processPRINT(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* parent, int childNum) {
@@ -158,78 +155,62 @@ void TreeWalker::processPRINT(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* 
 	string option = createStringFromTree(optionTree); // Check this
 
 	if (option == "ARRMEMBER") {
-		/*
 		string arrayID = createStringFromTree(childByNum(optionTree, 1));
-		ExprAST expr(st, childNum(optionTree, 2));
+		ExprAST expr(st, childByNum(optionTree, 2));
 		PrintAST print(st, arrayID, &expr);
 		parent->addChild(&print, childNum);
-		*/
 	} else if (option == "FUNC") {
-		/*
 		string funcID = createStringFromTree(childByNum(optionTree, 1));
-		CallParamsAST params(st, childNum(optionTree, 2));
-		PrintAST print(st, funcID, CallParamsAST);
+		CallParamsAST params(st, childByNum(optionTree, 2));
+		PrintAST print(st, funcID, &params);
 		parent->addChild(&print, childNum);
-		*/
 	} else {
-		/*
 		ExprAST expr(st, optionTree);
-		PrintAST print(st, expr);
+		PrintAST print(st, &expr);
 		parent->addChild(&print, childNum);
-		*/
 	}
 }
 
 void TreeWalker::processRETURN(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* parent, int childNum) {
-	/*
 	ExprAST expr(st, childByNum(tree, 1));
 	ReturnAST ret(st, &expr);
 	parent->addChild(&ret, childNum);
-	*/
 }
 
 void TreeWalker::processSTDIN(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* parent, int childNum) {
-	/*
 	ExprAST expr(st, childByNum(tree, 1));
 	StdinAST in(st, &expr);
 	parent->addChild(&in, childNum);
-	*/
 }
 
 void TreeWalker::processWHILE(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* parent, int childNum) {
-	/*
 	ExprAST expr(st, childByNum(tree, 1));
 	WhileAST whilenode(st, &expr);
 	parent->addChild(&whilenode, childNum);
 
 	for (int i = 2; i < tree->getChildCount(tree); ++i) {
-		walk(childByNum(tree, i), &st, &whilenode, i);
+		walk(childByNum(tree, i), st, &whilenode, i);
 	}
-	*/
 }
 
 void TreeWalker::processCHOICE(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* parent, int childNum) {
-	/*
 	ExprAST expr(st, childByNum(tree, 1));
 	ChoiceAST choice(st, &expr);
 	parent->addChild(&choice, childNum);
 
 	for (int i = 2; i < tree->getChildCount(tree); ++i) {
-		walk(childByNum(tree, i), &st, &whilenode, i);
+		walk(childByNum(tree, i), st, &choice, i);
 	}
-	*/
 }
 
 void TreeWalker::processIF(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* parent, int childNum) {
-	/*
 	ExprAST expr(st, childByNum(tree, 1));
 	IfAST ifnode(st, &expr);
 	parent->addChild(&ifnode, childNum);
 
 	for (int i = 2; i < tree->getChildCount(tree); ++i) {
-		walk(childByNum(tree, i), &st, &ifnode, i);
+		walk(childByNum(tree, i), st, &ifnode, i);
 	}
-	*/
 }
 
 // Code shortening methods:
