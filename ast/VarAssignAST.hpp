@@ -3,7 +3,7 @@
 
 #include "ASTNode.hpp"
 #include "ExprAST.hpp"
-#include "Variable.hpp"
+#include "../objs/Variable.hpp"
 
 class VarAssignAST : public ASTNode {
 	SymbolTable* _st;

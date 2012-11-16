@@ -3,7 +3,7 @@
 
 #include <antlr3.h>
 #include <map>
-#include "AST.hpp"
+#include "ast/AST.hpp"
 
 using namespace std;
 

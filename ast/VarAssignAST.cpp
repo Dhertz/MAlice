@@ -1,6 +1,5 @@
 #include "VarAssignAST.hpp"
-#include "Identifier.hpp"
-
+#include "../objs/Identifier.hpp"
 
 VarAssignAST::VarAssignAST(SymbolTable* st, string varName, ExprAST* expr) : ASTNode(st) {
 	_st = st;

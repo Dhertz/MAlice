@@ -3,7 +3,7 @@
 
 #include <antlr3.h>
 #include "ASTNode.hpp"
-#include "Type.hpp"
+#include "../objs/Type.hpp"
 
 class ExprAST : public ASTNode {
 	Type* _type;

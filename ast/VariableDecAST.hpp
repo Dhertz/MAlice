@@ -2,8 +2,8 @@
 #define VARIABLE_DEC_AST_H
 
 #include "ASTNode.hpp"
-#include "Variable.hpp"
 #include "ExprAST.hpp"
+#include "../objs/Variable.hpp"
 
 class VariableDecAST : public ASTNode {
 	SymbolTable* _st;

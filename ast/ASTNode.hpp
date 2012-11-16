@@ -1,7 +1,7 @@
 #ifndef AST_NODE_H
 #define AST_NODE_H
 
-#include "SymbolTable.hpp"
+#include "../SymbolTable.hpp"
 #include <vector>
 
 class ASTNode {
