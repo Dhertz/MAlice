@@ -1,16 +1,20 @@
 #include "Array.hpp"
 
-Array::Array(Type elemType, int elems) {
+Array::Array(Type* elemType, int elems) {
 	_elemType = elemType;
 	_elems = elems;
 }
 
-Type Array::getType() {
+Type* Array::getElemType() {
 	return _elemType;
 }
 
 int Array::getSize() {
 	return _elems;
+}
+
+string Array::getType() {
+	return "Array";
 }
 
 /*

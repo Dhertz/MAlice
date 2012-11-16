@@ -9,3 +9,5 @@ vector<ASTNode*> ASTNode::getChildren() {
 }
 
 void ASTNode::check() {}
+
+void ASTNode::print() {}

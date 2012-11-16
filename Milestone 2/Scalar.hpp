@@ -10,6 +10,7 @@ public:
 	Scalar(int min, int max);
 	int getMin();
 	int getMax();
+	string getType();
 };
 
 #endif

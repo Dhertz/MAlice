@@ -1,12 +1,12 @@
 #include "Function.hpp"
 
-Function::Function(Type returnType, vector<Param> params, SymbolTable* st) {
+Function::Function(Type* returnType, vector<Param> params, SymbolTable* st) {
 	_returnType = returnType;
 	_params = params;
 	_st = st;
 }
 
-Type Function::getType() {
+Type* Function::getType() {
 	return _returnType;
 }
 

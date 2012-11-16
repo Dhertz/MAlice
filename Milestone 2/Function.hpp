@@ -10,13 +10,13 @@
 using namespace std;
 
 class Function : public Identifier {
-	Type _returnType;
+	Type* _returnType;
 	vector<Param> _params;
 	SymbolTable* _st;
 
 public:
-	Function(Type returnType, vector<Param> params, SymbolTable* st);
-	Type getType();
+	Function(Type* returnType, vector<Param> params, SymbolTable* st);
+	Type* getType();
 	vector<Param> getParams();
 	SymbolTable getTable();
 };
