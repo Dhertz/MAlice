@@ -23,13 +23,6 @@
 #ignore OS X indexing files and eclipse files
 .DS_Store
 .project
-Milestone 2/.settings/*
-Milestone 2/.cproject
-Milestone 2/.project
-Milestone 2/Default/*
 
 #ignore ANTLR examples
 ANTLR C++ examples/*
-
-Milestone 2/libantlr3c/antlr3config.h
-Milestone 2/compile
