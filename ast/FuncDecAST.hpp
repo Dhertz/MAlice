@@ -6,7 +6,7 @@
 class FuncDecAST : public ASTNode {
 
 public:
-	FuncDecAST(SymbolTable* st, string name, HeaderParamsAST*, string returnType);
+	FuncDecAST(SymbolTable* st, string name, HeaderParamsAST* params, string returnType);
 };
 
 #endif

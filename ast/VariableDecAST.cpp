@@ -6,6 +6,8 @@ VariableDecAST::VariableDecAST(SymbolTable* st, string typeName, string varName)
 	_varName = varName;
 }
 
+VariableDecAST::VariableDecAST(SymbolTable* st, string typeName, string varName, ExprAST* expr) : ASTNode(st) {}
+
 void VariableDecAST::check() {
 	Identifier* type = _st->lookupCurrLevelAndEnclosingLevels(_typeName);
 	Identifier* name = _st->lookupCurrLevelOnly(_varName);

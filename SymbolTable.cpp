@@ -2,6 +2,10 @@
 
 using namespace std;
 
+SymbolTable::SymbolTable() {
+	_encSymTable = NULL;
+}
+
 SymbolTable::SymbolTable(SymbolTable* st) {
 	_encSymTable = st;
 }

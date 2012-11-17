@@ -1,6 +1,11 @@
+#include <iostream>
+#include "SymbolTable.hpp"
+#include "objs/Scalar.hpp"
+#include "ast/AST.hpp"
+#include "TreeWalker.hpp"
+// The ANTLR includes have to be BELOW the boost includes
 #include "MAliceLexer.h"
 #include "MAliceParser.h"
-#include <iostream>
 
 using namespace std;
 
@@ -21,6 +26,16 @@ void printTree(pANTLR3_BASE_TREE ast) {
 	print(ast, 0);
 }
 
+void printError(string message) {
+	cerr << message << endl;
+	exit(1);
+}
+
+void initST(SymbolTable top) {
+	Scalar intScalar(-(2^31), (2^31 - 1)); // Remove Magic numbers 
+	top.add("int", &intScalar);
+}
+
 void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
 	cout << "Parsing File " << filename << "..." << endl << endl;
 
@@ -30,34 +45,29 @@ void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
 	pMAliceParser parser;
 
 	input = antlr3AsciiFileStreamNew(filename);
-	if (input == NULL) {
-		cerr << "Unable to open file " << filename << endl;
-		exit(ANTLR3_ERR_NOFILE);
-	}
+	if (input == NULL) printError("Unable to open file.");
 
 	lex = MAliceLexerNew(input);
-	if (lex == NULL) {
-		cerr << "Unable to create lexer." << endl;
-		exit(ANTLR3_ERR_NOMEM);
-	}
+	if (lex == NULL) printError("Unable to create lexer.");
 
 	tokens = antlr3CommonTokenStreamSourceNew(ANTLR3_SIZE_HINT, TOKENSOURCE(lex));
-	if (tokens == NULL) {
-		cerr << "Unable to create tokenstream." << endl;
-		exit(ANTLR3_ERR_NOMEM);
-	}
+	if (tokens == NULL) printError("Unable to create tokenstream.");
 
 	parser = MAliceParserNew(tokens);
-	if (parser == NULL) {
-		cerr << "Unable to create parser." << endl;
-		exit(ANTLR3_ERR_NOMEM);
-	}
+	if (parser == NULL) printError("Unable to create parser.");
 
 	MAliceParser_program_return r = parser->program(parser);
+	pANTLR3_BASE_TREE tree = r.tree;
+
 	if (doPrintTree) {
-		pANTLR3_BASE_TREE tree = r.tree;
 		printTree(tree);
 	}
+
+	SymbolTable top;
+	initST(top);
+	AST semanticTree;
+
+	TreeWalker walker(&top, tree, &semanticTree);
 
 	parser->free(parser);
 	tokens->free(tokens);

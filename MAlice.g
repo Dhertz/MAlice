@@ -274,6 +274,10 @@ statement: body |
            'what' 'was' expression '?' 
            -> ^(STDIN expression) |
 
+           ('eventually' '(' expression ')' 'because' statementList 'enough' 'times' delimiter) =>
+           'eventually' '(' expression ')' 'because' statementList 'enough' 'times' delimiter
+           -> ^(WHILE expression statementList) |
+
            'eventually' '(' expression ')' 'because' statementList 'enough' 'times' 
            -> ^(WHILE expression statementList) |
 

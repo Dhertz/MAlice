@@ -1,6 +1,10 @@
 #ifndef PRINT_AST
 #define PRINT_AST
 
+#include "ASTNode.hpp"
+#include "ExprAST.hpp"
+#include "CallParamsAST.hpp"
+
 class PrintAST : public ASTNode {
 
 public:

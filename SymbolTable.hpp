@@ -10,6 +10,7 @@ class SymbolTable {
 	boost::unordered_map<string, Identifier*> _dict;
 
 public:
+	SymbolTable();
 	SymbolTable(SymbolTable* st);
 	void add(string name, Identifier* obj);
 	Identifier* lookupCurrLevelOnly(string name);

@@ -1,6 +1,9 @@
 #ifndef HEADER_PARAMS_AST
 #define HEADER_PARAMS_AST
 
+#include "ASTNode.hpp"
+#include <antlr3.h>
+
 class HeaderParamsAST : public ASTNode {
 
 public:
