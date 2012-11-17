@@ -27,7 +27,7 @@ void printTree(pANTLR3_BASE_TREE ast) {
 }
 
 void printError(string message) {
-	cerr << message << endl;
+	cerr << message << endl << endl;
 	exit(1);
 }
 
@@ -37,7 +37,7 @@ void initST(SymbolTable top) {
 }
 
 void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
-	cout << "Parsing File " << filename << "..." << endl << endl;
+	cout << endl << "Parsing File " << filename << "..." << endl << endl;
 
 	pANTLR3_INPUT_STREAM input;
 	pMAliceLexer lex;
@@ -59,6 +59,10 @@ void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
 	MAliceParser_program_return r = parser->program(parser);
 	pANTLR3_BASE_TREE tree = r.tree;
 
+	if (parser->pParser->rec->getNumberOfSyntaxErrors(parser->pParser->rec) > 0) {
+		printError("Syntax errors found. Stopping.");
+	}
+
 	if (doPrintTree) {
 		printTree(tree);
 	}
@@ -74,7 +78,7 @@ void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
 	lex->free(lex);
 	input->close(input);
 
-	cout << "Done." << endl << endl;
+	cout << "Done." << endl;
 }
 
 int main(int argc, char* argv[]) {
