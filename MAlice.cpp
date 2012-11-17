@@ -1,6 +1,6 @@
 #include <iostream>
 #include "SymbolTable.hpp"
-#include "objs/Scalar.hpp"
+#include "idents/Number.hpp"
 #include "ast/AST.hpp"
 #include "TreeWalker.hpp"
 // The ANTLR includes have to be BELOW the boost includes
@@ -32,8 +32,8 @@ void printError(string message) {
 }
 
 void initST(SymbolTable top) {
-	Scalar intScalar(-(2^31), (2^31 - 1)); // Remove Magic numbers 
-	top.add("int", &intScalar);
+	Number intNumber(-(2^31), (2^31 - 1)); // Remove Magic numbers 
+	top.add("int", &intNumber);
 }
 
 void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {

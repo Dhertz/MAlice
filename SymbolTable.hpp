@@ -3,7 +3,7 @@
 
 #include <boost/unordered_map.hpp>
 #include <string>
-#include "objs/Identifier.hpp"
+#include "idents/Identifier.hpp"
 
 class SymbolTable {
 	SymbolTable* _encSymTable;

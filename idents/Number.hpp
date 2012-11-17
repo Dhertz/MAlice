@@ -3,11 +3,11 @@
 
 #include "Type.hpp"
 
-class Scalar : public Type {
+class Number : public Type {
 	int _min, _max;
 
 public:
-	Scalar(int min, int max);
+	Number(int min, int max);
 	int getMin();
 	int getMax();
 	string getType();
