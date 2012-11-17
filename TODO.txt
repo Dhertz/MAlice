@@ -1,8 +1,0 @@
-TODO list:
-Part 1:
-	- Extend/proof/re-word sections already done
-Part 2:
-	- Write grammar for ANTLR3
-	- Work out how toglue it all together in C++
-	- Work on Lexer and Parser generated code
-	- Write tool for semantic analysis
