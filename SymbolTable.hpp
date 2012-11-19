@@ -15,6 +15,8 @@ public:
 	void add(string name, Identifier* obj);
 	Identifier* lookupCurrLevelOnly(string name);
 	Identifier* lookupCurrLevelAndEnclosingLevels(string name);
+	void printCurrLevelOnly();
+	void printCurrLevelAndEnclosingLevels();
 };
 
 #endif

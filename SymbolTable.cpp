@@ -11,6 +11,7 @@ SymbolTable::SymbolTable(SymbolTable* st) {
 }
 
 void SymbolTable::add(string name, Identifier* obj) {
+	cout << "Setting _dict[" << name << "] to " << obj << " in ST " << this << endl;
 	_dict[name] = obj;
 }
 
@@ -30,4 +31,23 @@ Identifier* SymbolTable::lookupCurrLevelAndEnclosingLevels(string name) {
 		}
 	}
 	return NULL;
+}
+
+void SymbolTable::printCurrLevelOnly() {
+	cout << "Printing curr level of ST " << this << "..." << endl;
+	for (boost::unordered_map<string, Identifier*>::iterator it = _dict.begin();
+	it != _dict.end();
+	++it) {
+		string name = it->first;
+		Identifier* obj = it->second;
+		cout << name << ": " << obj << endl;
+	}
+	cout << "Done." << endl;
+}
+
+void SymbolTable::printCurrLevelAndEnclosingLevels() {
+	cout << "Printing all levels of ST " << this << endl;
+	for (SymbolTable* st = this; st != NULL; st = st->_encSymTable) {
+		st->printCurrLevelOnly();
+	}
 }
