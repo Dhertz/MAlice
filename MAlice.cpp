@@ -32,8 +32,8 @@ void printError(string message) {
 }
 
 void initST(SymbolTable top) {
-	Number intNumber(-(2^31), (2^31 - 1)); // Remove Magic numbers 
-	top.add("int", &intNumber);
+	Number intNumber(-(2^31), (2^31 - 1)); // TODO: remove magic numbers 
+	top.add("number", &intNumber);
 }
 
 void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {

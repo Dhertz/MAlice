@@ -7,11 +7,10 @@
 
 class VariableDecAST : public ASTNode {
 	SymbolTable* _st;
-
 	string _typeName;
 	string _varName;
-	Variable* _varObj;
 	ExprAST* _expr;
+	Variable* _varObj;
 
 public:
 	VariableDecAST(SymbolTable* st, string typeName, string varName);
