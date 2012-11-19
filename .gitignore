@@ -26,3 +26,9 @@
 
 compile
 libantlr3c/antlr3config.h
+
+#ignore system-specific junk
+MAliceLexer.c
+MAliceLexer.h
+MAliceParser.c
+MAliceParser.h

@@ -5,9 +5,11 @@
 
 class Param : public Identifier {
 	Type* _type;
+	string _name;
 public:
-	Param(Type* type);
+	Param(Type* type, string name);
 	Type* getType();
+	string getName();
 	string getID();
 };
 

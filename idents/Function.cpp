@@ -17,3 +17,7 @@ vector<Param> Function::getParams() {
 SymbolTable Function::getTable() {
 	return _st;
 }
+
+string Function::getID() {
+	return "";
+}

@@ -16,6 +16,7 @@ class Function : public Identifier {
 
 public:
 	Function(Type* returnType, vector<Param> params, SymbolTable* st);
+	string getID();
 	Type* getType();
 	vector<Param> getParams();
 	SymbolTable getTable();
