@@ -28,7 +28,7 @@ void VariableDecAST::check() {
 
 	// _st->printCurrLevelAndEnclosingLevels();
 
-	if (type == NULL) {
+	if (!type) {
 		cerr << "unknown type " << _typeName << endl;
 	} else if (type->getID() != "Type") {
 		cerr << _typeName  << " is not a type" << endl;
