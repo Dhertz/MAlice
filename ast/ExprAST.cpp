@@ -11,7 +11,7 @@ string ExprAST::createStringFromTree(pANTLR3_BASE_TREE tree) {
 	return res;
 }
 
-ExprAST::ExprAST(SymbolTable* st, pANTLR3_BASE_TREE tree) : ASTNode(st) {
+ExprAST::ExprAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree) : ASTNode(st) {
 	_tree = tree;
 
 	check();
@@ -26,6 +26,6 @@ void ExprAST::check() {
 	}
 }
 
-Type* ExprAST::getType() {
+boost::shared_ptr<Type> ExprAST::getType() {
 	return _type;
 }

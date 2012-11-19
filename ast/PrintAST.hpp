@@ -8,9 +8,9 @@
 class PrintAST : public ASTNode {
 
 public:
-	PrintAST(SymbolTable* st, string arrayName, ExprAST* element);
-	PrintAST(SymbolTable* st, string funcName, CallParamsAST* params);
-	PrintAST(SymbolTable* st, ExprAST* expr);
+	PrintAST(boost::shared_ptr<SymbolTable> st, string arrayName, ExprAST* element);
+	PrintAST(boost::shared_ptr<SymbolTable> st, string funcName, CallParamsAST* params);
+	PrintAST(boost::shared_ptr<SymbolTable> st, ExprAST* expr);
 };
 
 #endif

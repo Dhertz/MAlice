@@ -1,3 +1,3 @@
 #include "WhileAST.hpp"
 
-WhileAST::WhileAST(SymbolTable* st, ExprAST* expr) : ASTNode(st) {}
+WhileAST::WhileAST(boost::shared_ptr<SymbolTable> st, ExprAST* expr) : ASTNode(st) {}

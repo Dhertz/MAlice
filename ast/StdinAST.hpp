@@ -7,7 +7,7 @@
 class StdinAST : public ASTNode {
 
 public:
-	StdinAST(SymbolTable* st, ExprAST* expr);
+	StdinAST(boost::shared_ptr<SymbolTable> st, ExprAST* expr);
 };
 
 #endif

@@ -1,3 +1,3 @@
 #include "IfAST.hpp"
 
-IfAST::IfAST(SymbolTable* st, ExprAST* expr) : ASTNode(st) {}
+IfAST::IfAST(boost::shared_ptr<SymbolTable> st, ExprAST* expr) : ASTNode(st) {}

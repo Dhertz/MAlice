@@ -1,6 +1,7 @@
 #ifndef IDENTIFIER_H
 #define IDENTIFIER_H
 
+#include <boost/shared_ptr.hpp>
 #include <string>
 
 using namespace std;

@@ -7,7 +7,7 @@
 class IncAST : public ASTNode {
 
 public:
-	IncAST(SymbolTable* st, ExprAST* expr);
+	IncAST(boost::shared_ptr<SymbolTable> st, ExprAST* expr);
 };
 
 #endif

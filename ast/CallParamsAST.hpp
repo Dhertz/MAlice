@@ -7,7 +7,7 @@
 class CallParamsAST : public ASTNode {
 
 public:
-	CallParamsAST(SymbolTable* st, pANTLR3_BASE_TREE tree);
+	CallParamsAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree);
 };
 
 #endif

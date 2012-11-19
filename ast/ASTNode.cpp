@@ -1,6 +1,6 @@
 #include "ASTNode.hpp"
 
-ASTNode::ASTNode(SymbolTable* st) {
+ASTNode::ASTNode(boost::shared_ptr<SymbolTable> st) {
 	_st = st;
 }
 

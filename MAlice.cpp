@@ -1,4 +1,5 @@
 #include <iostream>
+#include <boost/shared_ptr.hpp>
 #include "SymbolTable.hpp"
 #include "idents/Number.hpp"
 #include "ast/AST.hpp"
@@ -31,9 +32,9 @@ void printError(string message) {
 	exit(1);
 }
 
-void initST(SymbolTable top) {
-	Number intNumber(-(2^31), (2^31 - 1)); // TODO: remove magic numbers 
-	top.add("number", &intNumber);
+void initST(boost::shared_ptr<SymbolTable> top) {
+	boost::shared_ptr<Number> iN(new Number(-(2^31), (2^31 - 1))); // TODO: remove magic numbers
+	top->add("number", iN);
 }
 
 void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
@@ -67,11 +68,11 @@ void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
 		printTree(tree);
 	}
 
-	SymbolTable top;
+	boost::shared_ptr<SymbolTable> top(new SymbolTable(boost::shared_ptr<SymbolTable>()));
 	initST(top);
 	AST semanticTree;
 
-	TreeWalker walker(&top, tree, &semanticTree);
+	TreeWalker walker(top, tree, &semanticTree);
 
 	parser->free(parser);
 	tokens->free(tokens);

@@ -5,11 +5,11 @@
 #include "Type.hpp"
 
 class Variable : public Identifier {
-	Type* _type;
+	boost::shared_ptr<Type> _type;
 
 public:
-	Variable(Type* type);
-	Type* getType();
+	Variable(boost::shared_ptr<Type> type);
+	boost::shared_ptr<Type> getType();
 	string getID();
 };
 

@@ -7,7 +7,7 @@
 class ArrayDecAST : public ASTNode {
 
 public:
-	ArrayDecAST(SymbolTable* st, ExprAST* expr, string typeName);
+	ArrayDecAST(boost::shared_ptr<SymbolTable> st, ExprAST* expr, string typeName);
 };
 
 #endif

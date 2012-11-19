@@ -7,7 +7,7 @@
 class FuncAST : public ASTNode {
 
 public:
-	FuncAST(SymbolTable* st, string name, CallParamsAST* params);
+	FuncAST(boost::shared_ptr<SymbolTable> st, string name, CallParamsAST* params);
 };
 
 #endif

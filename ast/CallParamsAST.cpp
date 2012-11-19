@@ -1,3 +1,3 @@
 #include "CallParamsAST.hpp"
 
-CallParamsAST::CallParamsAST(SymbolTable* st, pANTLR3_BASE_TREE tree) : ASTNode(st) {}
+CallParamsAST::CallParamsAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree) : ASTNode(st) {}

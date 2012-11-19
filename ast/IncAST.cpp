@@ -1,3 +1,3 @@
 #include "IncAST.hpp"
 
-IncAST::IncAST(SymbolTable* st, ExprAST* expr) : ASTNode(st) {}
+IncAST::IncAST(boost::shared_ptr<SymbolTable> st, ExprAST* expr) : ASTNode(st) {}

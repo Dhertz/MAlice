@@ -1,3 +1,3 @@
 #include "HeaderParamsAST.hpp"
 
-HeaderParamsAST::HeaderParamsAST(SymbolTable* st, pANTLR3_BASE_TREE tree) : ASTNode(st) {}
+HeaderParamsAST::HeaderParamsAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree) : ASTNode(st) {}

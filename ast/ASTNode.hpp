@@ -7,9 +7,9 @@
 class ASTNode {
 	vector<ASTNode*> _children;
 protected:
-	SymbolTable* _st;
+	boost::shared_ptr<SymbolTable> _st;
 public:
-	ASTNode(SymbolTable* st);
+	ASTNode(boost::shared_ptr<SymbolTable> st);
 	vector<ASTNode*> getChildren();
 	void addChild(ASTNode* child, int position);
 	void print();

@@ -7,7 +7,7 @@
 class HeaderParamsAST : public ASTNode {
 
 public:
-	HeaderParamsAST(SymbolTable* st, pANTLR3_BASE_TREE tree);
+	HeaderParamsAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree);
 };
 
 #endif

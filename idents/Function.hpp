@@ -12,10 +12,10 @@ using namespace std;
 class Function : public Identifier {
 	Type* _returnType;
 	vector<Param> _params;
-	SymbolTable* _st;
+	boost::shared_ptr<SymbolTable> _st;
 
 public:
-	Function(Type* returnType, vector<Param> params, SymbolTable* st);
+	Function(Type* returnType, vector<Param> params, boost::shared_ptr<SymbolTable> st);
 	Type* getType();
 	vector<Param> getParams();
 	SymbolTable getTable();

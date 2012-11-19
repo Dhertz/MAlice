@@ -7,7 +7,7 @@
 class WhileAST : public ASTNode {
 
 public:
-	WhileAST(SymbolTable* st, ExprAST* expr);
+	WhileAST(boost::shared_ptr<SymbolTable> st, ExprAST* expr);
 };
 
 #endif

@@ -1,6 +1,6 @@
 #include "Function.hpp"
 
-Function::Function(Type* returnType, vector<Param> params, SymbolTable* st) {
+Function::Function(Type* returnType, vector<Param> params, boost::shared_ptr<SymbolTable> st) {
 	_returnType = returnType;
 	_params = params;
 	_st = st;

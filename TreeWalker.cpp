@@ -20,7 +20,7 @@
 #include "ast/IfAST.hpp"
 
 //Construct object, assign fields and start walking the input tree from the top
-TreeWalker::TreeWalker(SymbolTable* topSt, pANTLR3_BASE_TREE inputTree, 
+TreeWalker::TreeWalker(boost::shared_ptr<SymbolTable> topSt, pANTLR3_BASE_TREE inputTree, 
 					   AST* outputTree) {
 	_topSt = topSt;
 	_inputTree = inputTree;
@@ -32,10 +32,10 @@ TreeWalker::TreeWalker(SymbolTable* topSt, pANTLR3_BASE_TREE inputTree,
 }
 
 // Call the correct method based on the type of the current AST node
-void TreeWalker::walk(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* parent, int childNum) {
+void TreeWalker::walk(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, ASTNode* parent, int childNum) {
 	string tokenName = createStringFromTree(tree);
 	map<string, PROC>::const_iterator it = _memberMap.find(tokenName);
-
+	// cout << "tokenName: " << tokenName << endl;
 	if (it != _memberMap.end()) {
 		PROC tokenProcessor = it->second;
 		(this->*tokenProcessor)(tree, st, parent, childNum);
@@ -43,19 +43,19 @@ void TreeWalker::walk(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* parent, 
 }
 
 // Create the root of the tree and first non-static symbol table, go to children
-void TreeWalker::processPROG(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* parent, int childNum) {
-	SymbolTable progSt(st);
+void TreeWalker::processPROG(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, ASTNode* parent, int childNum) {
+	boost::shared_ptr<SymbolTable> progSt(new SymbolTable(st));
 
-	ASTNode root(&progSt); // Maybe we need a different node for this?
+	ASTNode root(progSt); // Maybe we need a different node for this?
 	_outputTree->setRoot(&root);
 
 	for (int i = 0; i < tree->getChildCount(tree); ++i) {
-		walk(childByNum(tree, i), &progSt, &root, i);
+		walk(childByNum(tree, i), progSt, &root, i);
 	}
 }
 
 // Create the param list, get the id, create node and walk to body
-void TreeWalker::processPROCDEC(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* parent, int childNum) {
+void TreeWalker::processPROCDEC(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, ASTNode* parent, int childNum) {
 	HeaderParamsAST params(st, childByNum(tree, 1));
 
 	pANTLR3_BASE_TREE idTree = childByNum(tree, 0);
@@ -68,16 +68,16 @@ void TreeWalker::processPROCDEC(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode
 }
 
 // We don't need a AST node here, but we do need a new symbol table as we have a new scope
-void TreeWalker::processBODY(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* parent, int childNum) {
-    SymbolTable scopeSt(st);
+void TreeWalker::processBODY(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, ASTNode* parent, int childNum) {
+	boost::shared_ptr<SymbolTable> scopeSt(new SymbolTable(st));
 
     for (int i = 0; i < tree->getChildCount(tree); ++i) {
-        walk(childByNum(tree, i), &scopeSt, parent, i);
+        walk(childByNum(tree, i), scopeSt, parent, i);
     }
 }
 
 // Like PROCDEC but with a type
-void TreeWalker::processFUNCDEC(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* parent, int childNum) {
+void TreeWalker::processFUNCDEC(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, ASTNode* parent, int childNum) {
 	HeaderParamsAST params(st, childByNum(tree, 1));
 
 	pANTLR3_BASE_TREE idTree = (childByNum(tree, 0));
@@ -95,7 +95,7 @@ void TreeWalker::processFUNCDEC(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode
 }
 
 // Work out if it's an array or not, then process accordingly
-void TreeWalker::processVARDEC(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* parent, int childNum) {
+void TreeWalker::processVARDEC(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, ASTNode* parent, int childNum) {
 	pANTLR3_BASE_TREE idTree = childByNum(tree, 0);
 	string varName = createStringFromTree(idTree);
 
@@ -121,7 +121,7 @@ void TreeWalker::processVARDEC(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode*
 	}
 }
 
-void TreeWalker::processVARSTAT(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* parent, int childNum) {
+void TreeWalker::processVARSTAT(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, ASTNode* parent, int childNum) {
 	string varId = createStringFromTree(childByNum(tree, 0));
 
 	pANTLR3_BASE_TREE optionsTree = childByNum(tree, 1);
@@ -143,19 +143,19 @@ void TreeWalker::processVARSTAT(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode
 	}
 }
 
-void TreeWalker::processINC(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* parent, int childNum) {
+void TreeWalker::processINC(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, ASTNode* parent, int childNum) {
 	ExprAST expr(st, childByNum(tree, 0));
 	IncAST inc(st, &expr);
 	parent->addChild(&inc, childNum);
 }
 
-void TreeWalker::processDEC(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* parent, int childNum) {
+void TreeWalker::processDEC(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, ASTNode* parent, int childNum) {
 	ExprAST expr(st, childByNum(tree, 0));
 	DecAST dec(st, &expr);
 	parent->addChild(&dec, childNum);
 }
 
-void TreeWalker::processPRINT(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* parent, int childNum) {
+void TreeWalker::processPRINT(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, ASTNode* parent, int childNum) {
 	pANTLR3_BASE_TREE optionTree = childByNum(tree, 0);
 	string option = createStringFromTree(optionTree); // Check this
 
@@ -176,19 +176,19 @@ void TreeWalker::processPRINT(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* 
 	}
 }
 
-void TreeWalker::processRETURN(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* parent, int childNum) {
+void TreeWalker::processRETURN(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, ASTNode* parent, int childNum) {
 	ExprAST expr(st, childByNum(tree, 0));
 	ReturnAST ret(st, &expr);
 	parent->addChild(&ret, childNum);
 }
 
-void TreeWalker::processSTDIN(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* parent, int childNum) {
+void TreeWalker::processSTDIN(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, ASTNode* parent, int childNum) {
 	ExprAST expr(st, childByNum(tree, 0));
 	StdinAST in(st, &expr);
 	parent->addChild(&in, childNum);
 }
 
-void TreeWalker::processWHILE(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* parent, int childNum) {
+void TreeWalker::processWHILE(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, ASTNode* parent, int childNum) {
 	ExprAST expr(st, childByNum(tree, 0));
 	WhileAST whilenode(st, &expr);
 	parent->addChild(&whilenode, childNum);
@@ -198,7 +198,7 @@ void TreeWalker::processWHILE(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* 
 	}
 }
 
-void TreeWalker::processCHOICE(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* parent, int childNum) {
+void TreeWalker::processCHOICE(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, ASTNode* parent, int childNum) {
 	ExprAST expr(st, childByNum(tree, 0));
 	ChoiceAST choice(st, &expr);
 	parent->addChild(&choice, childNum);
@@ -208,7 +208,7 @@ void TreeWalker::processCHOICE(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode*
 	}
 }
 
-void TreeWalker::processIF(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* parent, int childNum) {
+void TreeWalker::processIF(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, ASTNode* parent, int childNum) {
 	ExprAST expr(st, childByNum(tree, 0));
 	IfAST ifnode(st, &expr);
 	parent->addChild(&ifnode, childNum);
@@ -218,7 +218,7 @@ void TreeWalker::processIF(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* par
 	}
 }
 
-void TreeWalker::processNS(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode* parent, int childNum) {}
+void TreeWalker::processNS(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, ASTNode* parent, int childNum) {}
 
 // Code shortening methods:
 

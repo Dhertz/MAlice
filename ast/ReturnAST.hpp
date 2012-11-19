@@ -7,7 +7,7 @@
 class ReturnAST : public ASTNode {
 
 public:
-	ReturnAST(SymbolTable* st, ExprAST* expr);
+	ReturnAST(boost::shared_ptr<SymbolTable> st, ExprAST* expr);
 };
 
 #endif

@@ -1,3 +1,3 @@
 #include "ChoiceAST.hpp"
 
-ChoiceAST::ChoiceAST(SymbolTable* st, ExprAST* expr) : ASTNode(st) {}
+ChoiceAST::ChoiceAST(boost::shared_ptr<SymbolTable> st, ExprAST* expr) : ASTNode(st) {}
