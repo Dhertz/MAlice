@@ -7,7 +7,7 @@
 class ArrayAssignAST : public ASTNode {
 
 public:
-	ArrayAssignAST(boost::shared_ptr<SymbolTable> st, string name, ExprAST* element, ExprAST* value);
+	ArrayAssignAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_ptr<ExprAST> element, boost::shared_ptr<ExprAST> value);
 };
 
 #endif

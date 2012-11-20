@@ -1,7 +1,7 @@
 #include "VarAssignAST.hpp"
 #include "../idents/Identifier.hpp"
 
-VarAssignAST::VarAssignAST(boost::shared_ptr<SymbolTable> st, string varName, ExprAST* expr) : ASTNode(st) {
+VarAssignAST::VarAssignAST(boost::shared_ptr<SymbolTable> st, string varName, boost::shared_ptr<ExprAST> expr) : ASTNode(st) {
 	_st = st;
 	_varName = varName;
 	_expr = expr;

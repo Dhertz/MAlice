@@ -7,7 +7,7 @@
 class DecAST : public ASTNode {
 
 public:
-	DecAST(boost::shared_ptr<SymbolTable> st, ExprAST* expr);
+	DecAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr);
 };
 
 #endif

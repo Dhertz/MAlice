@@ -7,7 +7,7 @@
 class ChoiceAST : public ASTNode {
 
 public:
-	ChoiceAST(boost::shared_ptr<SymbolTable> st, ExprAST* expr);
+	ChoiceAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr);
 };
 
 #endif

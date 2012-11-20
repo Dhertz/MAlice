@@ -7,7 +7,7 @@
 class IfAST : public ASTNode {
 
 public:
-	IfAST(boost::shared_ptr<SymbolTable> st, ExprAST* expr);
+	IfAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr);
 };
 
 #endif

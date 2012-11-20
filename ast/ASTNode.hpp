@@ -5,13 +5,13 @@
 #include <vector>
 
 class ASTNode {
-	vector<ASTNode*> _children;
+	vector< boost::shared_ptr<ASTNode> > _children;
 protected:
 	boost::shared_ptr<SymbolTable> _st;
 public:
 	ASTNode(boost::shared_ptr<SymbolTable> st);
-	vector<ASTNode*> getChildren();
-	void addChild(ASTNode* child, int position);
+	vector< boost::shared_ptr<ASTNode> > getChildren();
+	void addChild(boost::shared_ptr<ASTNode> child, int position);
 	void print();
 	virtual void check();
 };

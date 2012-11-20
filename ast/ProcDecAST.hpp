@@ -6,7 +6,7 @@
 class ProcDecAST : public ASTNode {
 
 public:
-	ProcDecAST(boost::shared_ptr<SymbolTable> st, string name, HeaderParamsAST* params);
+	ProcDecAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_ptr<HeaderParamsAST> params);
 };
 
 #endif
