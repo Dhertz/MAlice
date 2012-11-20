@@ -6,7 +6,6 @@
 class Type : public Identifier {
 public:
 	string getID();
-	virtual string getType() = 0;
 };
 
 #endif

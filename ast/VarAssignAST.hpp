@@ -10,11 +10,9 @@ class VarAssignAST : public ASTNode {
 	string _varName;
 	ExprAST* _expr;
 	Variable* _varObj;
-
 public:
 	VarAssignAST(SymbolTable* st, string varName, ExprAST* expr);
 	void check();
-
 };
 
 #endif

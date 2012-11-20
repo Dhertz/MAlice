@@ -17,6 +17,7 @@ public:
 	Identifier* lookupCurrLevelAndEnclosingLevels(string name);
 	void printCurrLevelOnly();
 	void printCurrLevelAndEnclosingLevels();
+	SymbolTable* getEncSymTable();
 };
 
 #endif

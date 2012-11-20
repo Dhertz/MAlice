@@ -7,12 +7,10 @@
 #include "../idents/Param.hpp"
 
 class HeaderParamsAST : public ASTNode {
-
-public:
 	SymbolTable* _st;
 	pANTLR3_BASE_TREE _tree;
 	vector<Param> _params;
-
+public:
 	HeaderParamsAST(SymbolTable* st, pANTLR3_BASE_TREE tree);
 	pANTLR3_BASE_TREE childByNum(pANTLR3_BASE_TREE tree, int num);
 	string createStringFromTree(pANTLR3_BASE_TREE tree);

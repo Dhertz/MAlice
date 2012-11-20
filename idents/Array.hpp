@@ -5,13 +5,11 @@
 
 class Array : public Type {
 	Type* _elemType;
-	int _elems;
 
 public:
-	Array(Type* elemType, int elems);
+	Array(Type* elemType);
 	Type* getElemType();
-	int getSize();
-	string getType();
+	string getID();
 };
 
 #endif

@@ -115,7 +115,7 @@ void TreeWalker::processVARDEC(pANTLR3_BASE_TREE tree, SymbolTable* st, ASTNode*
 		}
 	} else {
 		ExprAST expr(st, exprTree);
-		ArrayDecAST dec(st, &expr, typeName);
+		ArrayDecAST dec(st, &expr, varName, typeName);
 		dec.addChild(&expr, 0);
 		parent->addChild(&dec, childNum);
 	}

@@ -5,11 +5,12 @@ FuncDecAST::FuncDecAST(SymbolTable* st, string name, HeaderParamsAST* params, st
 	_name = name;
 	_returnType = returnType;
 	_params = params;
+	check();
 }
 
 void FuncDecAST::check() {
 	Identifier* type = _st->lookupCurrLevelAndEnclosingLevels(_returnType);
-	Identifier* name = _st->lookupCurrLevelOnly(_name);
+	Identifier* name = _st->lookupCurrLevelAndEnclosingLevels(_name);
 
 	if (type == NULL) {
 
@@ -19,12 +20,11 @@ void FuncDecAST::check() {
 
 	} else {
 		vector<Param> v = _params->getParams();
-		SymbolTable n;
 		vector<Param>::iterator param;
 		for (param=v.begin(); param < v.end(); param++) {
-			n.add(param->getName(), param->getType());
+			_st->getEncSymTable()->add(param->getName(), param->getType());
 		}
-		Function f((Type*) type, v, &n);
+		Function f((Type*) type, v, _st);
 		_funcObj = &f;
 		_st->add(_name, _funcObj);
 	}

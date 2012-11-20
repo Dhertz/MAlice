@@ -7,14 +7,12 @@
 #include <vector>
 
 class FuncDecAST : public ASTNode {
-
-public:
 	SymbolTable* _st;
 	string _name;
 	string _returnType;
 	HeaderParamsAST* _params;
 	Function* _funcObj;
-
+public:
 	FuncDecAST(SymbolTable* st, string name, HeaderParamsAST* params, string returnType);
 	void check();
 };

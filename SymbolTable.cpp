@@ -51,3 +51,7 @@ void SymbolTable::printCurrLevelAndEnclosingLevels() {
 		st->printCurrLevelOnly();
 	}
 }
+
+SymbolTable* SymbolTable::getEncSymTable() {
+	return _encSymTable;
+}

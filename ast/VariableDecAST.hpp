@@ -11,7 +11,6 @@ class VariableDecAST : public ASTNode {
 	string _varName;
 	ExprAST* _expr;
 	Variable* _varObj;
-
 public:
 	VariableDecAST(SymbolTable* st, string typeName, string varName);
 	VariableDecAST(SymbolTable* st, string typeName, string varName, ExprAST* expr);

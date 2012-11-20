@@ -19,5 +19,5 @@ SymbolTable Function::getTable() {
 }
 
 string Function::getID() {
-	return "";
+	return "Function";
 }
