@@ -70,9 +70,10 @@ void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
 
 	boost::shared_ptr<SymbolTable> top(new SymbolTable(boost::shared_ptr<SymbolTable>()));
 	initST(top);
-	AST semanticTree;
 
-	TreeWalker walker(top, tree, &semanticTree);
+	boost::shared_ptr<AST> semanticTree(new AST());
+
+	TreeWalker walker(top, tree, semanticTree);
 
 	parser->free(parser);
 	tokens->free(tokens);

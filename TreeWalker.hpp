@@ -12,7 +12,7 @@ class TreeWalker {
 	map<string, PROC> _memberMap;
 	boost::shared_ptr<SymbolTable> _topSt;
 	pANTLR3_BASE_TREE _inputTree;
-	AST* _outputTree;
+	boost::shared_ptr<AST> _outputTree;
 	void init();
 	void processPROG(pANTLR3_BASE_TREE, boost::shared_ptr<SymbolTable>, ASTNode* parent, int childNum);
 	void processPROCDEC(pANTLR3_BASE_TREE, boost::shared_ptr<SymbolTable>, ASTNode* parent, int childNum);
@@ -35,7 +35,7 @@ class TreeWalker {
 
 public:
 	void walk(pANTLR3_BASE_TREE, boost::shared_ptr<SymbolTable>, ASTNode* parent, int childNum);
-	TreeWalker(boost::shared_ptr<SymbolTable> topSt, pANTLR3_BASE_TREE inputTree, AST* outputTree);
+	TreeWalker(boost::shared_ptr<SymbolTable> topSt, pANTLR3_BASE_TREE inputTree, boost::shared_ptr<AST> outputTree);
 };
 
 #endif

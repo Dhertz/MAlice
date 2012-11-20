@@ -20,8 +20,7 @@
 #include "ast/IfAST.hpp"
 
 //Construct object, assign fields and start walking the input tree from the top
-TreeWalker::TreeWalker(boost::shared_ptr<SymbolTable> topSt, pANTLR3_BASE_TREE inputTree, 
-					   AST* outputTree) {
+TreeWalker::TreeWalker(boost::shared_ptr<SymbolTable> topSt, pANTLR3_BASE_TREE inputTree, boost::shared_ptr<AST> outputTree) {
 	_topSt = topSt;
 	_inputTree = inputTree;
 	_outputTree = outputTree;
