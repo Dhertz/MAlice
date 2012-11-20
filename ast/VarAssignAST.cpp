@@ -26,7 +26,6 @@ void VarAssignAST::check() {
 		if (_expr->getType() != varCasted->getType()) {
 			cerr << "lhs (" << varCasted->getType()->getID() << ") and rhs (" << _expr->getType() << ") not type compatible" << endl;	
 		} else {
-			cout << "Sweet." << endl;
 			_varObj = varCasted;
 		}
 	}	

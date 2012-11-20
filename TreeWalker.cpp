@@ -134,8 +134,8 @@ void TreeWalker::processVARSTAT(pANTLR3_BASE_TREE tree, boost::shared_ptr<Symbol
 		parent->addChild(&assign, childNum);
 	} else if (option == "FUNC") {
 		CallParamsAST params(st, childByNum(optionsTree, 0));
-		FuncAST func(st, varId, &params);
-		parent->addChild(&func, childNum);
+		// FuncAST func(st, varId, &params);
+		// parent->addChild(&func, childNum);
 	} else if (option == "ASSIGN") {
 		ExprAST expr(st, childByNum(optionsTree, 0));
 		VarAssignAST assign(st, varId, &expr);
