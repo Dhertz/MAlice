@@ -45,7 +45,7 @@ void TreeWalker::walk(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st,
 void TreeWalker::processPROG(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ASTNode> parent, int childNum) {
 	boost::shared_ptr<SymbolTable> progSt(new SymbolTable(st));
 
-	boost::shared_ptr<ASTNode> root(new ASTNode(progSt)); // Maybe we need a different node for this?
+	boost::shared_ptr<ASTNode> root(new ASTNode(progSt, boost::shared_ptr<ASTNode>())); // Maybe we need a different node for this?
 	_outputTree->setRoot(root);
 
 	for (int i = 0; i < tree->getChildCount(tree); ++i) {
@@ -55,12 +55,12 @@ void TreeWalker::processPROG(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTab
 
 // Create the param list, get the id, create node and walk to body
 void TreeWalker::processPROCDEC(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ASTNode> parent, int childNum) {
-	boost::shared_ptr<HeaderParamsAST> params(new HeaderParamsAST(st, childByNum(tree, 1)));
+	boost::shared_ptr<HeaderParamsAST> params(new HeaderParamsAST(st, childByNum(tree, 1), parent));
 
 	pANTLR3_BASE_TREE idTree = childByNum(tree, 0);
 	string procName = createStringFromTree(idTree);
 
-	boost::shared_ptr<ProcDecAST> dec(new ProcDecAST(st, procName, params));
+	boost::shared_ptr<ProcDecAST> dec(new ProcDecAST(st, procName, params, parent));
 	parent->addChild(dec, childNum);
 
 	walk(childByNum(tree, 2), st, dec, 2);
@@ -75,25 +75,45 @@ void TreeWalker::processBODY(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTab
     }
 }
 
-
 // Like PROCDEC but with a type
 void TreeWalker::processFUNCDEC(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ASTNode> parent, int childNum) {
-	boost::shared_ptr<HeaderParamsAST> params(new HeaderParamsAST(st, childByNum(tree, 1)));
+	boost::shared_ptr<HeaderParamsAST> params(new HeaderParamsAST(st, childByNum(tree, 1), parent));
 
-	pANTLR3_BASE_TREE idTree = (childByNum(tree, 0));
-	pANTLR3_BASE_TREE typeTree = (childByNum(tree, 2));
+	pANTLR3_BASE_TREE idTree = childByNum(tree, 0);
+	pANTLR3_BASE_TREE typeTree = childByNum(tree, 2);
 
-	// Extract method from here
 	string funcName = createStringFromTree(idTree);
 	string funcType = createStringFromTree(typeTree);
 
-	boost::shared_ptr<FuncDecAST> dec(new FuncDecAST(st, funcName, params, funcType));
+	boost::shared_ptr<FuncDecAST> dec(new FuncDecAST(st, funcName, params, funcType, parent));
+
+	pANTLR3_BASE_TREE bodyTree = childByNum(tree, 3);
+
+	// I don't like doing this here, can't think of a better solution at the moment
+	if (!findReturn(bodyTree)) {
+		cerr << "Function " << funcName << " does not have a return statement for all paths." << endl;
+	}
 
 	parent->addChild(dec, childNum);
 
 	walk(childByNum(tree, 3), st, dec, 3);
 }
 
+// Let's check if a function definition has a return statement
+bool TreeWalker::findReturn(pANTLR3_BASE_TREE tree) {
+	for (int i = 0; i < tree->getChildCount(tree); ++i) {
+		pANTLR3_BASE_TREE childTree = childByNum(tree, i);
+		string tok = createStringFromTree(childTree);
+
+		if (tok == "IF" || tok == "CHOICE") {
+			return findReturn(childTree);
+		} else if (tok == "RETURN") {
+			return true;
+		}
+    }
+
+    return false;
+}
 
 // Work out if it's an array or not, then process accordingly
 void TreeWalker::processVARDEC(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ASTNode> parent, int childNum) {
@@ -106,20 +126,20 @@ void TreeWalker::processVARDEC(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolT
 
 	if (createStringFromTree(varOptionsTree) == "NEWVAR") {
 		if (exprTree == NULL) {
-			boost::shared_ptr<VariableDecAST> dec(new VariableDecAST(st, typeName, varName));
+			boost::shared_ptr<VariableDecAST> dec(new VariableDecAST(st, typeName, varName, parent));
 			parent->addChild(dec, childNum);
 		} else {
-			boost::shared_ptr<VariableDecAST> dec(new VariableDecAST(st, typeName, varName));
+			boost::shared_ptr<VariableDecAST> dec(new VariableDecAST(st, typeName, varName, parent));
 			
-			boost::shared_ptr<ExprAST> expr(new ExprAST(st, exprTree));
-			boost::shared_ptr<VarAssignAST> assign(new VarAssignAST(st, varName, expr));
+			boost::shared_ptr<ExprAST> expr(new ExprAST(st, exprTree, parent));
+			boost::shared_ptr<VarAssignAST> assign(new VarAssignAST(st, varName, expr, parent));
 
 			parent->addChild(dec, childNum);
 			parent->addChild(assign, childNum + 1);
 		}
 	} else {
-		boost::shared_ptr<ExprAST> expr(new ExprAST(st, exprTree));
-		boost::shared_ptr<ArrayDecAST> dec(new ArrayDecAST(st, expr, varName, typeName));
+		boost::shared_ptr<ExprAST> expr(new ExprAST(st, exprTree, parent));
+		boost::shared_ptr<ArrayDecAST> dec(new ArrayDecAST(st, expr, varName, typeName, parent));
 		dec->addChild(expr, 0);
 		parent->addChild(dec, childNum);
 	}
@@ -132,31 +152,31 @@ void TreeWalker::processVARSTAT(pANTLR3_BASE_TREE tree, boost::shared_ptr<Symbol
 	string option = createStringFromTree(optionsTree);
 
 	if (option == "ARRMEMBER") {
-		boost::shared_ptr<ExprAST> elem(new ExprAST(st, childByNum(optionsTree, 0)));
-		boost::shared_ptr<ExprAST> val(new ExprAST(st, childByNum(optionsTree, 1)));
-		boost::shared_ptr<ArrayAssignAST> assign(new ArrayAssignAST(st, varId, elem, val));
+		boost::shared_ptr<ExprAST> elem(new ExprAST(st, childByNum(optionsTree, 0), parent));
+		boost::shared_ptr<ExprAST> val(new ExprAST(st, childByNum(optionsTree, 1), parent));
+		boost::shared_ptr<ArrayAssignAST> assign(new ArrayAssignAST(st, varId, elem, val, parent));
 		parent->addChild(assign, childNum);
 	} else if (option == "FUNC") {
-		boost::shared_ptr<CallParamsAST> params(new CallParamsAST(st, childByNum(optionsTree, 0)));
-		boost::shared_ptr<FuncAST> func(new FuncAST(st, varId, params));
+		boost::shared_ptr<CallParamsAST> params(new CallParamsAST(st, childByNum(optionsTree, 0), parent));
+		boost::shared_ptr<FuncAST> func(new FuncAST(st, varId, params, parent));
 		parent->addChild(func, childNum);
 	} else if (option == "ASSIGN") {
-		boost::shared_ptr<ExprAST> expr(new ExprAST(st, childByNum(optionsTree, 0)));
-		boost::shared_ptr<VarAssignAST> assign(new VarAssignAST(st, varId, expr));
+		boost::shared_ptr<ExprAST> expr(new ExprAST(st, childByNum(optionsTree, 0), parent));
+		boost::shared_ptr<VarAssignAST> assign(new VarAssignAST(st, varId, expr, parent));
 		parent->addChild(assign, childNum);
 	}
 }
 
 void TreeWalker::processINC(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ASTNode> parent, int childNum) {
-	boost::shared_ptr<ExprAST> expr(new ExprAST(st, childByNum(tree, 0)));
-	boost::shared_ptr<IncAST> inc(new IncAST(st, expr));
+	boost::shared_ptr<ExprAST> expr(new ExprAST(st, childByNum(tree, 0), parent));
+	boost::shared_ptr<IncAST> inc(new IncAST(st, expr, parent));
 	parent->addChild(inc, childNum);
 }
 
 
 void TreeWalker::processDEC(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ASTNode> parent, int childNum) {
-	boost::shared_ptr<ExprAST> expr(new ExprAST(st, childByNum(tree, 0)));
-	boost::shared_ptr<DecAST> dec(new DecAST(st, expr));
+	boost::shared_ptr<ExprAST> expr(new ExprAST(st, childByNum(tree, 0), parent));
+	boost::shared_ptr<DecAST> dec(new DecAST(st, expr, parent));
 	parent->addChild(dec, childNum);
 }
 
@@ -165,37 +185,37 @@ void TreeWalker::processPRINT(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTa
 	string option = createStringFromTree(optionTree); // Check this
 
 	if (option == "ARRMEMBER") {
-		string arrayID = createStringFromTree(childByNum(optionTree, 0));
-		boost::shared_ptr<ExprAST> expr(new ExprAST(st, childByNum(optionTree, 1)));
-		boost::shared_ptr<PrintAST> print(new PrintAST(st, arrayID, expr));
+		string arrayID = createStringFromTree(childByNum(optionTree, 0), parent);
+		boost::shared_ptr<ExprAST> expr(new ExprAST(st, childByNum(optionTree, 1), parent));
+		boost::shared_ptr<PrintAST> print(new PrintAST(st, arrayID, expr, parent));
 		parent->addChild(print, childNum);
 	} else if (option == "FUNC") {
-		string funcID = createStringFromTree(childByNum(optionTree, 0));
-		boost::shared_ptr<CallParamsAST> params(new CallParamsAST(st, childByNum(optionTree, 1)));
-		boost::shared_ptr<PrintAST> print(new PrintAST(st, funcID, params));
+		string funcID = createStringFromTree(childByNum(optionTree, 0, parent));
+		boost::shared_ptr<CallParamsAST> params(new CallParamsAST(st, childByNum(optionTree, 1), parent));
+		boost::shared_ptr<PrintAST> print(new PrintAST(st, funcID, params, parent));
 		parent->addChild(print, childNum);
 	} else {
-		boost::shared_ptr<ExprAST> expr(new ExprAST(st, optionTree));
-		boost::shared_ptr<PrintAST> print(new PrintAST(st, expr));
+		boost::shared_ptr<ExprAST> expr(new ExprAST(st, optionTree, parent));
+		boost::shared_ptr<PrintAST> print(new PrintAST(st, expr, parent));
 		parent->addChild(print, childNum);
 	}
 }
 
 void TreeWalker::processRETURN(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ASTNode> parent, int childNum) {
-	boost::shared_ptr<ExprAST> expr(new ExprAST(st, childByNum(tree, 0)));
-	boost::shared_ptr<ReturnAST> ret(new ReturnAST(st, expr));
+	boost::shared_ptr<ExprAST> expr(new ExprAST(st, childByNum(tree, 0), parent));
+	boost::shared_ptr<ReturnAST> ret(new ReturnAST(st, expr, parent));
 	parent->addChild(ret, childNum);
 }
 
 void TreeWalker::processSTDIN(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ASTNode> parent, int childNum) {
-	boost::shared_ptr<ExprAST> expr(new ExprAST(st, childByNum(tree, 0)));
-	boost::shared_ptr<StdinAST> in(new StdinAST(st, expr));
+	boost::shared_ptr<ExprAST> expr(new ExprAST(st, childByNum(tree, 0), parent));
+	boost::shared_ptr<StdinAST> in(new StdinAST(st, expr, parent));
 	parent->addChild(in, childNum);
 }
 
 void TreeWalker::processWHILE(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ASTNode> parent, int childNum) {
-	boost::shared_ptr<ExprAST> expr(new ExprAST(st, childByNum(tree, 0)));
-	boost::shared_ptr<WhileAST> whilenode(new WhileAST(st, expr));
+	boost::shared_ptr<ExprAST> expr(new ExprAST(st, childByNum(tree, 0), parent));
+	boost::shared_ptr<WhileAST> whilenode(new WhileAST(st, expr, parent));
 	parent->addChild(whilenode, childNum);
 
 	for (int i = 1; i < tree->getChildCount(tree); ++i) {
@@ -204,8 +224,8 @@ void TreeWalker::processWHILE(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTa
 }
 
 void TreeWalker::processCHOICE(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ASTNode> parent, int childNum) {
-	boost::shared_ptr<ExprAST> expr(new ExprAST(st, childByNum(tree, 0)));
-	boost::shared_ptr<ChoiceAST> choice(new ChoiceAST(st, expr));
+	boost::shared_ptr<ExprAST> expr(new ExprAST(st, childByNum(tree, 0), parent));
+	boost::shared_ptr<ChoiceAST> choice(new ChoiceAST(st, expr, parent));
 	parent->addChild(choice, childNum);
 
 	for (int i = 1; i < tree->getChildCount(tree); ++i) {
@@ -214,8 +234,8 @@ void TreeWalker::processCHOICE(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolT
 }
 
 void TreeWalker::processIF(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ASTNode> parent, int childNum) {
-	boost::shared_ptr<ExprAST> expr(new ExprAST(st, childByNum(tree, 0)));
-	boost::shared_ptr<IfAST> ifnode(new IfAST(st, expr));
+	boost::shared_ptr<ExprAST> expr(new ExprAST(st, childByNum(tree, 0), parent));
+	boost::shared_ptr<IfAST> ifnode(new IfAST(st, expr, parent));
 	parent->addChild(ifnode, childNum);
 
 	for (int i = 1; i < tree->getChildCount(tree); ++i) {

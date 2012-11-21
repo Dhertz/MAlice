@@ -34,3 +34,7 @@ void FuncDecAST::check() {
 		_st->getEncSymTable()->add(_name, _funcObj);
 	}
 }
+
+string FuncDecAST::getNodeName() {
+	return "FuncDec";
+}
