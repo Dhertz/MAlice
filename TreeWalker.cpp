@@ -34,7 +34,6 @@ TreeWalker::TreeWalker(boost::shared_ptr<SymbolTable> topSt, pANTLR3_BASE_TREE i
 void TreeWalker::walk(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ASTNode> parent, int childNum) {
 	string tokenName = createStringFromTree(tree);
 	map<string, PROC>::const_iterator it = _memberMap.find(tokenName);
-	// cout << "tokenName: " << tokenName << endl;
 	if (it != _memberMap.end()) {
 		PROC tokenProcessor = it->second;
 		(this->*tokenProcessor)(tree, st, parent, childNum);
@@ -87,13 +86,13 @@ void TreeWalker::processFUNCDEC(pANTLR3_BASE_TREE tree, boost::shared_ptr<Symbol
 
 	boost::shared_ptr<FuncDecAST> dec(new FuncDecAST(st, funcName, params, funcType, parent));
 
-	pANTLR3_BASE_TREE bodyTree = childByNum(tree, 3);
+	/*pANTLR3_BASE_TREE bodyTree = childByNum(tree, 3);
 
 	// I don't like doing this here, can't think of a better solution at the moment
 	if (!findReturn(bodyTree)) {
 		cerr << "Function " << funcName << " does not have a return statement for all paths." << endl;
 	}
-
+	*/
 	parent->addChild(dec, childNum);
 
 	walk(childByNum(tree, 3), st, dec, 3);
@@ -101,18 +100,21 @@ void TreeWalker::processFUNCDEC(pANTLR3_BASE_TREE tree, boost::shared_ptr<Symbol
 
 // Let's check if a function definition has a return statement
 bool TreeWalker::findReturn(pANTLR3_BASE_TREE tree) {
+	bool thislevelflag = false;
 	for (int i = 0; i < tree->getChildCount(tree); ++i) {
-		pANTLR3_BASE_TREE childTree = childByNum(tree, i);
-		string tok = createStringFromTree(childTree);
+		string tok = createStringFromTree(childByNum(tree, i));
+		cout << tok << endl;
 
-		if (tok == "IF" || tok == "CHOICE") {
-			return findReturn(childTree);
-		} else if (tok == "RETURN") {
-			return true;
+		if (tok == "IF" | tok == "WHILE" | tok == "CHOICE") {
+			thislevelflag = findReturn(childByNum(tree, i));
 		}
-    }
 
-    return false;
+		if (tok == "RETURN") {
+			thislevelflag == true;
+		}
+	}
+
+	return thislevelflag;
 }
 
 // Work out if it's an array or not, then process accordingly
