@@ -9,7 +9,6 @@ class Array : public Type {
 public:
 	Array(boost::shared_ptr<Type> elemType);
 	boost::shared_ptr<Type> getElemType();
-	string getBaseName();
 	string getTypeName();
 };
 
