@@ -10,15 +10,15 @@
 using namespace std;
 
 class Function : public Identifier {
-	Type* _returnType;
-	vector<Param> _params;
-	SymbolTable* _st;
+	boost::shared_ptr<Type> _returnType;
+	vector< boost::shared_ptr<Param> > _params;
+	boost::shared_ptr<SymbolTable> _st;
 
 public:
-	Function(Type* returnType, vector<Param> params, SymbolTable* st);
 	string getID();
-	Type* getType();
-	vector<Param> getParams();
+	Function(boost::shared_ptr<Type> returnType, vector< boost::shared_ptr<Param> > params, boost::shared_ptr<SymbolTable> st);
+	boost::shared_ptr<Type> getType();
+	vector< boost::shared_ptr<Param> > getParams();
 	SymbolTable getTable();
 };
 

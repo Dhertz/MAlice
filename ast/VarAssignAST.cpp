@@ -1,7 +1,7 @@
 #include "VarAssignAST.hpp"
 #include "../idents/Identifier.hpp"
 
-VarAssignAST::VarAssignAST(SymbolTable* st, string varName, ExprAST* expr) : ASTNode(st) {
+VarAssignAST::VarAssignAST(boost::shared_ptr<SymbolTable> st, string varName, boost::shared_ptr<ExprAST> expr) : ASTNode(st) {
 	_st = st;
 	_varName = varName;
 	_expr = expr;
@@ -10,22 +10,22 @@ VarAssignAST::VarAssignAST(SymbolTable* st, string varName, ExprAST* expr) : AST
 }
 
 void VarAssignAST::check() {
-	Identifier* var = _st->lookupCurrLevelAndEnclosingLevels(_varName);
+	// cout << "VarAssignAST::check() is looking for " << _varName << " in all levels of " << _st << "..." << endl;
+ 	boost::shared_ptr<Identifier> var = _st->lookupCurrLevelAndEnclosingLevels(_varName);
 
-	cout << "VarAssignAST::check() is looking for " << _varName << " in all levels of " << _st << "..." << endl;
-	_st->printCurrLevelAndEnclosingLevels();
+	// _st->printCurrLevelAndEnclosingLevels();
 
-	if (var == NULL) {
+	if (!var) {
 		cerr << "unknown variable " << _varName << endl;
 	} else if (var->getID() != "Variable") {
 		cerr << _varName << " is not a variable" << endl;
 	} else {
-		Variable* varCasted = (Variable*) var;
+		boost::shared_ptr<Variable> varCasted = boost::shared_polymorphic_downcast<Variable>(var);
 
+		// TODO: replace getType() with getType()->getType() once ExprAST::check() has been implemented and sets its type
 		if (_expr->getType() != varCasted->getType()) {
-			cerr << "lhs and rhs not type compatible" << endl;	
+			cerr << "lhs (" << varCasted->getType() << ") and rhs (" << _expr->getType() << ") not type compatible" << endl;	
 		} else {
-			cout << "Sweet." << endl;
 			_varObj = varCasted;
 		}
 	}	

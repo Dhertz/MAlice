@@ -1,10 +1,10 @@
 #include "Variable.hpp"
 
-Variable::Variable(Type* type) {
+Variable::Variable(boost::shared_ptr<Type> type) {
 	_type = type;
 }
 
-Type* Variable::getType() {
+boost::shared_ptr<Type> Variable::getType() {
 	return _type;
 }
 

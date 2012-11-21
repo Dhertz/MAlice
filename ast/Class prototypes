@@ -2,55 +2,55 @@ Class prototypes:
 
 This is a list of class constructors I have need for that don't exist yet:
 
-HeaderParamAST(SymbolTable*, pANTLR3_BASE_TREE);
+HeaderParamAST(boost::shared_ptr<SymbolTable>, pANTLR3_BASE_TREE);
 -- the tree's children are the header params, it's flat tree
 
-ProcDecAST(SymbolTable*, string, HeaderParamAST);
+ProcDecAST(boost::shared_ptr<SymbolTable>, string, HeaderParamAST);
 -- the string is the function name
 
-FuncDecAST(SymbolTable*, string, HeaderParamAST, string)
+FuncDecAST(boost::shared_ptr<SymbolTable>, string, HeaderParamAST, string)
 -- first string is name, second string is type
 
-VariableDecAST(SymbolTable*, string, string, ExprAST*)
+VariableDecAST(boost::shared_ptr<SymbolTable>, string, string, ExprAST*)
 -- like the current one but with an ExprAST to support inline assignments
 -- keep the old one too
 
-ExprAST(SymbolTable*, pANTLR3_BASE_TREE)
+ExprAST(boost::shared_ptr<SymbolTable>, pANTLR3_BASE_TREE)
 -- Need to be pased the tree to type check the expression all the way down the tree
 
-ArrayDecAST(SymbolTable*, ExprAST*, string)
+ArrayDecAST(boost::shared_ptr<SymbolTable>, ExprAST*, string)
 -- ExprAST is the size of the array, string is the type
 
-CallParamsAST(SymbolTable*, pANTLR3_BASE_TREE)
+CallParamsAST(boost::shared_ptr<SymbolTable>, pANTLR3_BASE_TREE)
 -- unlike HPs this tree won't be flat; it's a list of expressions
 
-FuncAST(SymbolTable*, string, CallParamsAST*)
+FuncAST(boost::shared_ptr<SymbolTable>, string, CallParamsAST*)
 -- basically identical to CallAST in notes
 
-ArrayAssignAST(SymbolTable*, string, ExprAST*, ExprAST*)
+ArrayAssignAST(boost::shared_ptr<SymbolTable>, string, ExprAST*, ExprAST*)
 -- first ExprAST is element number, second is new value
 
-IncAST(SymbolTable*, ExprAST*)
+IncAST(boost::shared_ptr<SymbolTable>, ExprAST*)
 
-DecAST(SymbolTable*, ExprAST*)
+DecAST(boost::shared_ptr<SymbolTable>, ExprAST*)
 
-PrintAST(SymbolTable*, string, ExprAST*)
+PrintAST(boost::shared_ptr<SymbolTable>, string, ExprAST*)
 -- this constructor is for printing an array member
 
-PrintAST(SymbolTable*, string, CallParamsAST*)
+PrintAST(boost::shared_ptr<SymbolTable>, string, CallParamsAST*)
 -- this is for printing a function call
 
-PrintAST(SymbolTable*, ExprAST*)
+PrintAST(boost::shared_ptr<SymbolTable>, ExprAST*)
 -- this is for printing any old expression - maybe we don't need the first one?
 
-ReturnAST(SymbolTable*, ExprAST*)
+ReturnAST(boost::shared_ptr<SymbolTable>, ExprAST*)
 
-StdinAST(SymbolTable*, ExprAST*)
+StdinAST(boost::shared_ptr<SymbolTable>, ExprAST*)
 
-WhileAST(SymbolTable*, ExprAST*)
+WhileAST(boost::shared_ptr<SymbolTable>, ExprAST*)
 -- Expr is loop condition (I don't think you need anything else..?)
 
-ChoiceAST(SymbolTable*, ExprAST*)
+ChoiceAST(boost::shared_ptr<SymbolTable>, ExprAST*)
 -- Same as while I think
 
-IfAST(SymbolTable*, ExprAST*)
+IfAST(boost::shared_ptr<SymbolTable>, ExprAST*)

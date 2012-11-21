@@ -1,27 +1,29 @@
 #include "ArrayDecAST.hpp"
 
-ArrayDecAST::ArrayDecAST(SymbolTable* st, ExprAST* length, string name, string elemType) : ASTNode(st) {
+ArrayDecAST::ArrayDecAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> length, string name, string typeName) : ASTNode(st) {
 	_st = st;
 	_name = name;
 	_length = length;
-	_elemType = elemType;
+	_elemType = typeName;
 	check();
 }
 
 void ArrayDecAST::check() {
-	Identifier* type = _st->lookupCurrLevelAndEnclosingLevels(_elemType);
-	Identifier* name = _st->lookupCurrLevelOnly(_name);
-	if (type == NULL) {
-
+	boost::shared_ptr<Identifier> type = _st->lookupCurrLevelAndEnclosingLevels(_elemType);
+	boost::shared_ptr<Identifier> name = _st->lookupCurrLevelOnly(_name);
+	
+	if (!type) {
+		cerr << "Unknown identifier used as type." << endl;
 	} else if (type->getID() != "Type") {
-
-	} else if (name != NULL) {
-
+		cerr << "Not a type" << endl;
+	} else if (name) {
+		cerr << "Variable already declared" << endl;
 	} else if ("Number" != _length->getType()->getID()) {
-
+		cerr << "Invalid array length" << endl;
 	} else {
-		Array a((Type*) type);
-		_arrObj = &a;
+		boost::shared_ptr<Type> typeCasted = boost::shared_polymorphic_downcast<Type>(type);
+		boost::shared_ptr<Array> a(new Array(typeCasted));
+		_arrObj = a;
 		_st->add(_name, _arrObj);
 	}
 }

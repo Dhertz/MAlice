@@ -1,11 +1,11 @@
 #include "Param.hpp"
 
-Param::Param(Type* type, string name) {
+Param::Param(boost::shared_ptr<Type> type, string name) {
 	_type = type;
 	_name = name;
 }
 
-Type* Param::getType() {
+boost::shared_ptr<Type> Param::getType() {
 	return _type;
 }
 

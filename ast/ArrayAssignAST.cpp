@@ -1,6 +1,6 @@
 #include "ArrayAssignAST.hpp"
 
-ArrayAssignAST::ArrayAssignAST(SymbolTable* st, string name, ExprAST* element, ExprAST* value) : ASTNode(st) {
+ArrayAssignAST::ArrayAssignAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_ptr<ExprAST> element, boost::shared_ptr<ExprAST> value) : ASTNode(st) {
 	_st = st;
 	_name = name;
 	_element = element;
@@ -9,17 +9,21 @@ ArrayAssignAST::ArrayAssignAST(SymbolTable* st, string name, ExprAST* element, E
 }
 
 void ArrayAssignAST::check() {
-	Identifier* array = _st->lookupCurrLevelAndEnclosingLevels(_name);
+	boost::shared_ptr<Identifier> array = _st->lookupCurrLevelAndEnclosingLevels(_name);
 	
 	if(_element->getType()->getID() != "Number") {
-
-	} else if (array == NULL) {
-
+		cerr << "Not a valid element number." << endl;
+	} else if (!array) {
+		cerr << "Unknown variable " << _name << endl;
 	} else if(array->getID() != "Array") {
-
-	} else if(_value->getType()->getID() == ((Array*) array)->getElemType()->getID()) {
-	
+		cerr << "Attempted array assignment on object which is not an array." << endl;
 	} else {
-		_arrObj = (Array*) array;
+		boost::shared_ptr<Array> arrCasted = boost::shared_polymorphic_downcast<Array>(array);
+
+		if(_value->getType()->getID() == arrCasted->getElemType()->getID()) {
+			cerr << "Type error." << endl;
+		} else {
+			_arrObj = arrCasted;
+		}
 	}
 }

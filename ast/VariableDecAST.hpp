@@ -6,14 +6,15 @@
 #include "../idents/Variable.hpp"
 
 class VariableDecAST : public ASTNode {
-	SymbolTable* _st;
+	boost::shared_ptr<SymbolTable> _st;
 	string _typeName;
 	string _varName;
-	ExprAST* _expr;
-	Variable* _varObj;
+	boost::shared_ptr<ExprAST> _expr;
+	boost::shared_ptr<Variable> _varObj;
+
 public:
-	VariableDecAST(SymbolTable* st, string typeName, string varName);
-	VariableDecAST(SymbolTable* st, string typeName, string varName, ExprAST* expr);
+	VariableDecAST(boost::shared_ptr<SymbolTable> st, string typeName, string varName);
+	VariableDecAST(boost::shared_ptr<SymbolTable> st, string typeName, string varName, boost::shared_ptr<ExprAST> expr);
 	void check();
 };
 

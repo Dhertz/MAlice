@@ -4,11 +4,11 @@
 #include "Type.hpp"
 
 class Array : public Type {
-	Type* _elemType;
+	boost::shared_ptr<Type> _elemType;
 
 public:
-	Array(Type* elemType);
-	Type* getElemType();
+	Array(boost::shared_ptr<Type> elemType);
+	boost::shared_ptr<Type> getElemType();
 	string getID();
 };
 

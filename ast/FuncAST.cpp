@@ -1,6 +1,6 @@
 #include "FuncAST.hpp"
 
-FuncAST::FuncAST(SymbolTable* st, string name, CallParamsAST* params) : ASTNode(st) {
+FuncAST::FuncAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_ptr<CallParamsAST> params) : ASTNode(st) {
 	_st = st;
 	_name = name;
 	_params = params;
@@ -8,23 +8,27 @@ FuncAST::FuncAST(SymbolTable* st, string name, CallParamsAST* params) : ASTNode(
 }
 
 void FuncAST::check() {
-	Identifier* function = _st->lookupCurrLevelOnly(_name);
-	if (function == NULL) {
+	boost::shared_ptr<Identifier> function = _st->lookupCurrLevelOnly(_name);
+	
+	if (!function) {
 
 	} else if (function->getID() != "Function") {
 
-	} else if (!parametersTypeCheck((Function*) function)) {
+	} else {
+		boost::shared_ptr<Function> funcCasted = boost::shared_polymorphic_downcast<Function>(function);
+		
+		if (!parametersTypeCheck(funcCasted)) {
 
+		}
 	}
 }
 
-bool FuncAST::parametersTypeCheck(Function* function) {
+bool FuncAST::parametersTypeCheck(boost::shared_ptr<Function> function) {
+	vector< boost::shared_ptr<Param> > params = function->getParams();
+	vector< boost::shared_ptr<Param> >::iterator i = params.begin();
 	
-	vector<Param> params = function->getParams();
-	vector<Param>::iterator i = params.begin();
-	
-	vector<Type*> paramTypes = _params->getTypes();
-	vector<Type*>::iterator j = paramTypes.begin();
+	vector< boost::shared_ptr<Type> > paramTypes = _params->getTypes();
+	vector< boost::shared_ptr<Type> >::iterator j = paramTypes.begin();
 	
 	if (params.size() != paramTypes.size()) {
 		cerr << "Invalid number of arguements for " << _name << endl;
@@ -32,12 +36,11 @@ bool FuncAST::parametersTypeCheck(Function* function) {
 	}
 
 	for (; j != paramTypes.end(); ++j) {
-		if (i->getType()->getID() != (*j)->getID()) {
+		if ((*i)->getType()->getID() != (*j)->getID()) {
 			cerr << "Type mismatch for " << _name << endl;
 			return false;
 		} else {
 			++i;
 		}
 	}
-
 }

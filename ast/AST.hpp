@@ -4,11 +4,11 @@
 #include "ASTNode.hpp"
 
 class AST {
-	ASTNode* _root;
+	boost::shared_ptr<ASTNode> _root;
 public:
-	void setRoot(ASTNode* root);
+	void setRoot(boost::shared_ptr<ASTNode> root);
 	void print();
-	void printNode(ASTNode* node);
+	void printNode(boost::shared_ptr<ASTNode> node);
 };
 
 #endif

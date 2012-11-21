@@ -1,10 +1,10 @@
 #include "Array.hpp"
 
-Array::Array(Type* elemType) {
+Array::Array(boost::shared_ptr<Type> elemType) {
 	_elemType = elemType;
 }
 
-Type* Array::getElemType() {
+boost::shared_ptr<Type> Array::getElemType() {
 	return _elemType;
 }
 

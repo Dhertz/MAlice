@@ -1,14 +1,14 @@
 #include "ASTNode.hpp"
 
-ASTNode::ASTNode(SymbolTable* st) {
+ASTNode::ASTNode(boost::shared_ptr<SymbolTable> st) {
 	_st = st;
 }
 
-vector<ASTNode*> ASTNode::getChildren() {
+vector< boost::shared_ptr<ASTNode> > ASTNode::getChildren() {
 	return _children;
 }
 
-void ASTNode::addChild(ASTNode* child, int childNum) {
+void ASTNode::addChild(boost::shared_ptr<ASTNode> child, int childNum) {
 	if (_children.begin() + childNum >= _children.end()) {
 		_children.push_back(child);
 	} else {

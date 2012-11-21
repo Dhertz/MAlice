@@ -8,14 +8,17 @@
 #include <vector>
 #include <iostream>
 
+// Forward declartion needed to avoid circular class declaration in ExprAST
+class CallParamsAST;
+
 class FuncAST : public ASTNode {
-	SymbolTable* _st;
+	boost::shared_ptr<SymbolTable> _st;
 	string _name;
-	CallParamsAST* _params;
+	boost::shared_ptr<CallParamsAST> _params;
 public:
-	FuncAST(SymbolTable* st, string name, CallParamsAST* params);
+	FuncAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_ptr<CallParamsAST> params);
 	void check();
-	bool parametersTypeCheck(Function* function);
+	bool parametersTypeCheck(boost::shared_ptr<Function> function);
 };
 
 #endif

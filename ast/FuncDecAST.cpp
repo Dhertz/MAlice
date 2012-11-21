@@ -1,6 +1,6 @@
 #include "FuncDecAST.hpp"
 
-FuncDecAST::FuncDecAST(SymbolTable* st, string name, HeaderParamsAST* params, string returnType) : ASTNode(st) {
+FuncDecAST::FuncDecAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_ptr<HeaderParamsAST> params, string returnType) : ASTNode(st) {
 	_st = st;
 	_name = name;
 	_returnType = returnType;
@@ -9,23 +9,26 @@ FuncDecAST::FuncDecAST(SymbolTable* st, string name, HeaderParamsAST* params, st
 }
 
 void FuncDecAST::check() {
-	Identifier* type = _st->lookupCurrLevelAndEnclosingLevels(_returnType);
-	Identifier* name = _st->lookupCurrLevelAndEnclosingLevels(_name);
+	boost::shared_ptr<Identifier> type = _st->lookupCurrLevelAndEnclosingLevels(_returnType);
+	boost::shared_ptr<Identifier> name = _st->lookupCurrLevelAndEnclosingLevels(_name);
 
-	if (type == NULL) {
+	if (!type) {
 
 	} else if (type->getID() != "Type") {
 
-	} else if (name != NULL) {
+	} else if (!name) {
 
 	} else {
-		vector<Param> v = _params->getParams();
-		vector<Param>::iterator param;
-		for (param=v.begin(); param < v.end(); param++) {
-			_st->getEncSymTable()->add(param->getName(), param->getType());
+		vector< boost::shared_ptr<Param> > v = _params->getParams();
+		vector< boost::shared_ptr<Param> >::iterator param;
+
+		for (param = v.begin(); param < v.end(); param++) {
+			_st->getEncSymTable()->add((*param)->getName(), (*param)->getType());
 		}
-		Function f((Type*) type, v, _st);
-		_funcObj = &f;
+
+		boost::shared_ptr<Type> typeCasted = boost::shared_polymorphic_downcast<Type>(type);
+		boost::shared_ptr<Function> f(new Function(typeCasted, v, _st));
+		_funcObj = f;
 		_st->add(_name, _funcObj);
 	}
 }

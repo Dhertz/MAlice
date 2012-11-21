@@ -10,7 +10,7 @@ string HeaderParamsAST::createStringFromTree(pANTLR3_BASE_TREE tree) {
 	return res;
 }
 
-HeaderParamsAST::HeaderParamsAST(SymbolTable* st, pANTLR3_BASE_TREE tree) : ASTNode(st) {
+HeaderParamsAST::HeaderParamsAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree) : ASTNode(st) {
 	_st = st;
 	_tree = tree;
 
@@ -23,28 +23,29 @@ void HeaderParamsAST::check() {
 		
 		string typeString = createStringFromTree(childByNum(_tree, i));
 		string nameString = createStringFromTree(childByNum(_tree, i+1));
-		Identifier* type = _st->lookupCurrLevelAndEnclosingLevels(typeString);
-		Identifier* name = _st->lookupCurrLevelOnly(nameString);
+		boost::shared_ptr<Identifier> type = _st->lookupCurrLevelAndEnclosingLevels(typeString);
+		boost::shared_ptr<Identifier> name = _st->lookupCurrLevelOnly(nameString);
 		
 		if (type->getID() != "Type") {
 
-		} else if(name != NULL) {
+		} else if(!name) {
 
 		} else if(duplicate(i+1, nameString)) {
 
 		} else {
-			Param p((Type*) type, nameString);
+			boost::shared_ptr<Type> typeCasted = boost::shared_polymorphic_downcast<Type>(type);
+			boost::shared_ptr<Param> p(new Param(typeCasted, nameString));
 			_params.push_back(p);
 		}
 	}
 }
 
-vector<Param> HeaderParamsAST::getParams() {
+vector< boost::shared_ptr<Param> > HeaderParamsAST::getParams() {
 	return _params;
 }
 
 bool HeaderParamsAST::duplicate(int upto, string name) {
-	for (int i = 0; i < upto; i=i+2) {
+	for (int i = 0; i < upto; i+=2) {
 		string nameString = createStringFromTree(childByNum(_tree, i+1));
 		if (nameString == name) {
 			return true;

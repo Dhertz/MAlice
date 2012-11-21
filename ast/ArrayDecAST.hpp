@@ -6,13 +6,13 @@
 #include "../idents/Array.hpp"
 
 class ArrayDecAST : public ASTNode {
-	SymbolTable* _st;
-	ExprAST* _length;
+	boost::shared_ptr<SymbolTable> _st;
+	boost::shared_ptr<ExprAST> _length;
 	string _name;
 	string _elemType;
-	Array* _arrObj;
+	boost::shared_ptr<Array> _arrObj;
 public:
-	ArrayDecAST(SymbolTable* st, ExprAST* expr, string name, string typeName);
+	ArrayDecAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr, string name, string typeName);
 	void check();
 };
 

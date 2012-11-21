@@ -10,13 +10,13 @@
 using namespace std;
 
 class Proc : public Identifier {
-	vector<Param> _params;
-	SymbolTable* _st;
+	vector< boost::shared_ptr<Param> > _params;
+	boost::shared_ptr<SymbolTable> _st;
 
 public:
-	Proc(vector<Param> params, SymbolTable* st);
+	Proc( boost::shared_ptr<SymbolTable> st, vector< boost::shared_ptr<Param> > params);
 	string getID();
-	vector<Param> getParams();
+	vector< boost::shared_ptr<Param> > getParams();
 	SymbolTable getTable();
 };
 

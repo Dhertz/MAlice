@@ -7,13 +7,13 @@
 #include <vector>
 
 class ProcDecAST : public ASTNode {
-	SymbolTable* _st;
+	boost::shared_ptr<SymbolTable> _st;
 	string _name;
 	string _returnType;
-	HeaderParamsAST* _params;
-	Proc* _procObj;
+	boost::shared_ptr<HeaderParamsAST> _params;
+	boost::shared_ptr<Proc> _procObj;
 public:
-	ProcDecAST(SymbolTable* st, string name, HeaderParamsAST* params);
+	ProcDecAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_ptr<HeaderParamsAST> params);
 	void check();
 };
 

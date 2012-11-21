@@ -5,10 +5,10 @@
 #include "ExprAST.hpp"
 
 class ReturnAST : public ASTNode {
-	SymbolTable _st;
-	ExprAST* _expr;
+	boost::shared_ptr<SymbolTable> _st;
+	boost::shared_ptr<ExprAST> _expr;
 public:
-	ReturnAST(SymbolTable* st, ExprAST* expr);
+	ReturnAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr);
 };
 
 #endif

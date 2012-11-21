@@ -5,10 +5,10 @@
 #include "ExprAST.hpp"
 
 class WhileAST : public ASTNode {
-	SymbolTable _st;
-	ExprAST* _expr;
+	boost::shared_ptr<SymbolTable> _st;
+	boost::shared_ptr<ExprAST> _expr;
 public:
-	WhileAST(SymbolTable* st, ExprAST* expr);
+	WhileAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr);
 	void check();
 };
 

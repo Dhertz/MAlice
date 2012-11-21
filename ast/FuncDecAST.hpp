@@ -7,13 +7,13 @@
 #include <vector>
 
 class FuncDecAST : public ASTNode {
-	SymbolTable* _st;
+	boost::shared_ptr<SymbolTable> _st;
 	string _name;
 	string _returnType;
-	HeaderParamsAST* _params;
-	Function* _funcObj;
+	boost::shared_ptr<HeaderParamsAST> _params;
+	boost::shared_ptr<Function> _funcObj;
 public:
-	FuncDecAST(SymbolTable* st, string name, HeaderParamsAST* params, string returnType);
+	FuncDecAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_ptr<HeaderParamsAST> params, string returnType);
 	void check();
 };
 

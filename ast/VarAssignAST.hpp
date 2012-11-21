@@ -6,12 +6,13 @@
 #include "../idents/Variable.hpp"
 
 class VarAssignAST : public ASTNode {
-	SymbolTable* _st;
+	boost::shared_ptr<SymbolTable> _st;
 	string _varName;
-	ExprAST* _expr;
-	Variable* _varObj;
+	boost::shared_ptr<ExprAST> _expr;
+	boost::shared_ptr<Variable> _varObj;
+
 public:
-	VarAssignAST(SymbolTable* st, string varName, ExprAST* expr);
+	VarAssignAST(boost::shared_ptr<SymbolTable> st, string varName, boost::shared_ptr<ExprAST> expr);
 	void check();
 };
 

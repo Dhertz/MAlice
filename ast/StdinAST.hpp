@@ -5,10 +5,10 @@
 #include "ExprAST.hpp"
 
 class StdinAST : public ASTNode {
-	SymbolTable st;
-	ExprAST* _expr;
+	boost::shared_ptr<SymbolTable> st;
+	boost::shared_ptr<ExprAST> _expr;
 public:
-	StdinAST(SymbolTable* st, ExprAST* expr);
+	StdinAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr);
 };
 
 #endif

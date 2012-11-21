@@ -5,10 +5,10 @@
 #include "ExprAST.hpp"
 
 class IfAST : public ASTNode {
-	SymbolTable* _st;
-	ExprAST* _expr;
+	boost::shared_ptr<SymbolTable> _st;
+	boost::shared_ptr<ExprAST> _expr;
 public:
-	IfAST(SymbolTable* st, ExprAST* expr);
+	IfAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr);
 	void check();
 };
 

@@ -7,16 +7,16 @@
 #include "../idents/Param.hpp"
 
 class HeaderParamsAST : public ASTNode {
-	SymbolTable* _st;
+	boost::shared_ptr<SymbolTable> _st;
 	pANTLR3_BASE_TREE _tree;
-	vector<Param> _params;
+	vector< boost::shared_ptr<Param> > _params;
 public:
-	HeaderParamsAST(SymbolTable* st, pANTLR3_BASE_TREE tree);
+	HeaderParamsAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree);
 	pANTLR3_BASE_TREE childByNum(pANTLR3_BASE_TREE tree, int num);
 	string createStringFromTree(pANTLR3_BASE_TREE tree);
 	bool duplicate(int upto, string name);
 	void check();
-	vector<Param> getParams();
+	vector< boost::shared_ptr<Param> > getParams();
 };
 
 #endif

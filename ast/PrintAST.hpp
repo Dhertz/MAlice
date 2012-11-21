@@ -7,18 +7,18 @@
 #include "../idents/Array.hpp"
 
 class PrintAST : public ASTNode {
-	SymbolTable* _st;
+	boost::shared_ptr<SymbolTable> _st;
 	string _name;
-	CallParamsAST* _params;
-	ExprAST* _element;
-	ExprAST* _expr;
-	Identifier* _type;
+	boost::shared_ptr<CallParamsAST> _params;
+	boost::shared_ptr<ExprAST> _element;
+	boost::shared_ptr<ExprAST> _expr;
+	boost::shared_ptr<Identifier> _type;
 public:
-	PrintAST(SymbolTable* st, string arrayName, ExprAST* element);
-	PrintAST(SymbolTable* st, string funcName, CallParamsAST* params);
-	PrintAST(SymbolTable* st, ExprAST* expr);
+	PrintAST(boost::shared_ptr<SymbolTable> st, string arrayName, boost::shared_ptr<ExprAST> element);
+	PrintAST(boost::shared_ptr<SymbolTable> st, string funcName, boost::shared_ptr<CallParamsAST> params);
+	PrintAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr);
 	void check();
-	Identifier* getType();
+	boost::shared_ptr<Identifier> getType();
 };
 
 #endif

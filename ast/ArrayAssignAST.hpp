@@ -6,13 +6,13 @@
 #include "../idents/Array.hpp"
 
 class ArrayAssignAST : public ASTNode {
-	SymbolTable* _st;
+	boost::shared_ptr<SymbolTable> _st;
 	string _name;
-	ExprAST* _element;
-	ExprAST* _value;
-	Array* _arrObj;
+	boost::shared_ptr<ExprAST> _element;
+	boost::shared_ptr<ExprAST> _value;
+	boost::shared_ptr<Array> _arrObj;
 public:
-	ArrayAssignAST(SymbolTable* st, string name, ExprAST* element, ExprAST* value);
+	ArrayAssignAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_ptr<ExprAST> element, boost::shared_ptr<ExprAST> value);
 	void check();
 };
 

@@ -8,13 +8,13 @@
 #include "ExprAST.hpp"
 
 class CallParamsAST : public ASTNode {
-	SymbolTable* _st;
+	boost::shared_ptr<SymbolTable> _st;
 	pANTLR3_BASE_TREE _tree;
-	vector<Type*> _types;
+	vector< boost::shared_ptr<Type> > _types;
 public:
-	CallParamsAST(SymbolTable* st, pANTLR3_BASE_TREE tree);
+	CallParamsAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree);
 	pANTLR3_BASE_TREE childByNum(pANTLR3_BASE_TREE tree, int num);
-	vector<Type*> getTypes();
+	vector< boost::shared_ptr<Type> > getTypes();
 };
 
 #endif

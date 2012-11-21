@@ -1,23 +1,24 @@
 #ifndef SYMBOL_TABLE_H
 #define SYMBOL_TABLE_H
 
+#include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp>
+#include <boost/enable_shared_from_this.hpp>
 #include <string>
 #include "idents/Identifier.hpp"
 
-class SymbolTable {
-	SymbolTable* _encSymTable;
-	boost::unordered_map<string, Identifier*> _dict;
+class SymbolTable : public boost::enable_shared_from_this<SymbolTable> {
+	boost::shared_ptr<SymbolTable> _encSymTable;
+	boost::unordered_map<string, boost::shared_ptr<Identifier> > _dict;
 
 public:
-	SymbolTable();
-	SymbolTable(SymbolTable* st);
-	void add(string name, Identifier* obj);
-	Identifier* lookupCurrLevelOnly(string name);
-	Identifier* lookupCurrLevelAndEnclosingLevels(string name);
+	SymbolTable(boost::shared_ptr<SymbolTable> st);
+	void add(string name, boost::shared_ptr<Identifier> obj);
+	boost::shared_ptr<Identifier> lookupCurrLevelOnly(string name);
+	boost::shared_ptr<Identifier> lookupCurrLevelAndEnclosingLevels(string name);
 	void printCurrLevelOnly();
 	void printCurrLevelAndEnclosingLevels();
-	SymbolTable* getEncSymTable();
+	boost::shared_ptr<SymbolTable> getEncSymTable();
 };
 
 #endif
