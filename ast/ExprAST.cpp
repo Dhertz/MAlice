@@ -4,6 +4,7 @@
 #include "../idents/Sentence.hpp"
 #include "../idents/Number.hpp"
 #include "../idents/Array.hpp"
+#include "../idents/Boolean.hpp"
 
 // Stolen from Owen. If these stay, might be best to move them to a Utils class or something
 void printMe(pANTLR3_BASE_TREE tree, int level) {
@@ -143,41 +144,126 @@ void ExprAST::check() {
 		boost::shared_ptr<Type> sentence = boost::shared_ptr<Type>(new Sentence);
 		_type = sentence;
 	} else {
-		// Recursive case, will resolve to an (internal) boolean or a number
+		// Recursive case, will resolve to a boolean or number
 
-		// Used in all cases where we return number
+		boost::shared_ptr<Type> retType = recurseTree(root, "*");
+		assert(retType);
+		_type = retType;
+	}
+}
+
+boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree, string expectedType) {
+	int children = tree->getChildCount(tree);
+	assert (0 <= children && children < 3);
+	if (children == 0) {
+		// Base case
+
+		// TODO: remove need for constructor arguments here
 		boost::shared_ptr<Type> number = boost::shared_ptr<Type>(new Number(0, 1));
+		return number;
+	} else if (children == 1) {
+		// Unary operator
+		string op = createStringFromTree(tree);
+		pANTLR3_BASE_TREE arg = childByNum(tree, 0);
 
-		int rootChildren = root->getChildCount(root);
-		assert (0 <= rootChildren && rootChildren < 3);
-		if (rootChildren == 0) {
-			// Raw integer
-			_type = number;
-		} else if (rootChildren == 1) {
-			// Unary operator
-			string op = tok;
-			pANTLR3_BASE_TREE arg = childByNum(root, 0);
+		string expEvalType;
+		boost::shared_ptr<Type> evaluatedType;
+		
+		if (_intArgIntRet.find(op) != _intArgIntRet.end()) {
+			expEvalType = "Number";
+		} else if (_boolArgBoolRet.find(op) != _boolArgBoolRet.end()) {
+			expEvalType = "Boolean";
+		} else {
+			ExprAST checkExp(_st, tree);
+			evaluatedType = checkExp.getTypeName();
 
+			if (expectedType != "*" && expectedType != evaluatedType->getTypeName()) {
+				cerr << "Expected argument expression to " << op << " to evaluate to a " << expectedType << ", but got a " << evaluatedType->getTypeName() << endl;
+				return boost::shared_ptr<Type>();
+			}
 			
-		} else if (rootChildren == 2) {
-			// Binary operator
-			string op = tok;
-			pANTLR3_BASE_TREE lhs = childByNum(root, 0);
-			pANTLR3_BASE_TREE rhs = childByNum(root, 1);
+			return evaluatedType;
 		}
 
-		cout << endl << endl << endl << endl;
+		evaluatedType = recurseTree(arg, expEvalType);
 
-		_type = number; // TODO: DON'T FORGET ABOUT THIS!
-
-		/* int args = opTree->getChildCount(opTree);
-
-		if (args == 1) {
-			cout << "Look for " << tok << " in unary" << endl;
+		if (expectedType != "*" && expectedType != evaluatedType->getTypeName()) {
+			cerr << "Argument to " << op << " should be a " << expectedType << ", but got " << evaluatedType->getTypeName() << endl;
+			return boost::shared_ptr<Type>();
 		} else {
-			cout << "Look for " << tok << " in binary" << endl;
-		} */
+			return evaluatedType;
+		}
+	} else if (children == 2) {
+		// Binary operator
+		string op = createStringFromTree(tree);
+		pANTLR3_BASE_TREE lhs = childByNum(tree, 0);
+		pANTLR3_BASE_TREE rhs = childByNum(tree, 1);
 
+		string lhsTok = createStringFromTree(lhs);
+		string rhsTok = createStringFromTree(rhs);
+
+		boost::shared_ptr<Type> lhsType, rhsType;
+
+		if (_mixedArgsMixedRet.find(op) != _mixedArgsMixedRet.end()) {
+			// args must be of same type
+			// return type is type of either arg
+			lhsType = recurseTree(lhs, "*");
+			rhsType = recurseTree(rhs, "*");
+			if (lhsType->getTypeName() != rhsType->getTypeName()) {
+				cerr << "Operand type mismatch in " << lhsTok << " " << op << " " << rhsTok
+					<< " (" << lhsType->getTypeName() << " isn't the same as " << rhsType->getTypeName() << ")" << endl;
+				return boost::shared_ptr<Type>();
+			} else if (expectedType != "*" && lhsType->getTypeName() != expectedType) {
+				cerr << "In this scenario, " << op << " will return a " << lhsType->getTypeName() << ", not a " << expectedType << endl;
+				return boost::shared_ptr<Type>();
+			}
+			return lhsType;
+		} else if (_mixedArgsBoolRet.find(op) != _mixedArgsBoolRet.end()) {
+			// args must be of same type
+
+			if (expectedType != "*" && expectedType != "Boolean") {
+				// No point even evaluating lhs or rhs because my return type is wrong
+				cerr << op << " returns a Boolean, not a " << expectedType << endl;
+				return boost::shared_ptr<Type>();
+			} else {
+				lhsType = recurseTree(lhs, "*");
+				rhsType = recurseTree(rhs, "*");
+				if (lhsType->getTypeName() != rhsType->getTypeName()) {
+					cerr << "Operand type mismatch in " << lhsTok << " " << op << " " << rhsTok
+						<< " (" << lhsType->getTypeName() << " isn't the same as " << rhsType->getTypeName() << ")" << endl;
+					return boost::shared_ptr<Type>();
+				}
+
+				// return new boolean
+				boost::shared_ptr<Type> evaluatedType = boost::shared_ptr<Type>(new Boolean);
+				return evaluatedType;
+			}
+		} else if (_boolArgsBoolRet.find(op) != _boolArgsBoolRet.end()) {
+			// args must be boolean
+
+			if (expectedType != "*" && expectedType != "Boolean") {
+				// No point even evaluating lhs or rhs because my return type is wrong
+				cerr << op << " returns a Boolean, not a " << expectedType << endl;
+				return boost::shared_ptr<Type>();
+			} else {
+				lhsType = recurseTree(lhs, "Boolean");
+				rhsType = recurseTree(rhs, "Boolean");
+
+				// return new boolean
+				boost::shared_ptr<Type> evaluatedType = boost::shared_ptr<Type>(new Boolean);
+				return evaluatedType;
+			}
+		} else {
+			ExprAST checkExp(_st, tree);
+			boost::shared_ptr<Type> evaluatedType = checkExp.getTypeName();
+
+			if (expectedType != "*" && expectedType != evaluatedType->getTypeName()) {
+				cerr << "Expected argument expression to " << op << " to evaluate to a " << expectedType << ", but got a " << evaluatedType->getTypeName() << endl;
+				return boost::shared_ptr<Type>();
+			}
+			
+			return evaluatedType;
+		}
 	}
 }
 
