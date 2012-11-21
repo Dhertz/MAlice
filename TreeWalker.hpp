@@ -30,6 +30,7 @@ class TreeWalker {
 	void processIF(pANTLR3_BASE_TREE, boost::shared_ptr<SymbolTable>, boost::shared_ptr<ASTNode> parent, int childNum);
 	void processCOND(pANTLR3_BASE_TREE, boost::shared_ptr<SymbolTable>, boost::shared_ptr<ASTNode> parent, int childNum);
 	void processNS(pANTLR3_BASE_TREE, boost::shared_ptr<SymbolTable>, boost::shared_ptr<ASTNode> parent, int childNum);
+	bool findReturn(pANTLR3_BASE_TREE tree);
 	pANTLR3_BASE_TREE childByNum(pANTLR3_BASE_TREE tree, int num);
 	string createStringFromTree(pANTLR3_BASE_TREE tree);
 

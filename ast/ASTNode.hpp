@@ -13,7 +13,9 @@ public:
 	ASTNode(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ASTNode> parent);
 	vector< boost::shared_ptr<ASTNode> > getChildren();
 	void addChild(boost::shared_ptr<ASTNode> child, int position);
+    boost::shared_ptr<ASTNode> getParent();
 	void print();
+	virtual string getNodeName();
 	virtual void check();
 };
 

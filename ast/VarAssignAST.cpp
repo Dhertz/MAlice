@@ -33,12 +33,6 @@ void VarAssignAST::check() {
 			} else {
 				_varObj = varCasted;
 			}
-		} else {
-			if (_expr->getTypeName() != varCasted->getTypeName()) {
-				cerr << "lhs (" << varCasted->getTypeName()->getTypeName() << ") and rhs (" << _expr->getTypeName() << ") not type compatible" << endl;		
-			} else {
-				_varObj = varCasted;
-			}
 		}
 	}	
 }

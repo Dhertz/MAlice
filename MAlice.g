@@ -315,7 +315,11 @@ prec6: prec5 (('==' | '!=')^ prec5)*;
 prec5: prec4 (('>' | '<' | '>=' | '<=')^ prec4)*;
 prec4: prec3 (('+' | '-')^ prec3)*;
 prec3: prec2 (('*' | '/' | '%')^ prec2)*;
-prec2: (('!' | '~' | '+' | '-')?)^ atom;
+prec2: '!' atom -> ^('!' atom) |
+       '~' atom -> ^('~' atom) |
+       '+' atom -> ^('+' atom) |
+       '-' atom -> ^('-' atom) |
+       atom;
 
 atom: (ID APOSTROPHE) => ID APOSTROPHE 's' expression 'piece' -> ^(ARRMEMBER ID expression) | 
       (ID callParams) => ID callParams -> ^(FUNC ID callParams) |
