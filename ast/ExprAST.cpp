@@ -2,6 +2,8 @@
 #include "../idents/Variable.hpp"
 #include "../idents/Letter.hpp"
 #include "../idents/Sentence.hpp"
+#include "../idents/Number.hpp"
+#include "../idents/Array.hpp"
 
 // Stolen from Owen. If these stay, might be best to move them to a Utils class or something
 pANTLR3_BASE_TREE ExprAST::childByNum(pANTLR3_BASE_TREE tree, int num) {
@@ -82,20 +84,50 @@ void ExprAST::check() {
 		}
 	} else if (tok == "ARRMEMBER") {
 		// Array member reference, evaluates to array's element type
-		cout << "TODO: ARRMEMBER" << endl;
+
+		string arrName = createStringFromTree(childByNum(root, 0));
+
+		boost::shared_ptr<Identifier> arrIdent = _st->lookupCurrLevelAndEnclosingLevels(arrName);
+		if (!arrIdent) {
+			cerr << arrName << " is not in scope" << endl;
+		} else if (arrIdent->getBaseName() != "Type") {
+			cerr << arrName << " is not an array" << endl;
+		} else {
+			boost::shared_ptr<Type> arrType = boost::shared_polymorphic_downcast<Type>(arrIdent);
+			if (arrType->getTypeName() != "Array") {
+				cerr << arrName << " is not an array" << endl;
+			} else {
+				boost::shared_ptr<Array> arr = boost::shared_polymorphic_downcast<Array>(arrIdent);
+
+				pANTLR3_BASE_TREE index = childByNum(root, 1);
+				ExprAST indexCheck(_st, index);
+
+				if (indexCheck.getTypeName()->getTypeName() != "Number") {
+					cerr << "Array index must evaluate to a Number." << endl;
+				} else {
+					_type = arr->getElemType();
+				}
+			}
+		}
+		
 	} else if (tok[0] == '\'') {
+		// Char of form 'x', evaluates to a Letter
 		boost::shared_ptr<Type> letter = boost::shared_ptr<Type>(new Letter);
 		_type = letter;
 	} else if (tok[0] == '"') {
+		// String of form "foo", evaluates to a Sentence
 		boost::shared_ptr<Type> sentence = boost::shared_ptr<Sentence>(new Sentence);
 		_type = sentence;
 	} else {
 		// Recursive case, will resolve to an (internal) boolean or a number
-		cout << "TODO: recursive case" << endl;
+		// cout << "TODO: recursive case" << endl;
+
+		// TODO: remove need for the constructor here
+		boost::shared_ptr<Type> number = boost::shared_ptr<Number>(new Number(0, 1));
+		_type = number;
 	}
 }
 
 boost::shared_ptr<Type> ExprAST::getTypeName() {
-	assert(_type);
 	return _type;
 }
