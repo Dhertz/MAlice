@@ -110,9 +110,11 @@ void TreeWalker::processVARDEC(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolT
 			parent->addChild(dec, childNum);
 		} else {
 			boost::shared_ptr<ExprAST> expr(new ExprAST(st, exprTree));
-			boost::shared_ptr<VariableDecAST> dec(new VariableDecAST(st, typeName, varName, expr));
-			dec->addChild(expr, 0);
+			boost::shared_ptr<VarAssignAST> assign(new VarAssignAST(st, varName, expr));
+
+			boost::shared_ptr<VariableDecAST> dec(new VariableDecAST(st, typeName, varName));
 			parent->addChild(dec, childNum);
+			parent->addChild(assign, childNum + 1);
 		}
 	} else {
 		boost::shared_ptr<ExprAST> expr(new ExprAST(st, exprTree));

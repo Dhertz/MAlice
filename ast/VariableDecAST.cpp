@@ -5,20 +5,9 @@ VariableDecAST::VariableDecAST(boost::shared_ptr<SymbolTable> st, string typeNam
 	_st = st;
 	_typeName = typeName;
 	_varName = varName;
-	_expr = boost::shared_ptr<ExprAST>();
 
 	check();
 }
-
-VariableDecAST::VariableDecAST(boost::shared_ptr<SymbolTable> st, string typeName, string varName, boost::shared_ptr<ExprAST> expr) : ASTNode(st) {
-	_st = st;
-	_typeName = typeName;
-	_varName = varName;
-	_expr = expr;
-
-	check();
-}
-
 void VariableDecAST::check() {
 	// cout << "VariableDecAST::check() is looking for " << _typeName << " in all levels of " << _st << "..." << endl;
 	boost::shared_ptr<Identifier> type = _st->lookupCurrLevelAndEnclosingLevels(_typeName);
@@ -38,11 +27,5 @@ void VariableDecAST::check() {
 		boost::shared_ptr<Type> typeCasted = boost::shared_polymorphic_downcast<Type>(type);
 		boost::shared_ptr<Variable> v(new Variable(typeCasted));
 		_st->add(_varName, v);
-
-		// TODO: if _expr != NULL, assign value too.
-		// Would rather avoid the need for this at Owen's end
-		if (_expr != NULL) {
-			cout << "TODO: assign inline value in VariableDecAST" << endl;
-		}
 	}
 }
