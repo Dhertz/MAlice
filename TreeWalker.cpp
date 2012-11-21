@@ -59,14 +59,20 @@ void TreeWalker::processPROCDEC(pANTLR3_BASE_TREE tree, boost::shared_ptr<Symbol
 	pANTLR3_BASE_TREE idTree = childByNum(tree, 0);
 	string procName = createStringFromTree(idTree);
 
-	boost::shared_ptr<ProcDecAST> dec(new ProcDecAST(st, procName, params, parent));
+	boost::shared_ptr<SymbolTable> scopeSt(new SymbolTable(st));
+
+	boost::shared_ptr<ProcDecAST> dec(new ProcDecAST(scopeSt, procName, params, parent));
 	parent->addChild(dec, childNum);
 
-	walk(childByNum(tree, 2), st, dec, 2);
+	walk(childByNum(tree, 2), scopeSt, dec, 2);
 }
 
 // We don't need a AST node here, but we do need a new symbol table as we have a new scope
+
+// If we could come up with a way to avoid having a new SymbolTable here and in 
+// the levels directly above then that would be good
 void TreeWalker::processBODY(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ASTNode> parent, int childNum) {
+
 	boost::shared_ptr<SymbolTable> scopeSt(new SymbolTable(st));
 
     for (int i = 0; i < tree->getChildCount(tree); ++i) {
@@ -84,7 +90,9 @@ void TreeWalker::processFUNCDEC(pANTLR3_BASE_TREE tree, boost::shared_ptr<Symbol
 	string funcName = createStringFromTree(idTree);
 	string funcType = createStringFromTree(typeTree);
 
-	boost::shared_ptr<FuncDecAST> dec(new FuncDecAST(st, funcName, params, funcType, parent));
+	boost::shared_ptr<SymbolTable> scopeSt(new SymbolTable(st));
+
+	boost::shared_ptr<FuncDecAST> dec(new FuncDecAST(scopeSt, funcName, params, funcType, parent));
 
 	pANTLR3_BASE_TREE bodyTree = childByNum(tree, 3);
 
@@ -95,7 +103,7 @@ void TreeWalker::processFUNCDEC(pANTLR3_BASE_TREE tree, boost::shared_ptr<Symbol
 
 	parent->addChild(dec, childNum);
 
-	walk(childByNum(tree, 3), st, dec, 3);
+	walk(childByNum(tree, 3), scopeSt, dec, 3);
 }
 
 // Let's check if a function definition has a return statement
