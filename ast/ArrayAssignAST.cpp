@@ -13,7 +13,7 @@ void ArrayAssignAST::check() {
 	
 	if (!array) {
 		cerr << _name << "not in scope!" << endl;
-	} else if(_element->getTypeName()->getBaseName() != "Number") {
+	} else if(_element->getTypeName()->getTypeName() != "Number") {
 		cerr << "Not a valid element number." << endl;
 	} else if (!array) {
 		cerr << "Unknown variable " << _name << endl;
@@ -22,8 +22,8 @@ void ArrayAssignAST::check() {
 	} else {
 		boost::shared_ptr<Array> arrCasted = boost::shared_polymorphic_downcast<Array>(array);
 
-		if(_value->getTypeName()->getBaseName() == arrCasted->getElemType()->getBaseName()) {
-			cerr << "Type error." << endl;
+		if(_value->getTypeName()->getTypeName() != arrCasted->getElemType()->getTypeName()) {
+			cerr << "Type error. (" << _value->getTypeName()->getTypeName() << " != " << arrCasted->getElemType()->getTypeName() << ")" << endl;
 		} else {
 			_arrObj = arrCasted;
 		}

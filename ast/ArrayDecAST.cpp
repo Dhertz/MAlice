@@ -18,8 +18,8 @@ void ArrayDecAST::check() {
 		cerr << "Not a type" << endl;
 	} else if (name) {
 		cerr << "Variable already declared" << endl;
-	} else if ("Number" != _length->getTypeName()->getBaseName()) {
-		cerr << "Invalid array length" << endl;
+	} else if ("Number" != _length->getTypeName()->getTypeName()) {
+		cerr << "Invalid array length";
 	} else {
 		boost::shared_ptr<Type> typeCasted = boost::shared_polymorphic_downcast<Type>(type);
 		boost::shared_ptr<Array> a(new Array(typeCasted));
