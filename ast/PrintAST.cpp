@@ -26,6 +26,6 @@ void PrintAST::check() {
 	}
 }
 
-boost::shared_ptr<Identifier> PrintAST::getType() {
+boost::shared_ptr<Identifier> PrintAST::getTypeName() {
 	return _type;
 }

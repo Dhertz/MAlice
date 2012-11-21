@@ -7,7 +7,7 @@ ChoiceAST::ChoiceAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAS
 }
 
 void ChoiceAST::check() {
-	if(_expr->getType()->getID() != "Boolean") {
+	if(_expr->getTypeName()->getBaseName() != "Boolean") {
 
 	}
 }

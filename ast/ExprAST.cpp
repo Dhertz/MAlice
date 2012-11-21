@@ -58,7 +58,7 @@ void ExprAST::check() {
 			boost::shared_ptr<Identifier> funcIdent = _st->lookupCurrLevelAndEnclosingLevels(funcName);
 			boost::shared_ptr<Function> func = boost::shared_polymorphic_downcast<Function>(funcIdent);
 
-			_type = func->getType();
+			_type = func->getTypeName();
 		} else {
 			cerr << "Invalid ExprAST node." << endl;
 		}
@@ -78,6 +78,6 @@ void ExprAST::check() {
 	}
 }
 
-boost::shared_ptr<Type> ExprAST::getType() {
+boost::shared_ptr<Type> ExprAST::getTypeName() {
 	return _type;
 }

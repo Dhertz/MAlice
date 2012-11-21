@@ -2,6 +2,6 @@
 
 Sentence::Sentence() {}
 
-string Sentence::getType() {
+string Sentence::getTypeName() {
 	return "Sentence";
 }

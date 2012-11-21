@@ -7,7 +7,7 @@ DecAST::DecAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> exp
 }
 
 void DecAST::check() {
-	if(_expr->getType()->getID() != "Number") {
+	if(_expr->getTypeName()->getBaseName() != "Number") {
 
 	}
 }

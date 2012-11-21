@@ -16,7 +16,7 @@ void ProcDecAST::check() {
 		vector< boost::shared_ptr<Param> > v = _params->getParams();
 		vector< boost::shared_ptr<Param> >::iterator param;
 		for (param=v.begin(); param < v.end(); param++) {
-			_st->add((*param)->getName(), (*param)->getType());
+			_st->add((*param)->getName(), (*param)->getTypeName());
 		}
 		boost::shared_ptr<Proc> p(new Proc(_st, v));
 		_procObj = p;

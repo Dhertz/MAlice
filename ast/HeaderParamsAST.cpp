@@ -26,7 +26,7 @@ void HeaderParamsAST::check() {
 		boost::shared_ptr<Identifier> type = _st->lookupCurrLevelAndEnclosingLevels(typeString);
 		boost::shared_ptr<Identifier> name = _st->lookupCurrLevelOnly(nameString);
 		
-		if (type->getID() != "Type") {
+		if (type->getBaseName() != "Type") {
 
 		} else if(!name) {
 

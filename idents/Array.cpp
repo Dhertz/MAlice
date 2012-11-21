@@ -10,10 +10,10 @@ boost::shared_ptr<Type> Array::getElemType() {
 
 // This doesn't look right...
 
-string Array::getID() {
+string Array::getBaseName() {
 	return "Array";
 }
 
-string Array::getType() {
+string Array::getTypeName() {
 	return "Array";
 }

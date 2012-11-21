@@ -18,7 +18,7 @@ public:
 	PrintAST(boost::shared_ptr<SymbolTable> st, string funcName, boost::shared_ptr<CallParamsAST> params);
 	PrintAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr);
 	void check();
-	boost::shared_ptr<Identifier> getType();
+	boost::shared_ptr<Identifier> getTypeName();
 };
 
 #endif

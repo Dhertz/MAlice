@@ -1,5 +1,5 @@
 #include "Type.hpp"
 
-string Type::getID() {
+string Type::getBaseName() {
 	return "Type";
 }

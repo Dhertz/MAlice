@@ -12,7 +12,7 @@ void FuncAST::check() {
 	
 	if (!function) {
 		cerr << "Function " << _name << " not in scope" << endl;
-	} else if (function->getID() != "Function") {
+	} else if (function->getBaseName() != "Function") {
 
 	} else {
 		boost::shared_ptr<Function> funcCasted = boost::shared_polymorphic_downcast<Function>(function);
@@ -37,7 +37,7 @@ bool FuncAST::parametersTypeCheck(boost::shared_ptr<Function> function) {
 	}
 
 	for (; j != paramTypes.end(); ++j) {
-		if ((*i)->getType()->getID() != (*j)->getID()) {
+		if ((*i)->getTypeName()->getBaseName() != (*j)->getBaseName()) {
 			cerr << "Type mismatch for " << _name << endl;
 			return false;
 		} else {

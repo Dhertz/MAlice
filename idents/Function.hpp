@@ -15,9 +15,9 @@ class Function : public Identifier {
 	boost::shared_ptr<SymbolTable> _st;
 
 public:
-	string getID();
+	string getBaseName();
 	Function(boost::shared_ptr<Type> returnType, vector< boost::shared_ptr<Param> > params, boost::shared_ptr<SymbolTable> st);
-	boost::shared_ptr<Type> getType();
+	boost::shared_ptr<Type> getTypeName();
 	vector< boost::shared_ptr<Param> > getParams();
 	SymbolTable getTable();
 };

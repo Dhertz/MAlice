@@ -8,9 +8,9 @@ class Param : public Identifier {
 	string _name;
 public:
 	Param(boost::shared_ptr<Type> type, string name);
-	boost::shared_ptr<Type> getType();
+	boost::shared_ptr<Type> getTypeName();
 	string getName();
-	string getID();
+	string getBaseName();
 };
 
 #endif
