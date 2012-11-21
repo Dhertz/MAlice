@@ -34,27 +34,33 @@ string ExprAST::createStringFromTree(pANTLR3_BASE_TREE tree) {
 }
 
 ExprAST::ExprAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree) : ASTNode(st) {
-	_unaryOps.insert("!");
-	_unaryOps.insert("~");
-	_unaryOps.insert("+");
-	_unaryOps.insert("-");
+	_boolArgBoolRet.insert("!");
 
-	_binaryOps.insert("||");
-	_binaryOps.insert("&&");
-	_binaryOps.insert("|");
-	_binaryOps.insert("^");
-	_binaryOps.insert("&");
-	_binaryOps.insert("==");
-	_binaryOps.insert("!=");
-	_binaryOps.insert(">");
-	_binaryOps.insert("<");
-	_binaryOps.insert(">=");
-	_binaryOps.insert("<=");
-	_binaryOps.insert("+");
-	_binaryOps.insert("-");
-	_binaryOps.insert("*");
-	_binaryOps.insert("/");
-	_binaryOps.insert("%");
+	_intArgIntRet.insert("~");
+	_intArgIntRet.insert("+");
+	_intArgIntRet.insert("-");
+
+	_boolArgsBoolRet.insert("||");
+	_boolArgsBoolRet.insert("&&");
+
+	// Mixed: int or char (LHS and RHS must match)
+	_mixedArgsMixedRet.insert("|");
+	_mixedArgsMixedRet.insert("^");
+	_mixedArgsMixedRet.insert("&");
+	_mixedArgsMixedRet.insert("&");
+	_mixedArgsMixedRet.insert("&");
+	_mixedArgsMixedRet.insert("+");
+	_mixedArgsMixedRet.insert("-");
+	_mixedArgsMixedRet.insert("*");
+	_mixedArgsMixedRet.insert("/");
+	_mixedArgsMixedRet.insert("%");
+
+	_mixedArgsBoolRet.insert("==");
+	_mixedArgsBoolRet.insert("!=");
+	_mixedArgsBoolRet.insert(">");
+	_mixedArgsBoolRet.insert("<");
+	_mixedArgsBoolRet.insert(">=");
+	_mixedArgsBoolRet.insert("<=");
 
 	_type = boost::shared_ptr<Type>();
 	_tree = tree;
@@ -119,6 +125,7 @@ void ExprAST::check() {
 				pANTLR3_BASE_TREE index = childByNum(root, 1);
 				ExprAST indexCheck(_st, index);
 
+				// Need to cast to Type before second getTypeName()?
 				if (indexCheck.getTypeName()->getTypeName() != "Number") {
 					cerr << "Array index must evaluate to a Number." << endl;
 				} else {
@@ -141,18 +148,22 @@ void ExprAST::check() {
 		// Used in all cases where we return number
 		boost::shared_ptr<Type> number = boost::shared_ptr<Type>(new Number(0, 1));
 
-		cout << "Root:" << endl;
-		printTreeMe(root);
-		cout << "Has " << root->getChildCount(root) << " children" << endl;
-
 		int rootChildren = root->getChildCount(root);
+		assert (0 <= rootChildren && rootChildren < 3);
 		if (rootChildren == 0) {
 			// Raw integer
 			_type = number;
 		} else if (rootChildren == 1) {
-			cout << "Look for unary operator " << tok;
+			// Unary operator
+			string op = tok;
+			pANTLR3_BASE_TREE arg = childByNum(root, 0);
+
+			
 		} else if (rootChildren == 2) {
-			cout << "Look for binary operator " << tok;
+			// Binary operator
+			string op = tok;
+			pANTLR3_BASE_TREE lhs = childByNum(root, 0);
+			pANTLR3_BASE_TREE rhs = childByNum(root, 1);
 		}
 
 		cout << endl << endl << endl << endl;
