@@ -1,4 +1,5 @@
 #include "ExprAST.hpp"
+#include "../idents/Variable.hpp"
 
 // Stolen from Owen. If these stay, might be best to move them to a Utils class or something
 pANTLR3_BASE_TREE ExprAST::childByNum(pANTLR3_BASE_TREE tree, int num) {
@@ -43,38 +44,37 @@ ExprAST::ExprAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree) : AS
 void ExprAST::check() {
 	int children = _tree->getChildCount(_tree);
 
-	if (children == 2) {
+	assert (children > 0);
+	pANTLR3_BASE_TREE root = childByNum(_tree, 0);
+	string tok = createStringFromTree(root);
+
+	if (tok == "FUNC") {
 		// Inline function call
-		string funcName = createStringFromTree(childByNum(_tree, 0));
-		pANTLR3_BASE_TREE cplTree = childByNum(_tree, 1);
+		string funcName = createStringFromTree(childByNum(root, 0));
+		pANTLR3_BASE_TREE cplTree = childByNum(root, 1);
 
-		if (createStringFromTree(cplTree) == "CPL") {
-			// Check that function call and parameters type-check
-			// i.e. function name in scope, and parameters exprs match expected type
-			boost::shared_ptr<CallParamsAST> callParamsNode = boost::shared_ptr<CallParamsAST>(new CallParamsAST(_st, cplTree));
-			FuncAST(_st, funcName, callParamsNode);
+		// Check that function call and parameters type-check
+		// i.e. function name in scope, and parameters exprs match expected type
+		boost::shared_ptr<CallParamsAST> callParamsNode = boost::shared_ptr<CallParamsAST>(new CallParamsAST(_st, cplTree));
+		FuncAST(_st, funcName, callParamsNode);
 
-			// This cast should be safe after FuncAST has done its work
-			boost::shared_ptr<Identifier> funcIdent = _st->lookupCurrLevelAndEnclosingLevels(funcName);
-			boost::shared_ptr<Function> func = boost::shared_polymorphic_downcast<Function>(funcIdent);
+		// This cast should be safe after FuncAST has done its work
+		boost::shared_ptr<Identifier> funcIdent = _st->lookupCurrLevelAndEnclosingLevels(funcName);
+		boost::shared_ptr<Function> func = boost::shared_polymorphic_downcast<Function>(funcIdent);
 
-			_type = func->getTypeName();
+		_type = func->getTypeName();
+	} else if (tok == "VAR") {
+		string varName = createStringFromTree(childByNum(root, 0));
+
+		boost::shared_ptr<Identifier> varIdent = _st->lookupCurrLevelAndEnclosingLevels(varName);
+		if (!varIdent) {
+			cerr << varName << " is not in scope" << endl;
+		} else if (varIdent->getBaseName() != "Variable") {
+			cerr << varName << " is not a variable" << endl;
 		} else {
-			cerr << "Invalid ExprAST node." << endl;
+			boost::shared_ptr<Variable> var = boost::shared_polymorphic_downcast<Variable>(varIdent);
+			_type = var->getTypeName();
 		}
-	} else if (children == 1) {
-		// Expression of type boolean or number
-
-		string op = createStringFromTree(childByNum(_tree, 0));
-		cout << "Op: " << op << endl;
-
-		/* cout << children << " children." << endl << endl;
-		for (int i = 0; i < children; ++i) {
-			pANTLR3_BASE_TREE child = childByNum(_tree, i);
-			cout << "Child " << i << ": " << createStringFromTree(child) << endl;
-		} */
-	} else {
-		cerr << "Invalid ExprAST node." << endl;
 	}
 }
 

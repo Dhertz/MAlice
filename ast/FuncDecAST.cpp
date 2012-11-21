@@ -23,12 +23,12 @@ void FuncDecAST::check() {
 		vector< boost::shared_ptr<Param> >::iterator param;
 
 		for (param = v.begin(); param < v.end(); param++) {
-			_st->getEncSymTable()->add((*param)->getName(), (*param)->getTypeName());
+			_st->add((*param)->getName(), (*param)->getTypeName());
 		}
 
 		boost::shared_ptr<Type> typeCasted = boost::shared_polymorphic_downcast<Type>(type);
 		boost::shared_ptr<Function> f(new Function(typeCasted, v, _st));
 		_funcObj = f;
-		_st->add(_name, _funcObj);
+		_st->getEncSymTable()->add(_name, _funcObj);
 	}
 }

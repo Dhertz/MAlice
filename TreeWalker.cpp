@@ -34,7 +34,7 @@ TreeWalker::TreeWalker(boost::shared_ptr<SymbolTable> topSt, pANTLR3_BASE_TREE i
 void TreeWalker::walk(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ASTNode> parent, int childNum) {
 	string tokenName = createStringFromTree(tree);
 	map<string, PROC>::const_iterator it = _memberMap.find(tokenName);
-	cout << "tokenName: " << tokenName << endl;
+	// cout << "tokenName: " << tokenName << endl;
 	if (it != _memberMap.end()) {
 		PROC tokenProcessor = it->second;
 		(this->*tokenProcessor)(tree, st, parent, childNum);
