@@ -1,6 +1,6 @@
 #include "Function.hpp"
 
-Function::Function(boost::shared_ptr<Type> returnType, vector< boost::shared_ptr<Param> > params, boost::shared_ptr<SymbolTable> st) {
+Function::Function(boost::shared_ptr<SymbolTable> st, vector< boost::shared_ptr<Param> > params, boost::shared_ptr<Type> returnType) : Callable(st, params) {
 	_returnType = returnType;
 	_params = params;
 	_st = st;
@@ -8,16 +8,4 @@ Function::Function(boost::shared_ptr<Type> returnType, vector< boost::shared_ptr
 
 boost::shared_ptr<Type> Function::getTypeName() {
 	return _returnType;
-}
-
-vector< boost::shared_ptr<Param> > Function::getParams() {
-	return _params;
-}
-
-SymbolTable Function::getTable() {
-	return _st;
-}
-
-string Function::getBaseName() {
-	return "Function";
 }

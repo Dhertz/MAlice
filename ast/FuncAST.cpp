@@ -20,7 +20,7 @@ void FuncAST::check() {
 	}
 }
 
-void FuncAST::parametersTypeCheck(boost::shared_ptr<Function> function) {
+void FuncAST::parametersTypeCheck(boost::shared_ptr<Callable> function) {
 	vector<boost::shared_ptr<Param> > params = function->getParams();
 	vector<boost::shared_ptr<Param> >::iterator i = params.begin();
 	
