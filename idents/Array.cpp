@@ -8,8 +8,12 @@ boost::shared_ptr<Type> Array::getElemType() {
 	return _elemType;
 }
 
+// This doesn't look right...
+
 string Array::getID() {
 	return "Array";
 }
 
-
+string Array::getType() {
+	return "Array";
+}
