@@ -86,13 +86,13 @@ void TreeWalker::processFUNCDEC(pANTLR3_BASE_TREE tree, boost::shared_ptr<Symbol
 
 	boost::shared_ptr<FuncDecAST> dec(new FuncDecAST(st, funcName, params, funcType, parent));
 
-	/*pANTLR3_BASE_TREE bodyTree = childByNum(tree, 3);
+	pANTLR3_BASE_TREE bodyTree = childByNum(tree, 3);
 
 	// I don't like doing this here, can't think of a better solution at the moment
 	if (!findReturn(bodyTree)) {
 		cerr << "Function " << funcName << " does not have a return statement for all paths." << endl;
 	}
-	*/
+
 	parent->addChild(dec, childNum);
 
 	walk(childByNum(tree, 3), st, dec, 3);
@@ -103,14 +103,13 @@ bool TreeWalker::findReturn(pANTLR3_BASE_TREE tree) {
 	bool thislevelflag = false;
 	for (int i = 0; i < tree->getChildCount(tree); ++i) {
 		string tok = createStringFromTree(childByNum(tree, i));
-		cout << tok << endl;
 
 		if (tok == "IF" | tok == "WHILE" | tok == "CHOICE") {
 			thislevelflag = findReturn(childByNum(tree, i));
 		}
 
 		if (tok == "RETURN") {
-			thislevelflag == true;
+			thislevelflag = true;
 		}
 	}
 
