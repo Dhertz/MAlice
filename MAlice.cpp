@@ -2,6 +2,7 @@
 #include "SymbolTable.hpp"
 #include "idents/Number.hpp"
 #include "idents/Sentence.hpp"
+#include "idents/Letter.hpp"
 #include "ast/AST.hpp"
 #include "TreeWalker.hpp"
 // The ANTLR includes have to be BELOW the boost includes
@@ -38,6 +39,9 @@ void initST(boost::shared_ptr<SymbolTable> top) {
 
 	boost::shared_ptr<Sentence> iS(new Sentence());
 	top->add("sentence", iS);
+
+	boost::shared_ptr<Letter> iL(new Letter());
+	top->add("letter", iL);
 }
 
 void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {

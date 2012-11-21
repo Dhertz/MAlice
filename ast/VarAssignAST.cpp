@@ -22,11 +22,20 @@ void VarAssignAST::check() {
 	} else {
 		boost::shared_ptr<Variable> varCasted = boost::shared_polymorphic_downcast<Variable>(var);
 
-		// TODO: replace getTypeName() with getTypeName()->getTypeName() once ExprAST::check() has been implemented and sets its type
-		if (_expr->getTypeName() != varCasted->getTypeName()) {
-			cerr << "lhs (" << varCasted->getTypeName()->getTypeName() << ") and rhs (" << _expr->getTypeName() << ") not type compatible" << endl;	
+		// TODO: patch this up once all ExprAST::check() cases make the expression point to a type (i.e. not null)
+		if (_expr->getTypeName()) {
+			// _expr points to a type, so we can check it properly
+			if (_expr->getTypeName()->getTypeName() != varCasted->getTypeName()->getTypeName()) {
+				cerr << "lhs (" << varCasted->getTypeName()->getTypeName() << ") and rhs (" << _expr->getTypeName() << ") not type compatible" << endl;		
+			} else {
+				_varObj = varCasted;
+			}
 		} else {
-			_varObj = varCasted;
+			if (_expr->getTypeName() != varCasted->getTypeName()) {
+				cerr << "lhs (" << varCasted->getTypeName()->getTypeName() << ") and rhs (" << _expr->getTypeName() << ") not type compatible" << endl;		
+			} else {
+				_varObj = varCasted;
+			}
 		}
 	}	
 }

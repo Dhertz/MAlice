@@ -1,5 +1,6 @@
 #include "ExprAST.hpp"
 #include "../idents/Variable.hpp"
+#include "../idents/Letter.hpp"
 
 // Stolen from Owen. If these stay, might be best to move them to a Utils class or something
 pANTLR3_BASE_TREE ExprAST::childByNum(pANTLR3_BASE_TREE tree, int num) {
@@ -49,7 +50,8 @@ void ExprAST::check() {
 	string tok = createStringFromTree(root);
 
 	if (tok == "FUNC") {
-		// Inline function call
+		// Inline function call, evaluates to function's return type
+
 		string funcName = createStringFromTree(childByNum(root, 0));
 		pANTLR3_BASE_TREE cplTree = childByNum(root, 1);
 
@@ -64,6 +66,8 @@ void ExprAST::check() {
 
 		_type = func->getTypeName();
 	} else if (tok == "VAR") {
+		// Variable reference, evaluates to variable's type
+
 		string varName = createStringFromTree(childByNum(root, 0));
 
 		boost::shared_ptr<Identifier> varIdent = _st->lookupCurrLevelAndEnclosingLevels(varName);
@@ -75,6 +79,16 @@ void ExprAST::check() {
 			boost::shared_ptr<Variable> var = boost::shared_polymorphic_downcast<Variable>(varIdent);
 			_type = var->getTypeName();
 		}
+	} else if (tok == "ARRMEMBER") {
+		// Array member reference, evaluates to array's element type
+	} else if (tok[0] == '\'') {
+		boost::shared_ptr<Type> letter = boost::shared_ptr<Type>(new Letter);
+		_type = letter;
+		cout << "Char!" << endl;
+	} else if (tok[0] == '"') {
+		cout << "String!" << endl;
+	} else {
+		// Recursive case, will resolve to an (internal) boolean or a number
 	}
 }
 
