@@ -21,7 +21,7 @@ void VariableDecAST::check() {
 		cerr << "unknown type " << _typeName << endl;
 	} else if (type->getID() != "Type") {
 		cerr << _typeName  << " is not a type" << endl;
-	} else if (name != NULL) {
+	} else if (name) {
 		cerr << _varName << " is already declared" << endl;
 	} else {
 		boost::shared_ptr<Type> typeCasted = boost::shared_polymorphic_downcast<Type>(type);
