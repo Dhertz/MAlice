@@ -5,8 +5,8 @@
 
 class Type : public Identifier {
 public:
-	string getID();
-	virtual string getType() = 0;
+	string getBaseName();
+	virtual string getTypeName() = 0;
 };
 
 #endif

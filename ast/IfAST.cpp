@@ -6,7 +6,7 @@ IfAST::IfAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr)
 }
 
 void IfAST::check() {
-	if(_expr->getType()->getID() != "Boolean") {
+	if(_expr->getTypeName()->getBaseName() != "Boolean") {
 		
 	}
 }

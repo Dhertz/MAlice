@@ -15,7 +15,7 @@ class Proc : public Identifier {
 
 public:
 	Proc( boost::shared_ptr<SymbolTable> st, vector< boost::shared_ptr<Param> > params);
-	string getID();
+	string getBaseName();
 	vector< boost::shared_ptr<Param> > getParams();
 	SymbolTable getTable();
 };

@@ -14,11 +14,11 @@ void ArrayDecAST::check() {
 	
 	if (!type) {
 		cerr << "Unknown identifier used as type." << endl;
-	} else if (type->getID() != "Type") {
+	} else if (type->getBaseName() != "Type") {
 		cerr << "Not a type" << endl;
 	} else if (name) {
 		cerr << "Variable already declared" << endl;
-	} else if ("Number" != _length->getType()->getID()) {
+	} else if ("Number" != _length->getTypeName()->getBaseName()) {
 		cerr << "Invalid array length" << endl;
 	} else {
 		boost::shared_ptr<Type> typeCasted = boost::shared_polymorphic_downcast<Type>(type);

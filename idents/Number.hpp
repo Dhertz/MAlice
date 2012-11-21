@@ -10,7 +10,7 @@ public:
 	Number(int min, int max);
 	int getMin();
 	int getMax();
-	string getType();
+	string getTypeName();
 };
 
 #endif

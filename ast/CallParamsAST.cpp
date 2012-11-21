@@ -9,7 +9,7 @@ CallParamsAST::CallParamsAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TRE
 	_tree = tree;
 	for (int i = 0; i < _tree->getChildCount(_tree); ++i) {
 		ExprAST e(_st, childByNum(_tree, i));
-		_types.push_back(e.getType());
+		_types.push_back(e.getTypeName());
 	}
 }
 

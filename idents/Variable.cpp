@@ -4,10 +4,10 @@ Variable::Variable(boost::shared_ptr<Type> type) {
 	_type = type;
 }
 
-boost::shared_ptr<Type> Variable::getType() {
+boost::shared_ptr<Type> Variable::getTypeName() {
 	return _type;
 }
 
-string Variable::getID() {
+string Variable::getBaseName() {
 	return "Variable";
 }

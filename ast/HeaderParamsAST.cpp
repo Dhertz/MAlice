@@ -26,7 +26,7 @@ void HeaderParamsAST::check() {
 		boost::shared_ptr<Identifier> type = _st->lookupCurrLevelAndEnclosingLevels(typeString);
 		boost::shared_ptr<Identifier> name = _st->lookupCurrLevelOnly(nameString);
 		
-		if (type->getID() != "Type") {
+		if (type->getBaseName() != "Type") {
 			cout << "Can't have a " << typeString << " parameter!" << endl;
 		} else if(name) {
 			cout << nameString << " has already been declared!" << endl;

@@ -17,14 +17,14 @@ void VarAssignAST::check() {
 
 	if (!var) {
 		cerr << "VarAssignAST: unknown variable " << _varName << endl;
-	} else if (var->getID() != "Variable") {
+	} else if (var->getBaseName() != "Variable") {
 		cerr << _varName << " is not a variable" << endl;
 	} else {
 		boost::shared_ptr<Variable> varCasted = boost::shared_polymorphic_downcast<Variable>(var);
 
-		// TODO: replace getType() with getType()->getType() once ExprAST::check() has been implemented and sets its type
-		if (_expr->getType() != varCasted->getType()) {
-			cerr << "lhs (" << varCasted->getType()->getType() << ") and rhs (" << _expr->getType() << ") not type compatible" << endl;	
+		// TODO: replace getTypeName() with getTypeName()->getTypeName() once ExprAST::check() has been implemented and sets its type
+		if (_expr->getTypeName() != varCasted->getTypeName()) {
+			cerr << "lhs (" << varCasted->getTypeName()->getTypeName() << ") and rhs (" << _expr->getTypeName() << ") not type compatible" << endl;	
 		} else {
 			_varObj = varCasted;
 		}

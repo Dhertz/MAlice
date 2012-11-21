@@ -7,9 +7,9 @@ ChoiceAST::ChoiceAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAS
 }
 
 void ChoiceAST::check() {
-	if (!_expr->getType()) {
+	if (_expr->getTypeName()) {
 		cerr << "Bad conditional expression." << endl;
-	} else if(_expr->getType()->getID() != "Boolean") {
+	} else if(_expr->getTypeName()->getBaseName() != "Boolean") {
 		cerr << "Conditional must be a boolean." << endl;
 	}
 }

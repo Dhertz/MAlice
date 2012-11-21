@@ -19,7 +19,7 @@ void VariableDecAST::check() {
 
 	if (!type) {
 		cerr << "unknown type " << _typeName << endl;
-	} else if (type->getID() != "Type") {
+	} else if (type->getBaseName() != "Type") {
 		cerr << _typeName  << " is not a type" << endl;
 	} else if (name) {
 		cerr << _varName << " is already declared" << endl;

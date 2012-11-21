@@ -13,6 +13,6 @@ SymbolTable Proc::getTable() {
 	return _st;
 }
 
-string Proc::getID() {
+string Proc::getBaseName() {
 	return "Proc";
 }

@@ -34,6 +34,7 @@ tokens {
       COND;
       ELSEIF;
     EXPR;
+    VAR;
     NS;
 }
 
@@ -254,10 +255,10 @@ statement: body |
            -> ^(DEC expression) |
 
            (ID APOSTROPHE 's' expression 'piece' print) => ID APOSTROPHE 's' expression 'piece' print delimiter
-           -> ^(PRINT ^(ARRMEMBER ID expression)) |
+           -> ^(PRINT ^(EXPR ^(ARRMEMBER ID expression))) |
 
            (ID callParams print) => ID callParams print delimiter 
-           -> ^(PRINT ^(FUNC ID callParams)) |
+           -> ^(PRINT ^(EXPR ^(FUNC ID callParams))) |
 
            (ID idOptions) => ID idOptions delimiter 
            -> ^(VARSTAT ID idOptions) |
@@ -316,9 +317,11 @@ prec4: prec3 (('+' | '-')^ prec3)*;
 prec3: prec2 (('*' | '/' | '%')^ prec2)*;
 prec2: (('!' | '~' | '+' | '-')?)^ atom;
 
-atom: ID (APOSTROPHE 's' expression 'piece' | callParams)? | 
+atom: (ID APOSTROPHE) => ID APOSTROPHE 's' expression 'piece' -> ^(ARRMEMBER ID expression) | 
+      (ID callParams) => ID callParams -> ^(FUNC ID callParams) |
+      ID -> ^(VAR ID) | 
       INT | 
-      (APOSTROPHE!) (.) (APOSTROPHE!) | 
+      (APOSTROPHE) (.) (APOSTROPHE) | 
       STRING | 
       '(' prec11 ')' -> prec11;
            

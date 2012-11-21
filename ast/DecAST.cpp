@@ -7,10 +7,10 @@ DecAST::DecAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> exp
 }
 
 void DecAST::check() {
-	if (_expr->getType()) {
+	if (!_expr->getTypeName()) {
 		cerr << "Bad expression." << endl;
-	} else if(_expr->getType()->getID() != "Number") {
+	} else if(_expr->getTypeName()->getBaseName() != "Number") {
 		cerr << "Can only decrement a number, not a " 
-			<< _expr->getType()->getID() << "!" << endl;
+			<< _expr->getTypeName()->getBaseName() << "!" << endl;
 	}
 }

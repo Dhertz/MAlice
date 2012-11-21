@@ -6,7 +6,7 @@
 class Sentence : public Type {
 public:
 	Sentence();
-	string getType();
+	string getTypeName();
 };
 
 #endif

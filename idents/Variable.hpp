@@ -9,8 +9,8 @@ class Variable : public Identifier {
 
 public:
 	Variable(boost::shared_ptr<Type> type);
-	boost::shared_ptr<Type> getType();
-	string getID();
+	boost::shared_ptr<Type> getTypeName();
+	string getBaseName();
 };
 
 #endif

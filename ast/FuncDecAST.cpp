@@ -14,7 +14,7 @@ void FuncDecAST::check() {
 
 	if (!type) {
 		cerr << "Return type " << _returnType << " not known" << endl;
-	} else if (type->getID() != "Type") {
+	} else if (type->getBaseName() != "Type") {
 		cerr << "Return type " << _returnType << " is not a type" << endl;
 	} else if (name) {
 		cerr << "Function " << _name << " already exists" << endl;
@@ -23,12 +23,12 @@ void FuncDecAST::check() {
 		vector< boost::shared_ptr<Param> >::iterator param;
 
 		for (param = v.begin(); param < v.end(); param++) {
-			_st->add((*param)->getName(), (*param)->getType());
+			_st->add((*param)->getName(), (*param)->getTypeName());
 		}
 
 		boost::shared_ptr<Type> typeCasted = boost::shared_polymorphic_downcast<Type>(type);
 		boost::shared_ptr<Function> f(new Function(typeCasted, v, _st));
 		_funcObj = f;
-		_st->getEncSymTable()§->add(_name, _funcObj);
+		_st->getEncSymTable()->add(_name, _funcObj);
 	}
 }

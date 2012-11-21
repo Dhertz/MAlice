@@ -8,7 +8,7 @@ IncAST::IncAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> exp
 
 
 void IncAST::check() {
-	if(_expr->getType()->getID() != "Number") {
+	if(_expr->getTypeName()->getBaseName() != "Number") {
 
 	}
 }

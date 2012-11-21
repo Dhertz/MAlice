@@ -11,18 +11,18 @@ ArrayAssignAST::ArrayAssignAST(boost::shared_ptr<SymbolTable> st, string name, b
 void ArrayAssignAST::check() {
 	boost::shared_ptr<Identifier> array = _st->lookupCurrLevelAndEnclosingLevels(_name);
 	
-	if (!_name) {
+	if (!array) {
 		cerr << _name << "not in scope!" << endl;
-	} else if(_element->getType()->getID() != "Number") {
+	} else if(_element->getTypeName()->getBaseName() != "Number") {
 		cerr << "Not a valid element number." << endl;
 	} else if (!array) {
 		cerr << "Unknown variable " << _name << endl;
-	} else if(array->getID() != "Array") {
+	} else if(array->getBaseName() != "Array") {
 		cerr << "Attempted array assignment on object which is not an array." << endl;
 	} else {
 		boost::shared_ptr<Array> arrCasted = boost::shared_polymorphic_downcast<Array>(array);
 
-		if(_value->getType()->getID() == arrCasted->getElemType()->getID()) {
+		if(_value->getTypeName()->getBaseName() == arrCasted->getElemType()->getBaseName()) {
 			cerr << "Type error." << endl;
 		} else {
 			_arrObj = arrCasted;

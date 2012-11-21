@@ -20,7 +20,7 @@ class ExprAST : public ASTNode {
 public:
 	ExprAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree);
 	void check();
-	boost::shared_ptr<Type> getType();
+	boost::shared_ptr<Type> getTypeName();
 };
 
 #endif

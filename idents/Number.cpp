@@ -13,6 +13,6 @@ int Number::getMax() {
 	return _max;
 }
 
-string Number::getType() {
+string Number::getTypeName() {
 	return "Number";
 }

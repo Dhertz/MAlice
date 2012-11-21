@@ -7,7 +7,7 @@ WhileAST::WhileAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST>
 }
 
 void WhileAST::check() {
- 	if(_expr->getType()->getID() != "Boolean") {
+ 	if(_expr->getTypeName()->getBaseName() != "Boolean") {
 
  	}
  }
