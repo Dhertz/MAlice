@@ -1,7 +1,7 @@
 #include "VariableDecAST.hpp"
 #include "../idents/Number.hpp"
 
-VariableDecAST::VariableDecAST(boost::shared_ptr<SymbolTable> st, string typeName, string varName) : ASTNode(st) {
+VariableDecAST::VariableDecAST(boost::shared_ptr<SymbolTable> st, string typeName, string varName, boost::shared_ptr<ASTNode> parent) : ASTNode(st, parent) {
 	_st = st;
 	_typeName = typeName;
 	_varName = varName;
@@ -18,13 +18,12 @@ void VariableDecAST::check() {
 	// _st->printCurrLevelAndEnclosingLevels();
 
 	if (!type) {
-		cerr << "unknown type " << _typeName << endl;
+		cerr << "Trying to declare variable of unknown type " << _typeName << "." << endl;
 	} else if (type->getBaseName() != "Type") {
-		cerr << _typeName  << " is not a type" << endl;
+		cerr << "Trying to declare variable of incorrect type " << _typeName << "." << endl;
 	} else if (name) {
-		cerr << _varName << " is already declared" << endl;
+		cerr << _varName << " is already declared." << endl;
 	} else {
-		cout << "Declaring variable " << _varName << endl;
 		boost::shared_ptr<Type> typeCasted = boost::shared_polymorphic_downcast<Type>(type);
 		boost::shared_ptr<Variable> v(new Variable(typeCasted));
 		_st->add(_varName, v);

@@ -16,7 +16,7 @@ class FuncAST : public ASTNode {
 	string _name;
 	boost::shared_ptr<CallParamsAST> _params;
 public:
-	FuncAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_ptr<CallParamsAST> params);
+	FuncAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_ptr<CallParamsAST> params, boost::shared_ptr<ASTNode> parent);
 	void check();
 	void parametersTypeCheck(boost::shared_ptr<Callable> function);
 };

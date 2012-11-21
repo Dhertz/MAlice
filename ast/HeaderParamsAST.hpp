@@ -11,7 +11,7 @@ class HeaderParamsAST : public ASTNode {
 	pANTLR3_BASE_TREE _tree;
 	vector< boost::shared_ptr<Param> > _params;
 public:
-	HeaderParamsAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree);
+	HeaderParamsAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree, boost::shared_ptr<ASTNode> parent);
 	pANTLR3_BASE_TREE childByNum(pANTLR3_BASE_TREE tree, int num);
 	string createStringFromTree(pANTLR3_BASE_TREE tree);
 	bool duplicate(int upto, string name);

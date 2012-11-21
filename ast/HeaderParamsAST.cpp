@@ -10,7 +10,7 @@ string HeaderParamsAST::createStringFromTree(pANTLR3_BASE_TREE tree) {
 	return res;
 }
 
-HeaderParamsAST::HeaderParamsAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree) : ASTNode(st) {
+HeaderParamsAST::HeaderParamsAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree, boost::shared_ptr<ASTNode> parent) : ASTNode(st, parent) {
 	_st = st;
 	_tree = tree;
 
@@ -25,13 +25,14 @@ void HeaderParamsAST::check() {
 		string nameString = createStringFromTree(childByNum(_tree, i+1));
 		boost::shared_ptr<Identifier> type = _st->lookupCurrLevelAndEnclosingLevels(typeString);
 		boost::shared_ptr<Identifier> name = _st->lookupCurrLevelOnly(nameString);
-		
-		if (type->getBaseName() != "Type") {
-			cout << "Can't have a " << typeString << " parameter!" << endl;
+		if(!type) {
+			cerr << "Header type doesn't exist." << endl;
+		} else if (type->getBaseName() != "Type") {
+			cerr << "Can't have a " << typeString << " parameter." << endl;
 		} else if (name) {
-			cout << nameString << " has already been declared!" << endl;
+			cerr << nameString << " has already been declared." << endl;
 		} else if (duplicate(i, nameString)) {
-			cout << "Duplicate parameters " << nameString << endl;
+			cerr << "Duplicate parameters " << nameString << "." << endl;
 		} else {
 			boost::shared_ptr<Type> typeCasted = boost::shared_polymorphic_downcast<Type>(type);
 			boost::shared_ptr<Param> p(new Param(typeCasted, nameString));

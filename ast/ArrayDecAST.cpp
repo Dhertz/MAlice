@@ -1,6 +1,6 @@
 #include "ArrayDecAST.hpp"
 
-ArrayDecAST::ArrayDecAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> length, string name, string typeName) : ASTNode(st) {
+ArrayDecAST::ArrayDecAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> length, string name, string typeName, boost::shared_ptr<ASTNode> parent) : ASTNode(st, parent) {
 	_st = st;
 	_name = name;
 	_length = length;

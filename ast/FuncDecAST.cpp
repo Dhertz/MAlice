@@ -1,7 +1,7 @@
 #include "FuncDecAST.hpp"
 #include "../idents/Variable.hpp"
 
-FuncDecAST::FuncDecAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_ptr<HeaderParamsAST> params, string returnType) : ASTNode(st) {
+FuncDecAST::FuncDecAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_ptr<HeaderParamsAST> params, string returnType, boost::shared_ptr<ASTNode> parent) : ASTNode(st, parent) {
 	_st = st;
 	_name = name;
 	_returnType = returnType;
@@ -14,9 +14,9 @@ void FuncDecAST::check() {
 	boost::shared_ptr<Identifier> name = _st->lookupCurrLevelAndEnclosingLevels(_name);
 
 	if (!type) {
-		cerr << "Return type " << _returnType << " not known" << endl;
+		cerr << "Return type " << _returnType << " not known" << "." << endl;
 	} else if (type->getBaseName() != "Type") {
-		cerr << "Return type " << _returnType << " is not a type" << endl;
+		cerr << "Return type " << _returnType << " is not a type." << endl;
 	} else if (name) {
 		cerr << "Function " << _name << " already exists" << endl;
 	} else {

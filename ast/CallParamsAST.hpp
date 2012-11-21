@@ -12,7 +12,7 @@ class CallParamsAST : public ASTNode {
 	pANTLR3_BASE_TREE _tree;
 	vector< boost::shared_ptr<Type> > _types;
 public:
-	CallParamsAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree);
+	CallParamsAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree, boost::shared_ptr<ASTNode> parent);
 	pANTLR3_BASE_TREE childByNum(pANTLR3_BASE_TREE tree, int num);
 	vector< boost::shared_ptr<Type> > getTypes();
 };

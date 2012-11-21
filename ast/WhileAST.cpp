@@ -1,13 +1,15 @@
 #include "WhileAST.hpp"
 
-WhileAST::WhileAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr) : ASTNode(st) {
+WhileAST::WhileAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr, boost::shared_ptr<ASTNode> parent) : ASTNode(st, parent) {
 	_st = st;
 	_expr = expr;
 	check();
 }
 
 void WhileAST::check() {
- 	if(_expr->getTypeName()->getBaseName() != "Boolean") {
-
+ 	if(!_expr){
+ 		cerr << "Invalid conditional in while header." << endl;
+ 	} else if(_expr->getTypeName()->getBaseName() != "Boolean") {
+ 		cerr << "While condition must be a boolean." << endl;
  	}
  }

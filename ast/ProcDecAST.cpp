@@ -1,6 +1,6 @@
 #include "ProcDecAST.hpp"
 
-ProcDecAST::ProcDecAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_ptr<HeaderParamsAST> params) : ASTNode(st) {
+ProcDecAST::ProcDecAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_ptr<HeaderParamsAST> params, boost::shared_ptr<ASTNode> parent) : ASTNode(st, parent) {
 	_st = st;
 	_name = name;
 	_params = params;
@@ -11,7 +11,7 @@ void ProcDecAST::check() {
 	boost::shared_ptr<Identifier> name = _st->lookupCurrLevelAndEnclosingLevels(_name);
 
 	if (name) {
-
+		cerr << "Procedure name " << _name << " already exists." << endl;
 	} else {
 		vector< boost::shared_ptr<Param> > v = _params->getParams();
 		vector< boost::shared_ptr<Param> >::iterator param;

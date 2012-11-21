@@ -1,7 +1,7 @@
 #include "VarAssignAST.hpp"
 #include "../idents/Identifier.hpp"
 
-VarAssignAST::VarAssignAST(boost::shared_ptr<SymbolTable> st, string varName, boost::shared_ptr<ExprAST> expr) : ASTNode(st) {
+VarAssignAST::VarAssignAST(boost::shared_ptr<SymbolTable> st, string varName, boost::shared_ptr<ExprAST> expr, boost::shared_ptr<ASTNode> parent) : ASTNode(st, parent) {
 	_st = st;
 	_varName = varName;
 	_expr = expr;
@@ -16,14 +16,17 @@ void VarAssignAST::check() {
 	// _st->printCurrLevelAndEnclosingLevels();
 
 	if (!var) {
-		cerr << "VarAssignAST: unknown variable " << _varName << endl;
+		cerr << "Cannot assign to non-exisitant variable " << _varName  << "." << endl;
 	} else if (var->getBaseName() != "Variable") {
-		cerr << _varName << " is not a variable" << endl;
+		cerr << "Cannot declare to " << _varName << " as it is a" 
+			<< var->getBaseName() << "." << endl;
 	} else {
 		boost::shared_ptr<Variable> varCasted = boost::shared_polymorphic_downcast<Variable>(var);
 
 		// TODO: patch this up once all ExprAST::check() cases make the expression point to a type (i.e. not null)
-		if (_expr->getTypeName()) {
+		if(!_expr) {
+			cerr << "Cannot assign variable" << _varName << "to bad expression." << endl;
+		} else if (_expr->getTypeName()) {
 			// _expr points to a type, so we can check it properly
 			if (_expr->getTypeName()->getTypeName() != varCasted->getTypeName()->getTypeName()) {
 				cerr << "lhs (" << varCasted->getTypeName()->getTypeName() << ") and rhs (" << _expr->getTypeName() << ") not type compatible" << endl;		

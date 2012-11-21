@@ -12,7 +12,7 @@ class ArrayAssignAST : public ASTNode {
 	boost::shared_ptr<ExprAST> _value;
 	boost::shared_ptr<Array> _arrObj;
 public:
-	ArrayAssignAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_ptr<ExprAST> element, boost::shared_ptr<ExprAST> value);
+	ArrayAssignAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_ptr<ExprAST> element, boost::shared_ptr<ExprAST> value, boost::shared_ptr<ASTNode> parent);
 	void check();
 };
 

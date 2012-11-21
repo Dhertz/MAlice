@@ -16,7 +16,7 @@ string ExprAST::createStringFromTree(pANTLR3_BASE_TREE tree) {
 	return res;
 }
 
-ExprAST::ExprAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree) : ASTNode(st) {
+ExprAST::ExprAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree, boost::shared_ptr<ASTNode> parent) : ASTNode(st, parent) {
 	_unaryOps.insert("!");
 	_unaryOps.insert("~");
 	_unaryOps.insert("+");
@@ -60,8 +60,8 @@ void ExprAST::check() {
 
 		// Check that function call and parameters type-check
 		// i.e. function name in scope, and parameters exprs match expected type
-		boost::shared_ptr<CallParamsAST> callParamsNode = boost::shared_ptr<CallParamsAST>(new CallParamsAST(_st, cplTree));
-		FuncAST(_st, funcName, callParamsNode);
+		boost::shared_ptr<CallParamsAST> callParamsNode = boost::shared_ptr<CallParamsAST>(new CallParamsAST(_st, cplTree, _parent));
+		FuncAST(_st, funcName, callParamsNode, _parent);
 
 		// This cast should be safe after FuncAST has done its work
 		boost::shared_ptr<Identifier> funcIdent = _st->lookupCurrLevelAndEnclosingLevels(funcName);
@@ -100,7 +100,7 @@ void ExprAST::check() {
 				boost::shared_ptr<Array> arr = boost::shared_polymorphic_downcast<Array>(arrIdent);
 
 				pANTLR3_BASE_TREE index = childByNum(root, 1);
-				ExprAST indexCheck(_st, index);
+				ExprAST indexCheck(_st, index, _parent);
 
 				if (indexCheck.getTypeName()->getTypeName() != "Number") {
 					cerr << "Array index must evaluate to a Number." << endl;
