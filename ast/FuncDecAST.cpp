@@ -29,7 +29,7 @@ void FuncDecAST::check() {
 		}
 
 		boost::shared_ptr<Type> typeCasted = boost::shared_polymorphic_downcast<Type>(type);
-		boost::shared_ptr<Function> f(new Function(typeCasted, v, _st));
+		boost::shared_ptr<Function> f(new Function(_st, v, typeCasted));
 		_funcObj = f;
 		_st->getEncSymTable()->add(_name, _funcObj);
 	}

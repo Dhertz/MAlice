@@ -12,15 +12,15 @@ void FuncAST::check() {
 	
 	if (!function) {
 		cerr << "Function " << _name << " not in scope" << endl;
-	} else if (function->getBaseName() != "Function") {
-		cerr << _name << " is not a function. You can't call it." << endl;
+	} else if (function->getBaseName() != "Callable") {
+		cerr << _name << " is not a function, it's a " << function->getBaseName() << ". You can't call it." << endl;
 	} else {
-		boost::shared_ptr<Function> funcCasted = boost::shared_polymorphic_downcast<Function>(function);
+		boost::shared_ptr<Callable> funcCasted = boost::shared_polymorphic_downcast<Callable>(function);
 		parametersTypeCheck(funcCasted);
 	}
 }
 
-void FuncAST::parametersTypeCheck(boost::shared_ptr<Function> function) {
+void FuncAST::parametersTypeCheck(boost::shared_ptr<Callable> function) {
 	vector<boost::shared_ptr<Param> > params = function->getParams();
 	vector<boost::shared_ptr<Param> >::iterator i = params.begin();
 	
