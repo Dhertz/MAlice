@@ -7,7 +7,7 @@ SymbolTable::SymbolTable(boost::shared_ptr<SymbolTable> st) {
 }
 
 void SymbolTable::add(string name, boost::shared_ptr<Identifier> obj) {
-	cout << "Setting _dict[" << name << "] to " << obj << " in ST " << this << endl;
+	// cout << "Setting _dict[" << name << "] to " << obj << " in ST " << this << endl;
 	_dict[name] = obj;
 	// printCurrLevelOnly();	
 }

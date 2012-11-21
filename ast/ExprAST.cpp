@@ -6,6 +6,23 @@
 #include "../idents/Array.hpp"
 
 // Stolen from Owen. If these stay, might be best to move them to a Utils class or something
+void printMe(pANTLR3_BASE_TREE tree, int level) {
+        for (int i = 0; i < level; ++i) {
+                cout << "--";
+        }
+
+        cout << " " << tree->getText(tree)->chars << endl;
+
+        int childCount = tree->getChildCount(tree);
+        for (int i = 0; i < childCount; ++i) {
+                printMe((pANTLR3_BASE_TREE) tree->getChild(tree, i), level + 1);
+        }
+}
+
+void printTreeMe(pANTLR3_BASE_TREE ast) {
+        printMe(ast, 0);
+}
+
 pANTLR3_BASE_TREE ExprAST::childByNum(pANTLR3_BASE_TREE tree, int num) {
 	return (pANTLR3_BASE_TREE) tree->getChild(tree, num);
 }
@@ -47,8 +64,8 @@ ExprAST::ExprAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree) : AS
 
 void ExprAST::check() {
 	int children = _tree->getChildCount(_tree);
-
 	assert (children > 0);
+
 	pANTLR3_BASE_TREE root = childByNum(_tree, 0);
 	string tok = createStringFromTree(root);
 
@@ -116,15 +133,40 @@ void ExprAST::check() {
 		_type = letter;
 	} else if (tok[0] == '"') {
 		// String of form "foo", evaluates to a Sentence
-		boost::shared_ptr<Type> sentence = boost::shared_ptr<Sentence>(new Sentence);
+		boost::shared_ptr<Type> sentence = boost::shared_ptr<Type>(new Sentence);
 		_type = sentence;
 	} else {
 		// Recursive case, will resolve to an (internal) boolean or a number
-		// cout << "TODO: recursive case" << endl;
 
-		// TODO: remove need for the constructor here
-		boost::shared_ptr<Type> number = boost::shared_ptr<Number>(new Number(0, 1));
-		_type = number;
+		// Used in all cases where we return number
+		boost::shared_ptr<Type> number = boost::shared_ptr<Type>(new Number(0, 1));
+
+		cout << "Root:" << endl;
+		printTreeMe(root);
+		cout << "Has " << root->getChildCount(root) << " children" << endl;
+
+		int rootChildren = root->getChildCount(root);
+		if (rootChildren == 0) {
+			// Raw integer
+			_type = number;
+		} else if (rootChildren == 1) {
+			cout << "Look for unary operator " << tok;
+		} else if (rootChildren == 2) {
+			cout << "Look for binary operator " << tok;
+		}
+
+		cout << endl << endl << endl << endl;
+
+		_type = number; // TODO: DON'T FORGET ABOUT THIS!
+
+		/* int args = opTree->getChildCount(opTree);
+
+		if (args == 1) {
+			cout << "Look for " << tok << " in unary" << endl;
+		} else {
+			cout << "Look for " << tok << " in binary" << endl;
+		} */
+
 	}
 }
 
