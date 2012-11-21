@@ -1,4 +1,5 @@
 #include "FuncDecAST.hpp"
+#include "../idents/Variable.hpp"
 
 FuncDecAST::FuncDecAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_ptr<HeaderParamsAST> params, string returnType) : ASTNode(st) {
 	_st = st;
@@ -23,7 +24,8 @@ void FuncDecAST::check() {
 		vector< boost::shared_ptr<Param> >::iterator param;
 
 		for (param = v.begin(); param < v.end(); param++) {
-			_st->add((*param)->getName(), (*param)->getTypeName());
+			boost::shared_ptr<Identifier> var(new Variable((*param)->getTypeName()));
+			_st->add((*param)->getName(), var);
 		}
 
 		boost::shared_ptr<Type> typeCasted = boost::shared_polymorphic_downcast<Type>(type);

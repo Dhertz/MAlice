@@ -28,9 +28,9 @@ void HeaderParamsAST::check() {
 		
 		if (type->getBaseName() != "Type") {
 			cout << "Can't have a " << typeString << " parameter!" << endl;
-		} else if(name) {
+		} else if (name) {
 			cout << nameString << " has already been declared!" << endl;
-		} else if(duplicate(i, nameString)) {
+		} else if (duplicate(i, nameString)) {
 			cout << "Duplicate parameters " << nameString << endl;
 		} else {
 			boost::shared_ptr<Type> typeCasted = boost::shared_polymorphic_downcast<Type>(type);

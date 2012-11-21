@@ -75,13 +75,14 @@ void ExprAST::check() {
 		if (!varIdent) {
 			cerr << varName << " is not in scope" << endl;
 		} else if (varIdent->getBaseName() != "Variable") {
-			cerr << varName << " is not a variable" << endl;
+			cerr << varName << " is not a variable. It is a " << varIdent->getBaseName() << "." << endl;
 		} else {
 			boost::shared_ptr<Variable> var = boost::shared_polymorphic_downcast<Variable>(varIdent);
 			_type = var->getTypeName();
 		}
 	} else if (tok == "ARRMEMBER") {
 		// Array member reference, evaluates to array's element type
+		cout << "TODO: ARRMEMBER" << endl;
 	} else if (tok[0] == '\'') {
 		boost::shared_ptr<Type> letter = boost::shared_ptr<Type>(new Letter);
 		_type = letter;
@@ -90,9 +91,11 @@ void ExprAST::check() {
 		_type = sentence;
 	} else {
 		// Recursive case, will resolve to an (internal) boolean or a number
+		cout << "TODO: recursive case" << endl;
 	}
 }
 
 boost::shared_ptr<Type> ExprAST::getTypeName() {
+	assert(_type);
 	return _type;
 }

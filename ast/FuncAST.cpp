@@ -21,25 +21,20 @@ void FuncAST::check() {
 }
 
 void FuncAST::parametersTypeCheck(boost::shared_ptr<Function> function) {
-	vector< boost::shared_ptr<Param> > params = function->getParams();
-	vector< boost::shared_ptr<Param> >::iterator i = params.begin();
+	vector<boost::shared_ptr<Param> > params = function->getParams();
+	vector<boost::shared_ptr<Param> >::iterator i = params.begin();
 	
-	vector< boost::shared_ptr<Type> > paramTypes = _params->getTypes();
-	vector< boost::shared_ptr<Type> >::iterator j = paramTypes.begin();
+	vector<boost::shared_ptr<Type> > paramTypes = _params->getTypes();
+	vector<boost::shared_ptr<Type> >::iterator j = paramTypes.begin();
 	
 	if (params.size() != paramTypes.size()) {
 		cerr << "Invalid number of arguments for " << _name << " (expected " << paramTypes.size()
 		<< ", got " << params.size() << ")" << endl;
 	}
 	for (; j != paramTypes.end(); ++j) {
-		if(!((*i)->getTypeName())) {
-			cerr << "Function paramter not well typed." << endl;
-		} else {
-			if ((*i)->getTypeName()->getBaseName() != (*j)->getBaseName()) {
-				cerr << "Type mismatch for " << _name << endl;
-			} else {
-				++i;
-			}
+		if ((*i)->getTypeName()->getBaseName() != (*j)->getBaseName()) {
+			cerr << "Type mismatch for " << _name << endl;
 		}
+		++i;
 	}
 }
