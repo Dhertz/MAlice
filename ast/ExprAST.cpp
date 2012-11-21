@@ -1,6 +1,7 @@
 #include "ExprAST.hpp"
 #include "../idents/Variable.hpp"
 #include "../idents/Letter.hpp"
+#include "../idents/Sentence.hpp"
 
 // Stolen from Owen. If these stay, might be best to move them to a Utils class or something
 pANTLR3_BASE_TREE ExprAST::childByNum(pANTLR3_BASE_TREE tree, int num) {
@@ -84,9 +85,9 @@ void ExprAST::check() {
 	} else if (tok[0] == '\'') {
 		boost::shared_ptr<Type> letter = boost::shared_ptr<Type>(new Letter);
 		_type = letter;
-		cout << "Char!" << endl;
 	} else if (tok[0] == '"') {
-		cout << "String!" << endl;
+		boost::shared_ptr<Type> sentence = boost::shared_ptr<Sentence>(new Sentence);
+		_type = sentence;
 	} else {
 		// Recursive case, will resolve to an (internal) boolean or a number
 	}
