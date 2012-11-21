@@ -56,9 +56,12 @@ void ExprAST::check() {
 
 			// This cast should be safe after FuncAST has done its work
 			boost::shared_ptr<Identifier> funcIdent = _st->lookupCurrLevelAndEnclosingLevels(funcName);
+
+			assert(funcIdent);
+
 			boost::shared_ptr<Function> func = boost::shared_polymorphic_downcast<Function>(funcIdent);
 
-			_type = func->getType();
+			// _type = func->getType();
 		} else {
 			cerr << "Invalid ExprAST node." << endl;
 		}

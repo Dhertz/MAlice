@@ -8,10 +8,10 @@ FuncAST::FuncAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_p
 }
 
 void FuncAST::check() {
-	boost::shared_ptr<Identifier> function = _st->lookupCurrLevelOnly(_name);
+	boost::shared_ptr<Identifier> function = _st->lookupCurrLevelAndEnclosingLevels(_name);
 	
 	if (!function) {
-
+		cerr << "Function " << _name << " not in scope" << endl;
 	} else if (function->getID() != "Function") {
 
 	} else {
@@ -31,7 +31,8 @@ bool FuncAST::parametersTypeCheck(boost::shared_ptr<Function> function) {
 	vector< boost::shared_ptr<Type> >::iterator j = paramTypes.begin();
 	
 	if (params.size() != paramTypes.size()) {
-		cerr << "Invalid number of arguements for " << _name << endl;
+		cerr << "Invalid number of arguments for " << _name << " (expected " << paramTypes.size()
+		<< ", got " << params.size() << ")" << endl;
 		return false;
 	}
 

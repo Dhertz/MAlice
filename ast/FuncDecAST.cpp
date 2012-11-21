@@ -13,11 +13,11 @@ void FuncDecAST::check() {
 	boost::shared_ptr<Identifier> name = _st->lookupCurrLevelAndEnclosingLevels(_name);
 
 	if (!type) {
-
+		cerr << "Return type " << _returnType << " not known" << endl;
 	} else if (type->getID() != "Type") {
-
-	} else if (!name) {
-
+		cerr << "Return type " << _returnType << " is not a type" << endl;
+	} else if (name) {
+		cerr << "Function " << _name << " already exists" << endl;
 	} else {
 		vector< boost::shared_ptr<Param> > v = _params->getParams();
 		vector< boost::shared_ptr<Param> >::iterator param;

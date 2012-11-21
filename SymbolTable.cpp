@@ -45,7 +45,7 @@ void SymbolTable::printCurrLevelOnly() {
 
 void SymbolTable::printCurrLevelAndEnclosingLevels() {
 	cout << "Printing all levels of ST " << this << endl;
-	for (boost::shared_ptr<SymbolTable> st(this); st != NULL; st = st->_encSymTable) {
+	for (boost::shared_ptr<SymbolTable> st = shared_from_this(); st; st = st->_encSymTable) {
 		st->printCurrLevelOnly();
 	}
 }
