@@ -13,19 +13,24 @@ void ArrayAssignAST::check() {
 	
 	if (!array) {
 		cerr << _name << "not in scope!" << endl;
-	} else if(_element->getTypeName()->getTypeName() != "Number") {
+	} else if (_element->getTypeName()->getTypeName() != "Number") {
 		cerr << "Not a valid element number." << endl;
 	} else if (!array) {
 		cerr << "Unknown variable " << _name << endl;
-	} else if(array->getBaseName() != "Array") {
+	} else if (array->getBaseName() != "Type") {
 		cerr << "Attempted array assignment on object which is not an array." << endl;
 	} else {
-		boost::shared_ptr<Array> arrCasted = boost::shared_polymorphic_downcast<Array>(array);
-
-		if(_value->getTypeName()->getTypeName() != arrCasted->getElemType()->getTypeName()) {
-			cerr << "Type error. (" << _value->getTypeName()->getTypeName() << " != " << arrCasted->getElemType()->getTypeName() << ")" << endl;
+		boost::shared_ptr<Type> arrayTypeCasted = boost::shared_polymorphic_downcast<Type>(array);
+		if (arrayTypeCasted->getTypeName() != "Array") {
+			cerr << "Attempted array assignment on object which is not an array." << endl;
 		} else {
-			_arrObj = arrCasted;
+			boost::shared_ptr<Array> arrCasted = boost::shared_polymorphic_downcast<Array>(array);
+
+			if(_value->getTypeName()->getTypeName() != arrCasted->getElemType()->getTypeName()) {
+				cerr << "Type error. (" << _value->getTypeName()->getTypeName() << " != " << arrCasted->getElemType()->getTypeName() << ")" << endl;
+			} else {
+				_arrObj = arrCasted;
+			}
 		}
 	}
 }
