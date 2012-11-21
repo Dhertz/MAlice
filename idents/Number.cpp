@@ -1,6 +1,6 @@
 #include "Number.hpp"
 
-Number::Number(int min, int max){
+Number::Number(int min, int max) {
 	_min = min;
 	_max = max;
 }

@@ -1,5 +1,5 @@
-#ifndef SCALAR_H
-#define SCALAR_H
+#ifndef NUMBER_H
+#define NUMBER_H
 
 #include "Type.hpp"
 

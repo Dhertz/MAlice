@@ -1,6 +1,7 @@
 #include <iostream>
 #include "SymbolTable.hpp"
 #include "idents/Number.hpp"
+#include "idents/Sentence.hpp"
 #include "ast/AST.hpp"
 #include "TreeWalker.hpp"
 // The ANTLR includes have to be BELOW the boost includes
@@ -34,6 +35,9 @@ void printError(string message) {
 void initST(boost::shared_ptr<SymbolTable> top) {
 	boost::shared_ptr<Number> iN(new Number(-(2^31), (2^31 - 1))); // TODO: remove magic numbers
 	top->add("number", iN);
+
+	boost::shared_ptr<Sentence> iS(new Sentence());
+	top->add("sentence", iS);
 }
 
 void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
