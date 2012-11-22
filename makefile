@@ -1,4 +1,4 @@
-CPP = g++ -I . -I libantlr3c -g
+CPP = g++ -I libantlr3c -g
 C   = gcc -I libantlr3c -g
 
 all: antlr grammar compile
