@@ -1,10 +1,8 @@
 #ifndef PRINT_AST
 #define PRINT_AST
 
-#include "ASTNode.hpp"
-#include "ExprAST.hpp"
 #include "CallParamsAST.hpp"
-#include "../idents/Array.hpp"
+#include "ExprAST.hpp"
 
 class PrintAST : public ASTNode {
 	boost::shared_ptr<SymbolTable> _st;

@@ -2,8 +2,6 @@
 #define HEADER_PARAMS_AST
 
 #include "ASTNode.hpp"
-#include <antlr3.h>
-#include <vector>
 #include "../idents/Param.hpp"
 #include "../TreeUtils.hpp"
 

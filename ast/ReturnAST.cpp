@@ -1,6 +1,5 @@
 #include "ReturnAST.hpp"
 #include "FuncDecAST.hpp"
-#include "../idents/Type.hpp"
 
 ReturnAST::ReturnAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr, boost::shared_ptr<ASTNode> parent, int lineNo) : ASTNode(st, parent, lineNo) {
 	_st = st;
@@ -11,7 +10,7 @@ ReturnAST::ReturnAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAS
 }
 
 void ReturnAST::check() {
-	if(!_expr) {
+	if (!_expr) {
 		cerr << "Line " << _lineNo << " - " << "Cannot return bad expression." << endl;
 	}
 

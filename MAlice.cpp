@@ -1,12 +1,8 @@
-#include <iostream>
-#include "SymbolTable.hpp"
+#include "idents/Letter.hpp"
 #include "idents/Number.hpp"
 #include "idents/Sentence.hpp"
-#include "idents/Letter.hpp"
-#include "ast/AST.hpp"
 #include "TreeWalker.hpp"
 #include "TreeUtils.hpp"
-// The ANTLR includes have to be BELOW the boost includes
 #include "MAliceLexer.h"
 #include "MAliceParser.h"
 

@@ -10,3 +10,6 @@ Part 2:
 	- Lose the constructor arguments on Number?
 	- Owen's comment in ASTNode.cpp?
 	- PrintAST check() looks a bit sparse?
+	- ReturnAST - check safety, the comment scares me :p
+	- Stdin check needs much more work (check it's assignable, so variable or array member I think). Current cerr makes no sense either
+	- See comment in VarAssign

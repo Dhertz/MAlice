@@ -8,7 +8,7 @@ StdinAST::StdinAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST>
 }
 
 void StdinAST::check() {
-	if(!_expr) {
+	if (!_expr) {
 		cerr << "Line " << _lineNo << " - " << "Cannot print bad expression." << endl;
 	}
 }

@@ -1,10 +1,8 @@
 #ifndef PROC_DEC_AST
 #define PROC_DEC_AST
 
-#include "ASTNode.hpp"
 #include "HeaderParamsAST.hpp"
 #include "../idents/Proc.hpp"
-#include <vector>
 
 class ProcDecAST : public ASTNode {
 	boost::shared_ptr<SymbolTable> _st;

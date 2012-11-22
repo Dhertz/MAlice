@@ -1,7 +1,6 @@
 #ifndef VAR_ASSIGN_AST_H
 #define VAR_ASSIGN_AST_H
 
-#include "ASTNode.hpp"
 #include "ExprAST.hpp"
 #include "../idents/Variable.hpp"
 

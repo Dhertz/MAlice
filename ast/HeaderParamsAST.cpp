@@ -8,7 +8,6 @@ HeaderParamsAST::HeaderParamsAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE
 	check();
 }
 
-
 void HeaderParamsAST::check() {
 	for (int i = 0; i + 1 < _tree->getChildCount(_tree); i += 2) {
 

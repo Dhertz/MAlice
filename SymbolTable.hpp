@@ -4,7 +4,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/enable_shared_from_this.hpp>
-#include <string>
 #include "idents/Identifier.hpp"
 
 class SymbolTable : public boost::enable_shared_from_this<SymbolTable> {

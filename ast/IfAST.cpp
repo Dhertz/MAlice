@@ -9,9 +9,9 @@ IfAST::IfAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr,
 }
 
 void IfAST::check() {
-	if(!_expr) {
+	if (!_expr) {
 		cerr << "Line " << _lineNo << " - " << "If conditional is not a proper expression." << endl;
-	} if(_expr->getTypeName()->getTypeName() != "Boolean") {
+	} else if (_expr->getTypeName()->getTypeName() != "Boolean") {
 		cerr << "Line " << _lineNo << " - " << "If statement conditional must be of type Boolean, it's of type" <<
 			_expr->getTypeName()->getTypeName() << "." << endl;
 	}
