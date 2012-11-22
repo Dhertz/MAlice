@@ -29,6 +29,8 @@ TreeWalker::TreeWalker(boost::shared_ptr<SymbolTable> topSt, pANTLR3_BASE_TREE i
 	init();
 
 	walk(_inputTree, _topSt, boost::shared_ptr<ASTNode>(), 0);
+
+	checkHatta();
 }
 
 // Call the correct method based on the type of the current AST node
@@ -44,6 +46,7 @@ void TreeWalker::walk(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st,
 // Create the root of the tree and first non-static symbol table, go to children
 void TreeWalker::processPROG(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ASTNode> parent, int childNum) {
 	boost::shared_ptr<SymbolTable> progSt(new SymbolTable(st));
+	st->addChild(progSt);
 
 	boost::shared_ptr<ASTNode> root(new ASTNode(progSt, boost::shared_ptr<ASTNode>(), getLine(tree)));
 	_outputTree->setRoot(root);
@@ -61,6 +64,7 @@ void TreeWalker::processPROCDEC(pANTLR3_BASE_TREE tree, boost::shared_ptr<Symbol
 	string procName = createStringFromTree(idTree);
 
 	boost::shared_ptr<SymbolTable> scopeSt(new SymbolTable(st));
+	st->addChild(scopeSt);
 
 	boost::shared_ptr<ProcDecAST> dec(new ProcDecAST(scopeSt, procName, params, parent, getLine(tree)));
 	parent->addChild(dec, childNum);
@@ -75,6 +79,7 @@ void TreeWalker::processPROCDEC(pANTLR3_BASE_TREE tree, boost::shared_ptr<Symbol
 void TreeWalker::processBODY(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ASTNode> parent, int childNum) {
 
 	boost::shared_ptr<SymbolTable> scopeSt(new SymbolTable(st));
+	st->addChild(scopeSt);
 
     for (int i = 0; i < tree->getChildCount(tree); ++i) {
         walk(childByNum(tree, i), scopeSt, parent, i);
@@ -92,6 +97,7 @@ void TreeWalker::processFUNCDEC(pANTLR3_BASE_TREE tree, boost::shared_ptr<Symbol
 	string funcType = createStringFromTree(typeTree);
 
 	boost::shared_ptr<SymbolTable> scopeSt(new SymbolTable(st));
+	st->addChild(scopeSt);
 
 	boost::shared_ptr<FuncDecAST> dec(new FuncDecAST(scopeSt, funcName, params, funcType, parent, getLine(tree)));
 
@@ -274,8 +280,8 @@ int TreeWalker::getLine (pANTLR3_BASE_TREE tree) {
 	cTree = (pANTLR3_COMMON_TREE)(tree->super);
 	token = cTree->token;
 
-	if	(token == NULL || token->getLine(token) == 0) {
-		if  (tree->getChildCount(tree) > 0) {
+	if (token == NULL || token->getLine(token) == 0) {
+		if (tree->getChildCount(tree) > 0) {
 			pANTLR3_BASE_TREE child;
 
 			child = (pANTLR3_BASE_TREE)tree->getChild(tree, 0);
@@ -284,6 +290,24 @@ int TreeWalker::getLine (pANTLR3_BASE_TREE tree) {
 		return 0;
 	}
 	return token->getLine(token);
+}
+
+void TreeWalker::checkHatta() {
+	boost::shared_ptr<SymbolTable> topFunctionTable = _topSt->getChildren()[0];
+	boost::shared_ptr<Identifier> hattaDef = topFunctionTable->lookupCurrLevelOnly("hatta");
+
+	if (hattaDef == boost::shared_ptr<Identifier>()) {
+		cerr << "hatta not defined at top level" << endl;
+	} else if (hattaDef->getBaseName() != "Callable") {
+		cerr << "hatta is not declared as a procedure" << endl;
+	} else {
+		boost::shared_ptr<Callable> hattaCasted = boost::shared_polymorphic_downcast<Callable>(hattaDef);
+		if (hattaCasted->getCallableFuncOrProc() != "Proc") {
+			cerr << "hatta is not declared as a procedure" << endl;
+		} else if (!hattaCasted->getParams().empty()) {
+			cerr << "hatta declared with paramaters" << endl;
+		}
+	}
 }
 
 // map intialisation

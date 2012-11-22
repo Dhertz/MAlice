@@ -34,6 +34,7 @@ class TreeWalker {
 	pANTLR3_BASE_TREE childByNum(pANTLR3_BASE_TREE tree, int num);
 	string createStringFromTree(pANTLR3_BASE_TREE tree);
 	int getLine(pANTLR3_BASE_TREE tree);
+	void checkHatta();
 
 public:
 	void walk(pANTLR3_BASE_TREE, boost::shared_ptr<SymbolTable>, boost::shared_ptr<ASTNode> parent, int childNum);
