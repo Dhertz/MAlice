@@ -8,24 +8,6 @@
 #include "../idents/Function.hpp"
 #include "../idents/Callable.hpp"
 
-// Stolen from Owen. If these stay, might be best to move them to a Utils class or something
-void printMe(pANTLR3_BASE_TREE tree, int level) {
-        for (int i = 0; i < level; ++i) {
-                cout << "--";
-        }
-
-        cout << " " << tree->getText(tree)->chars << endl;
-
-        int childCount = tree->getChildCount(tree);
-        for (int i = 0; i < childCount; ++i) {
-                printMe((pANTLR3_BASE_TREE) tree->getChild(tree, i), level + 1);
-        }
-}
-
-void printTreeMe(pANTLR3_BASE_TREE ast) {
-        printMe(ast, 0);
-}
-
 ExprAST::ExprAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree, boost::shared_ptr<ASTNode> parent, int lineNo) : ASTNode(st, parent, lineNo) {
 	_boolArgBoolRet.insert("!");
 
