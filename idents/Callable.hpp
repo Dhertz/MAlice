@@ -3,7 +3,7 @@
 
 #include "Identifier.hpp"
 #include "Param.hpp"
-#include "SymbolTable.hpp"
+#include "../SymbolTable.hpp"
 #include <vector>
 
 class Callable : public Identifier {
