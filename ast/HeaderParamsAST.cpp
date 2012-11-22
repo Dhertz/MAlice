@@ -10,10 +10,10 @@ string HeaderParamsAST::createStringFromTree(pANTLR3_BASE_TREE tree) {
 	return res;
 }
 
-HeaderParamsAST::HeaderParamsAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree, boost::shared_ptr<ASTNode> parent) : ASTNode(st, parent) {
+HeaderParamsAST::HeaderParamsAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree, boost::shared_ptr<ASTNode> parent, int lineNo) : ASTNode(st, parent, lineNo) {
 	_st = st;
 	_tree = tree;
-
+	_lineNo = lineNo;
 	check();
 }
 
@@ -30,13 +30,13 @@ void HeaderParamsAST::check() {
 			boost::shared_ptr<Identifier> type = _st->lookupCurrLevelAndEnclosingLevels(typeString);
 			boost::shared_ptr<Identifier> name = _st->lookupCurrLevelOnly(nameString);
 			if(!type) {
-				cerr << "Header type " << typeString << " doesn't exist." << endl;
+				cerr << "Line " << _lineNo << " - " << "Header type " << typeString << " doesn't exist." << endl;
 			} else if (type->getBaseName() != "Type") {
-				cerr << "Can't have a " << typeString << " parameter." << endl;
+				cerr << "Line " << _lineNo << " - " << "Can't have a " << typeString << " parameter." << endl;
 			} else if (name) {
-				cerr << nameString << " has already been declared." << endl;
+				cerr << "Line " << _lineNo << " - " << nameString << " has already been declared." << endl;
 			} else if (duplicate(i, nameString)) {
-				cerr << "Duplicate parameters " << nameString << "." << endl;
+				cerr << "Line " << _lineNo << " - " << "Duplicate parameters " << nameString << "." << endl;
 			} else {
 				boost::shared_ptr<Type> typeCasted = boost::shared_polymorphic_downcast<Type>(type);
 				boost::shared_ptr<Type> spider(new Spider(typeCasted));
@@ -48,13 +48,13 @@ void HeaderParamsAST::check() {
 		boost::shared_ptr<Identifier> type = _st->lookupCurrLevelAndEnclosingLevels(typeString);
 		boost::shared_ptr<Identifier> name = _st->lookupCurrLevelOnly(nameString);
 		if(!type) {
-			cerr << "Header type " << typeString << " doesn't exist." << endl;
+			cerr << "Line " << _lineNo << " - " << "Header type " << typeString << " doesn't exist." << endl;
 		} else if (type->getBaseName() != "Type") {
-			cerr << "Can't have a " << typeString << " parameter." << endl;
+			cerr << "Line " << _lineNo << " - " << "Can't have a " << typeString << " parameter." << endl;
 		} else if (name) {
-			cerr << nameString << " has already been declared." << endl;
+			cerr << "Line " << _lineNo << " - " << nameString << " has already been declared." << endl;
 		} else if (duplicate(i, nameString)) {
-			cerr << "Duplicate parameters " << nameString << "." << endl;
+			cerr << "Line " << _lineNo << " - " << "Duplicate parameters " << nameString << "." << endl;
 		} else {
 			boost::shared_ptr<Type> typeCasted = boost::shared_polymorphic_downcast<Type>(type);
 			boost::shared_ptr<Param> p(new Param(typeCasted, nameString));

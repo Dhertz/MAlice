@@ -1,11 +1,12 @@
 #include "FuncDecAST.hpp"
 #include "../idents/Variable.hpp"
 
-FuncDecAST::FuncDecAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_ptr<HeaderParamsAST> params, string returnType, boost::shared_ptr<ASTNode> parent) : ASTNode(st, parent) {
+FuncDecAST::FuncDecAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_ptr<HeaderParamsAST> params, string returnType, boost::shared_ptr<ASTNode> parent, int lineNo) : ASTNode(st, parent, lineNo) {
 	_st = st;
 	_name = name;
 	_returnType = returnType;
 	_params = params;
+	_lineNo = lineNo;
 	check();
 }
 
@@ -14,11 +15,11 @@ void FuncDecAST::check() {
 	boost::shared_ptr<Identifier> name = _st->lookupCurrLevelAndEnclosingLevels(_name);
 
 	if (!type) {
-		cerr << "Return type " << _returnType << " not known" << "." << endl;
+		cerr << "Line " << _lineNo << " - " << "Return type " << _returnType << " not known" << "." << endl;
 	} else if (type->getBaseName() != "Type") {
-		cerr << "Return type " << _returnType << " is not a type." << endl;
+		cerr << "Line " << _lineNo << " - " << "Return type " << _returnType << " is not a type." << endl;
 	} else if (name) {
-		cerr << "Function " << _name << " already exists" << endl;
+		cerr << "Line " << _lineNo << " - " << "Function " << _name << " already exists" << endl;
 	} else {
 		vector< boost::shared_ptr<Param> > v = _params->getParams();
 		vector< boost::shared_ptr<Param> >::iterator param;

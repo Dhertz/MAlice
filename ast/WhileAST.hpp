@@ -7,8 +7,9 @@
 class WhileAST : public ASTNode {
 	boost::shared_ptr<SymbolTable> _st;
 	boost::shared_ptr<ExprAST> _expr;
+    int _lineNo;
 public:
-	WhileAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr, boost::shared_ptr<ASTNode> parent);
+	WhileAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr, boost::shared_ptr<ASTNode> parent, int lineNo);
 	void check();
 };
 

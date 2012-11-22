@@ -12,8 +12,9 @@ class FuncDecAST : public ASTNode {
 	string _returnType;
 	boost::shared_ptr<HeaderParamsAST> _params;
 	boost::shared_ptr<Function> _funcObj;
+	int _lineNo;
 public:
-	FuncDecAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_ptr<HeaderParamsAST> params, string returnType, boost::shared_ptr<ASTNode> parent);
+	FuncDecAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_ptr<HeaderParamsAST> params, string returnType, boost::shared_ptr<ASTNode> parent, int lineNo);
 	void check();
 	string getNodeName();
 	string getReturnType();

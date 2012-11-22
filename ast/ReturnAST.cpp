@@ -1,17 +1,17 @@
 #include "ReturnAST.hpp"
 #include "FuncDecAST.hpp"
 
-ReturnAST::ReturnAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr, boost::shared_ptr<ASTNode> parent) : ASTNode(st, parent) {
+ReturnAST::ReturnAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr, boost::shared_ptr<ASTNode> parent, int lineNo) : ASTNode(st, parent, lineNo) {
 	_st = st;
 	_expr = expr;
 	_parent = parent;
-
+	_lineNo = lineNo;
 	check();
 }
 
 void ReturnAST::check() {
 	if(!_expr) {
-		cerr << "Cannot return bad expression." << endl;
+		cerr << "Line " << _lineNo << " - " << "Cannot return bad expression." << endl;
 	}
 
 	checkFunctionType(_parent);
@@ -19,7 +19,7 @@ void ReturnAST::check() {
 
 void ReturnAST::checkFunctionType(boost::shared_ptr<ASTNode> parent) {
 	if (!parent) {
-		cerr << "Null" << endl;
+		cerr << "Line " << _lineNo << " - " << "Null" << endl;
 	}
 
 	if (parent->getNodeName() == "FuncDec") {
@@ -34,7 +34,7 @@ void ReturnAST::checkFunctionType(boost::shared_ptr<ASTNode> parent) {
 		string exprType = _expr->getTypeName()->getTypeName();
 
 		if (funcReturnType != exprType) {
-			cerr << "Return type for function " << funcName << " (" << funcReturnType << ") does not match type of returned expression (" << exprType << ")." << endl;
+			cerr << "Line " << _lineNo << " - " << "Return type for function " << funcName << " (" << funcReturnType << ") does not match type of returned expression (" << exprType << ")." << endl;
 		}
 	} else {
 		checkFunctionType(parent->getParent());

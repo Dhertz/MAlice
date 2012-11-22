@@ -1,16 +1,17 @@
 #include "DecAST.hpp"
 
-DecAST::DecAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr, boost::shared_ptr<ASTNode> parent) : ASTNode(st, parent) {
+DecAST::DecAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr, boost::shared_ptr<ASTNode> parent, int lineNo) : ASTNode(st, parent, lineNo) {
 	_st = st;
 	_expr = expr;
+    _lineNo = lineNo;
 	check();
 }
 
 void DecAST::check() {
 	if (!_expr->getTypeName()) {
-		cerr << "Bad expression." << endl;
+		cerr << "Line " << _lineNo << " - " << "Bad expression." << endl;
 	} else if(_expr->getTypeName()->getTypeName() != "Number") {
-		cerr << "Can only decrement a number, not a " 
+		cerr << "Line " << _lineNo << " - " << "Can only decrement a number, not a " 
 			<< _expr->getTypeName()->getTypeName() << "!" << endl;
 	}
 }

@@ -20,8 +20,9 @@ class ExprAST : public ASTNode {
 	pANTLR3_BASE_TREE childByNum(pANTLR3_BASE_TREE tree, int num);
 	string createStringFromTree(pANTLR3_BASE_TREE tree);
 	boost::shared_ptr<Type> recurseTree(pANTLR3_BASE_TREE tree, string expectedType);
+	int _lineNo;
 public:
-	ExprAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree, boost::shared_ptr<ASTNode> parent);
+	ExprAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree, boost::shared_ptr<ASTNode> parent, int lineNo);
 	void check();
 	boost::shared_ptr<Type> getTypeName();
 };

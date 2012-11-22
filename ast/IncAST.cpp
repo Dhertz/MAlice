@@ -1,17 +1,18 @@
 #include "IncAST.hpp"
 
-IncAST::IncAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr, boost::shared_ptr<ASTNode> parent) : ASTNode(st, parent) {
+IncAST::IncAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr, boost::shared_ptr<ASTNode> parent, int lineNo) : ASTNode(st, parent, lineNo) {
 	_st = st;
 	_expr = expr;
+    _lineNo = lineNo;
 	check();
 }
 
 
 void IncAST::check() {
 	if(!_expr){
-		cerr << "Cannot increment bad expression." << endl;
+		cerr << "Line " << _lineNo << " - " << "Cannot increment bad expression." << endl;
 	} if(_expr->getTypeName()->getTypeName() != "Number") {
-		cerr << "Cannot increment expression of type " 
+		cerr << "Line " << _lineNo << " - " << "Cannot increment expression of type " 
 			<< _expr->getTypeName()->getTypeName() << "." << endl;
 	}
 }

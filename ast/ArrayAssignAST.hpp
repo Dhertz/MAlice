@@ -11,8 +11,9 @@ class ArrayAssignAST : public ASTNode {
 	boost::shared_ptr<ExprAST> _element;
 	boost::shared_ptr<ExprAST> _value;
 	boost::shared_ptr<Array> _arrObj;
+    int _lineNo;
 public:
-	ArrayAssignAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_ptr<ExprAST> element, boost::shared_ptr<ExprAST> value, boost::shared_ptr<ASTNode> parent);
+	ArrayAssignAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_ptr<ExprAST> element, boost::shared_ptr<ExprAST> value, boost::shared_ptr<ASTNode> parent, int lineNo);
 	void check();
 };
 

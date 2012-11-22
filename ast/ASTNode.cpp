@@ -1,8 +1,9 @@
 #include "ASTNode.hpp"
 
-ASTNode::ASTNode(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ASTNode> parent) {
+ASTNode::ASTNode(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ASTNode> parent, int lineNo) {
 	_st = st;
 	_parent = parent;
+	_lineNo = lineNo;
 }
 
 vector< boost::shared_ptr<ASTNode> > ASTNode::getChildren() {

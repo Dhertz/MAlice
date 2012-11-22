@@ -36,7 +36,7 @@ string ExprAST::createStringFromTree(pANTLR3_BASE_TREE tree) {
 	return res;
 }
 
-ExprAST::ExprAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree, boost::shared_ptr<ASTNode> parent) : ASTNode(st, parent) {
+ExprAST::ExprAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree, boost::shared_ptr<ASTNode> parent, int lineNo) : ASTNode(st, parent, lineNo) {
 	_boolArgBoolRet.insert("!");
 
 	_intArgIntRet.insert("~");
@@ -67,7 +67,7 @@ ExprAST::ExprAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree, boos
 
 	_type = boost::shared_ptr<Type>();
 	_tree = tree;
-
+	_lineNo = lineNo;
 	check();
 }
 
@@ -86,15 +86,15 @@ void ExprAST::check() {
 
 		// Check that function call and parameters type-check
 		// i.e. function name in scope, and parameters exprs match expected type
-		boost::shared_ptr<CallParamsAST> callParamsNode = boost::shared_ptr<CallParamsAST>(new CallParamsAST(_st, cplTree, _parent));
-		FuncAST funcCheck(_st, funcName, callParamsNode, _parent);
+		boost::shared_ptr<CallParamsAST> callParamsNode = boost::shared_ptr<CallParamsAST>(new CallParamsAST(_st, cplTree, _parent, _lineNo));
+		FuncAST funcCheck(_st, funcName, callParamsNode, _parent, _lineNo);
 
 		boost::shared_ptr<Identifier> funcIdent = _st->lookupCurrLevelAndEnclosingLevels(funcName);
 		boost::shared_ptr<Callable> funcCallable = boost::shared_polymorphic_downcast<Callable>(funcIdent);
 
 		if (funcCallable->getCallableFuncOrProc() == "Proc") {
 			// Error case - expression can't be a proc
-			cerr << "Procedure " << funcName << " cannot be an expression, since it has no return type" << endl;
+			cerr << "Line " << _lineNo << " - " << "Procedure " << funcName << " cannot be an expression, since it has no return type" << endl;
 		} else if (funcCallable->getCallableFuncOrProc() == "Function") {
 			boost::shared_ptr<Function> func = boost::shared_polymorphic_downcast<Function>(funcIdent);
 			_type = func->getTypeName();
@@ -106,9 +106,9 @@ void ExprAST::check() {
 
 		boost::shared_ptr<Identifier> varIdent = _st->lookupCurrLevelAndEnclosingLevels(varName);
 		if (!varIdent) {
-			cerr << varName << " is not in scope" << endl;
+			cerr << "Line " << _lineNo << " - " << varName << " is not in scope" << endl;
 		} else if (varIdent->getBaseName() != "Variable") {
-			cerr << varName << " is not a variable. It is a " << varIdent->getBaseName() << "." << endl;
+			cerr << "Line " << _lineNo << " - " << varName << " is not a variable. It is a " << varIdent->getBaseName() << "." << endl;
 		} else {
 			boost::shared_ptr<Variable> var = boost::shared_polymorphic_downcast<Variable>(varIdent);
 			_type = var->getTypeName();
@@ -120,22 +120,22 @@ void ExprAST::check() {
 
 		boost::shared_ptr<Identifier> arrIdent = _st->lookupCurrLevelAndEnclosingLevels(arrName);
 		if (!arrIdent) {
-			cerr << arrName << " is not in scope" << endl;
+			cerr << "Line " << _lineNo << " - " << arrName << " is not in scope" << endl;
 		} else if (arrIdent->getBaseName() != "Type") {
-			cerr << arrName << " is not an array" << endl;
+			cerr << "Line " << _lineNo << " - " << arrName << " is not an array" << endl;
 		} else {
 			boost::shared_ptr<Type> arrType = boost::shared_polymorphic_downcast<Type>(arrIdent);
 			if (arrType->getTypeName() != "Array") {
-				cerr << arrName << " is not an array" << endl;
+				cerr << "Line " << _lineNo << " - " << arrName << " is not an array" << endl;
 			} else {
 				boost::shared_ptr<Array> arr = boost::shared_polymorphic_downcast<Array>(arrIdent);
 
 				pANTLR3_BASE_TREE index = childByNum(root, 1);
-				ExprAST indexCheck(_st, index, _parent);
+				ExprAST indexCheck(_st, index, _parent, _lineNo);
 
 				// Need to cast to Type before second getTypeName()?
 				if (indexCheck.getTypeName()->getTypeName() != "Number") {
-					cerr << "Array index must evaluate to a Number." << endl;
+					cerr << "Line " << _lineNo << " - " << "Array index must evaluate to a Number." << endl;
 				} else {
 					_type = arr->getElemType();
 				}
@@ -180,11 +180,11 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree, string expe
 		} else if (_boolArgBoolRet.find(op) != _boolArgBoolRet.end()) {
 			expEvalType = "Boolean";
 		} else {
-			ExprAST checkExp(_st, tree, _parent);
+			ExprAST checkExp(_st, tree, _parent, _lineNo);
 			evaluatedType = checkExp.getTypeName();
 
 			if (expectedType != "*" && expectedType != evaluatedType->getTypeName()) {
-				cerr << "Expected argument expression to " << op << " to evaluate to a " << expectedType << ", but got a " << evaluatedType->getTypeName() << endl;
+				cerr << "Line " << _lineNo << " - " << "Expected argument expression to " << op << " to evaluate to a " << expectedType << ", but got a " << evaluatedType->getTypeName() << endl;
 				return boost::shared_ptr<Type>();
 			}
 			
@@ -194,7 +194,7 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree, string expe
 		evaluatedType = recurseTree(arg, expEvalType);
 
 		if (expectedType != "*" && expectedType != evaluatedType->getTypeName()) {
-			cerr << "Argument to " << op << " should be a " << expectedType << ", but got " << evaluatedType->getTypeName() << endl;
+			cerr << "Line " << _lineNo << " - " << "Argument to " << op << " should be a " << expectedType << ", but got " << evaluatedType->getTypeName() << endl;
 			return boost::shared_ptr<Type>();
 		} else {
 			return evaluatedType;
@@ -216,11 +216,11 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree, string expe
 			lhsType = recurseTree(lhs, "*");
 			rhsType = recurseTree(rhs, "*");
 			if (lhsType->getTypeName() != rhsType->getTypeName()) {
-				cerr << "Operand type mismatch in " << lhsTok << " " << op << " " << rhsTok
+				cerr << "Line " << _lineNo << " - " << "Operand type mismatch in " << lhsTok << " " << op << " " << rhsTok
 					<< " (" << lhsType->getTypeName() << " isn't the same as " << rhsType->getTypeName() << ")" << endl;
 				return boost::shared_ptr<Type>();
 			} else if (expectedType != "*" && lhsType->getTypeName() != expectedType) {
-				cerr << "In this scenario, " << op << " will return a " << lhsType->getTypeName() << ", not a " << expectedType << endl;
+				cerr << "Line " << _lineNo << " - " << "In this scenario, " << op << " will return a " << lhsType->getTypeName() << ", not a " << expectedType << endl;
 				return boost::shared_ptr<Type>();
 			}
 			return lhsType;
@@ -229,13 +229,13 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree, string expe
 
 			if (expectedType != "*" && expectedType != "Boolean") {
 				// No point even evaluating lhs or rhs because my return type is wrong
-				cerr << op << " returns a Boolean, not a " << expectedType << endl;
+				cerr << "Line " << _lineNo << " - " << op << " returns a Boolean, not a " << expectedType << endl;
 				return boost::shared_ptr<Type>();
 			} else {
 				lhsType = recurseTree(lhs, "*");
 				rhsType = recurseTree(rhs, "*");
 				if (lhsType->getTypeName() != rhsType->getTypeName()) {
-					cerr << "Operand type mismatch in " << lhsTok << " " << op << " " << rhsTok
+					cerr << "Line " << _lineNo << " - " << "Operand type mismatch in " << lhsTok << " " << op << " " << rhsTok
 						<< " (" << lhsType->getTypeName() << " isn't the same as " << rhsType->getTypeName() << ")" << endl;
 					return boost::shared_ptr<Type>();
 				}
@@ -249,7 +249,7 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree, string expe
 
 			if (expectedType != "*" && expectedType != "Boolean") {
 				// No point even evaluating lhs or rhs because my return type is wrong
-				cerr << op << " returns a Boolean, not a " << expectedType << endl;
+				cerr << "Line " << _lineNo << " - " << op << " returns a Boolean, not a " << expectedType << endl;
 				return boost::shared_ptr<Type>();
 			} else {
 				lhsType = recurseTree(lhs, "Boolean");
@@ -260,11 +260,11 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree, string expe
 				return evaluatedType;
 			}
 		} else {
-			ExprAST checkExp(_st, tree, _parent);
+			ExprAST checkExp(_st, tree, _parent, _lineNo);
 			boost::shared_ptr<Type> evaluatedType = checkExp.getTypeName();
 
 			if (expectedType != "*" && expectedType != evaluatedType->getTypeName()) {
-				cerr << "Expected argument expression to " << op << " to evaluate to a " << expectedType << ", but got a " << evaluatedType->getTypeName() << endl;
+				cerr << "Line " << _lineNo << " - " << "Expected argument expression to " << op << " to evaluate to a " << expectedType << ", but got a " << evaluatedType->getTypeName() << endl;
 				return boost::shared_ptr<Type>();
 			}
 			
