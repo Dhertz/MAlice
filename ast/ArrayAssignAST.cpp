@@ -28,6 +28,7 @@ void ArrayAssignAST::check() {
 
 			if(_value->getTypeName()->getTypeName() != arrCasted->getElemType()->getTypeName()) {
 				cerr << "Type error. (" << _value->getTypeName()->getTypeName() << " != " << arrCasted->getElemType()->getTypeName() << ")" << endl;
+				cerr << "Array " << _name << " has address " << array << " in ST" << endl;
 			} else {
 				_arrObj = arrCasted;
 			}

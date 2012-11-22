@@ -101,17 +101,30 @@ void ExprAST::check() {
 		}
 	} else if (tok == "VAR") {
 		// Variable reference, evaluates to variable's type
+		// Also allowed to be an array, so that function calls with array arguments are allowed
 
 		string varName = createStringFromTree(childByNum(root, 0));
 
 		boost::shared_ptr<Identifier> varIdent = _st->lookupCurrLevelAndEnclosingLevels(varName);
 		if (!varIdent) {
 			cerr << varName << " is not in scope" << endl;
-		} else if (varIdent->getBaseName() != "Variable") {
-			cerr << varName << " is not a variable. It is a " << varIdent->getBaseName() << "." << endl;
 		} else {
-			boost::shared_ptr<Variable> var = boost::shared_polymorphic_downcast<Variable>(varIdent);
-			_type = var->getTypeName();
+			string baseName = varIdent->getBaseName();
+
+			if (baseName == "Type") {
+				boost::shared_ptr<Type> varType = boost::shared_polymorphic_downcast<Type>(varIdent);
+				if (varType->getTypeName() != "Array") {
+					cerr << varName << " is not a variable. It is a " << varIdent->getBaseName() << "." << endl;
+				} else {
+					boost::shared_ptr<Array> arr = boost::shared_polymorphic_downcast<Array>(varType);
+					_type = arr->getElemType();
+				}
+			} else if (baseName == "Variable") {
+				boost::shared_ptr<Variable> var = boost::shared_polymorphic_downcast<Variable>(varIdent);
+				_type = var->getTypeName();
+			} else {
+				cerr << varName << " is not a variable. It is a " << varIdent->getBaseName() << "." << endl;
+			}
 		}
 	} else if (tok == "ARRMEMBER") {
 		// Array member reference, evaluates to array's element type
@@ -119,7 +132,7 @@ void ExprAST::check() {
 		string arrName = createStringFromTree(childByNum(root, 0));
 
 		boost::shared_ptr<Identifier> arrIdent = _st->lookupCurrLevelAndEnclosingLevels(arrName);
-		cout << "Array identifier is at " << arrIdent << endl;
+
 		if (!arrIdent) {
 			cerr << arrName << " is not in scope" << endl;
 		} else if (arrIdent->getBaseName() != "Type") {
