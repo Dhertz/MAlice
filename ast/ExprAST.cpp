@@ -26,16 +26,6 @@ void printTreeMe(pANTLR3_BASE_TREE ast) {
         printMe(ast, 0);
 }
 
-pANTLR3_BASE_TREE ExprAST::childByNum(pANTLR3_BASE_TREE tree, int num) {
-	return (pANTLR3_BASE_TREE) tree->getChild(tree, num);
-}
-
-string ExprAST::createStringFromTree(pANTLR3_BASE_TREE tree) {
-	string res((const char *) tree->getText(tree)->to8(tree->getText(tree))->chars, 
-			   tree->getText(tree)->len);
-	return res;
-}
-
 ExprAST::ExprAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree, boost::shared_ptr<ASTNode> parent, int lineNo) : ASTNode(st, parent, lineNo) {
 	_boolArgBoolRet.insert("!");
 
@@ -75,14 +65,14 @@ void ExprAST::check() {
 	int children = _tree->getChildCount(_tree);
 	assert (children > 0);
 
-	pANTLR3_BASE_TREE root = childByNum(_tree, 0);
-	string tok = createStringFromTree(root);
+	pANTLR3_BASE_TREE root = TreeUtils::childByNum(_tree, 0);
+	string tok = TreeUtils::createStringFromTree(root);
 
 	if (tok == "FUNC") {
 		// Inline function call, evaluates to function's return type
 
-		string funcName = createStringFromTree(childByNum(root, 0));
-		pANTLR3_BASE_TREE cplTree = childByNum(root, 1);
+		string funcName = TreeUtils::createStringFromTree(TreeUtils::childByNum(root, 0));
+		pANTLR3_BASE_TREE cplTree = TreeUtils::childByNum(root, 1);
 
 		// Check that function call and parameters type-check
 		// i.e. function name in scope, and parameters exprs match expected type
@@ -103,7 +93,7 @@ void ExprAST::check() {
 		// Variable reference, evaluates to variable's type
 		// Also allowed to be an array, so that function calls with array arguments are allowed
 
-		string varName = createStringFromTree(childByNum(root, 0));
+		string varName = TreeUtils::createStringFromTree(TreeUtils::childByNum(root, 0));
 
 		boost::shared_ptr<Identifier> varIdent = _st->lookupCurrLevelAndEnclosingLevels(varName);
 		if (!varIdent) {
@@ -129,7 +119,7 @@ void ExprAST::check() {
 	} else if (tok == "ARRMEMBER") {
 		// Array member reference, evaluates to array's element type
 
-		string arrName = createStringFromTree(childByNum(root, 0));
+		string arrName = TreeUtils::createStringFromTree(TreeUtils::childByNum(root, 0));
 
 		boost::shared_ptr<Identifier> arrIdent = _st->lookupCurrLevelAndEnclosingLevels(arrName);
 
@@ -144,7 +134,7 @@ void ExprAST::check() {
 			} else {
 				boost::shared_ptr<Array> arr = boost::shared_polymorphic_downcast<Array>(arrIdent);
 
-				pANTLR3_BASE_TREE index = childByNum(root, 1);
+				pANTLR3_BASE_TREE index = TreeUtils::childByNum(root, 1);
 				ExprAST indexCheck(_st, index, _parent, _lineNo);
 
 				// Need to cast to Type before second getTypeName()?
@@ -183,8 +173,8 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree, string expe
 		return number;
 	} else if (children == 1) {
 		// Unary operator
-		string op = createStringFromTree(tree);
-		pANTLR3_BASE_TREE arg = childByNum(tree, 0);
+		string op = TreeUtils::createStringFromTree(tree);
+		pANTLR3_BASE_TREE arg = TreeUtils::childByNum(tree, 0);
 
 		string expEvalType;
 		boost::shared_ptr<Type> evaluatedType;
@@ -215,12 +205,12 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree, string expe
 		}
 	} else if (children == 2) {
 		// Binary operator
-		string op = createStringFromTree(tree);
-		pANTLR3_BASE_TREE lhs = childByNum(tree, 0);
-		pANTLR3_BASE_TREE rhs = childByNum(tree, 1);
+		string op = TreeUtils::createStringFromTree(tree);
+		pANTLR3_BASE_TREE lhs = TreeUtils::childByNum(tree, 0);
+		pANTLR3_BASE_TREE rhs = TreeUtils::childByNum(tree, 1);
 
-		string lhsTok = createStringFromTree(lhs);
-		string rhsTok = createStringFromTree(rhs);
+		string lhsTok = TreeUtils::createStringFromTree(lhs);
+		string rhsTok = TreeUtils::createStringFromTree(rhs);
 
 		boost::shared_ptr<Type> lhsType, rhsType;
 

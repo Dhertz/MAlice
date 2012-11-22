@@ -17,8 +17,6 @@ class ExprAST : public ASTNode {
 	set<string> _mixedArgsBoolRet;
 	boost::shared_ptr<Type> _type;
 	pANTLR3_BASE_TREE _tree;
-	pANTLR3_BASE_TREE childByNum(pANTLR3_BASE_TREE tree, int num);
-	string createStringFromTree(pANTLR3_BASE_TREE tree);
 	boost::shared_ptr<Type> recurseTree(pANTLR3_BASE_TREE tree, string expectedType);
 	int _lineNo;
 public:

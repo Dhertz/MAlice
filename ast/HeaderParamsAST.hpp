@@ -6,6 +6,7 @@
 #include <vector>
 #include "../idents/Param.hpp"
 #include "../idents/Spider.hpp"
+#include "../TreeUtils.hpp"
 
 class HeaderParamsAST : public ASTNode {
 	boost::shared_ptr<SymbolTable> _st;
@@ -14,8 +15,6 @@ class HeaderParamsAST : public ASTNode {
     int _lineNo;
 public:
 	HeaderParamsAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree, boost::shared_ptr<ASTNode> parent, int lineNo);
-	pANTLR3_BASE_TREE childByNum(pANTLR3_BASE_TREE tree, int num);
-	string createStringFromTree(pANTLR3_BASE_TREE tree);
 	bool duplicate(int upto, string name);
 	void check();
 	vector< boost::shared_ptr<Param> > getParams();
