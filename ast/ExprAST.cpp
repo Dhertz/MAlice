@@ -5,6 +5,8 @@
 #include "../idents/Number.hpp"
 #include "../idents/Array.hpp"
 #include "../idents/Boolean.hpp"
+#include "../idents/Function.hpp"
+#include "../idents/Callable.hpp"
 
 // Stolen from Owen. If these stay, might be best to move them to a Utils class or something
 void printMe(pANTLR3_BASE_TREE tree, int level) {
@@ -85,13 +87,18 @@ void ExprAST::check() {
 		// Check that function call and parameters type-check
 		// i.e. function name in scope, and parameters exprs match expected type
 		boost::shared_ptr<CallParamsAST> callParamsNode = boost::shared_ptr<CallParamsAST>(new CallParamsAST(_st, cplTree, _parent));
-		FuncAST(_st, funcName, callParamsNode, _parent);
+		FuncAST funcCheck(_st, funcName, callParamsNode, _parent);
 
-		// This cast should be safe after FuncAST has done its work
 		boost::shared_ptr<Identifier> funcIdent = _st->lookupCurrLevelAndEnclosingLevels(funcName);
-		boost::shared_ptr<Function> func = boost::shared_polymorphic_downcast<Function>(funcIdent);
+		boost::shared_ptr<Callable> funcCallable = boost::shared_polymorphic_downcast<Callable>(funcIdent);
 
-		_type = func->getTypeName();
+		if (funcCallable->getCallableFuncOrProc() == "Proc") {
+			// Error case - expression can't be a proc
+			cerr << "Procedure " << funcName << " cannot be an expression, since it has no return type" << endl;
+		} else if (funcCallable->getCallableFuncOrProc() == "Function") {
+			boost::shared_ptr<Function> func = boost::shared_polymorphic_downcast<Function>(funcIdent);
+			_type = func->getTypeName();
+		}
 	} else if (tok == "VAR") {
 		// Variable reference, evaluates to variable's type
 

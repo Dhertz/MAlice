@@ -9,3 +9,7 @@ Function::Function(boost::shared_ptr<SymbolTable> st, vector< boost::shared_ptr<
 boost::shared_ptr<Type> Function::getTypeName() {
 	return _returnType;
 }
+
+string Function::getCallableFuncOrProc() {
+	return "Function";
+}

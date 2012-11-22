@@ -8,7 +8,6 @@
 #include "CallParamsAST.hpp"
 #include "FuncAST.hpp"
 #include "../idents/Type.hpp"
-#include "../idents/Function.hpp"
 
 class ExprAST : public ASTNode {
 	set<string> _boolArgBoolRet;
