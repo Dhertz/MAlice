@@ -51,3 +51,11 @@ void SymbolTable::printCurrLevelAndEnclosingLevels() {
 boost::shared_ptr<SymbolTable> SymbolTable::getEncSymTable() {
 	return _encSymTable;
 }
+
+void SymbolTable::addChild(boost::shared_ptr<SymbolTable> table) {
+	_children.push_back(table);
+}
+
+vector< boost::shared_ptr<SymbolTable> > SymbolTable::getChildren() {
+	return _children;
+}
