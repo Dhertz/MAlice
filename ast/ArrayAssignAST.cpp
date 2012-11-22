@@ -1,4 +1,5 @@
 #include "ArrayAssignAST.hpp"
+#include <iostream>
 
 ArrayAssignAST::ArrayAssignAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_ptr<ExprAST> element, boost::shared_ptr<ExprAST> value, boost::shared_ptr<ASTNode> parent, int lineNo) : ASTNode(st, parent, lineNo) {
 	_st = st;

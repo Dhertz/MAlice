@@ -1,4 +1,5 @@
 #include "SymbolTable.hpp"
+#include <iostream>
 
 SymbolTable::SymbolTable(boost::shared_ptr<SymbolTable> st) {
 	_encSymTable = st;

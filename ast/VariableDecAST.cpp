@@ -1,4 +1,5 @@
 #include "VariableDecAST.hpp"
+#include <iostream>
 
 VariableDecAST::VariableDecAST(boost::shared_ptr<SymbolTable> st, string typeName, string varName, boost::shared_ptr<ASTNode> parent, int lineNo) : ASTNode(st, parent, lineNo) {
 	_st = st;
