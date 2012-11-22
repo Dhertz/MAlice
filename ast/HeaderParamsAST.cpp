@@ -33,8 +33,8 @@ void HeaderParamsAST::check() {
 				cerr << "Header type " << typeString << " doesn't exist." << endl;
 			} else if (type->getBaseName() != "Type") {
 				cerr << "Can't have a " << typeString << " parameter." << endl;
-			//} else if (name) {
-			//	cerr << nameString << " has already been declared." << endl;
+			} else if (name) {
+				cerr << nameString << " has already been declared." << endl;
 			} else if (duplicate(i, nameString)) {
 				cerr << "Duplicate parameters " << nameString << "." << endl;
 			} else {
@@ -51,8 +51,8 @@ void HeaderParamsAST::check() {
 			cerr << "Header type " << typeString << " doesn't exist." << endl;
 		} else if (type->getBaseName() != "Type") {
 			cerr << "Can't have a " << typeString << " parameter." << endl;
-		//} else if (name) {
-		//	cerr << nameString << " has already been declared." << endl;
+		} else if (name) {
+			cerr << nameString << " has already been declared." << endl;
 		} else if (duplicate(i, nameString)) {
 			cerr << "Duplicate parameters " << nameString << "." << endl;
 		} else {
