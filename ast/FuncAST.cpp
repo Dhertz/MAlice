@@ -29,17 +29,21 @@ void FuncAST::parametersTypeCheck(boost::shared_ptr<Callable> function) {
 	vector<boost::shared_ptr<Type> >::iterator j = paramTypes.begin();
 	
 	if (params.size() != paramTypes.size()) {
-		cerr << "Line " << _lineNo << " - " << "Invalid number of arguments for " << _name << " (expected " << paramTypes.size()
-		<< ", got " << params.size() << ")." << endl;
+		cerr << "Invalid number of arguments for " << _name << "(expected " 
+			<< params.size() << ", got " << paramTypes.size() << ")." << endl;
 	}
-	for (; j != paramTypes.end(); ++j) {
-		if(!(*i)) {
+	
+	int minimum = min(params.size(), paramTypes.size());
+	
+	for (int k = 0; k < minimum; ++i, ++j, ++k) {
+		if (!(*i)) {
 			cerr << "Line " << _lineNo << " - " << "Bad parameter type." << endl;
-		} else if(!(*j)) {
+		} else if (!(*j)) {
 			cerr << "Line " << _lineNo << " - " << "Bad parameter type." << endl;
+		} else if (!(*i)->getTypeName()) {
+			cerr << "Line " << _lineNo << " - " << "Parameter has no type." << endl;
 		} else if ((*i)->getTypeName()->getBaseName() != (*j)->getBaseName()) {
 			cerr << "Line " << _lineNo << " - " << "Type mismatch for " << _name << "." << endl;
 		}
-		++i;
 	}
 }

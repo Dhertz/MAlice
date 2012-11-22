@@ -24,9 +24,14 @@ void FuncDecAST::check() {
 		vector< boost::shared_ptr<Param> > v = _params->getParams();
 		vector< boost::shared_ptr<Param> >::iterator param;
 
-		for (param = v.begin(); param < v.end(); param++) {
-			boost::shared_ptr<Identifier> var(new Variable((*param)->getTypeName()));
-			_st->add((*param)->getName(), var);
+		for (param=v.begin(); param != v.end(); param++) {
+			if((*param)->getTypeName()->getTypeName() == "Array") {
+				boost::shared_ptr<Identifier> arr(new Array((*param)->getTypeName()));
+				_st->add((*param)->getName(), arr);
+			} else {
+				boost::shared_ptr<Identifier> var(new Variable((*param)->getTypeName()));
+				_st->add((*param)->getName(), var);
+			}
 		}
 
 		boost::shared_ptr<Type> typeCasted = boost::shared_polymorphic_downcast<Type>(type);
@@ -38,10 +43,6 @@ void FuncDecAST::check() {
 
 string FuncDecAST::getNodeName() {
 	return "FuncDec";
-}
-
-string FuncDecAST::getReturnType() {
-	return _returnType;
 }
 
 string FuncDecAST::getFuncName() {

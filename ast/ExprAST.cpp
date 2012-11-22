@@ -101,17 +101,30 @@ void ExprAST::check() {
 		}
 	} else if (tok == "VAR") {
 		// Variable reference, evaluates to variable's type
+		// Also allowed to be an array, so that function calls with array arguments are allowed
 
 		string varName = createStringFromTree(childByNum(root, 0));
 
 		boost::shared_ptr<Identifier> varIdent = _st->lookupCurrLevelAndEnclosingLevels(varName);
 		if (!varIdent) {
 			cerr << "Line " << _lineNo << " - " << varName << " is not in scope" << endl;
-		} else if (varIdent->getBaseName() != "Variable") {
-			cerr << "Line " << _lineNo << " - " << varName << " is not a variable. It is a " << varIdent->getBaseName() << "." << endl;
 		} else {
-			boost::shared_ptr<Variable> var = boost::shared_polymorphic_downcast<Variable>(varIdent);
-			_type = var->getTypeName();
+			string baseName = varIdent->getBaseName();
+
+			if (baseName == "Type") {
+				boost::shared_ptr<Type> varType = boost::shared_polymorphic_downcast<Type>(varIdent);
+				if (varType->getTypeName() != "Array") {
+					cerr << varName << " is not a variable. It is a " << varIdent->getBaseName() << "." << endl;
+				} else {
+					boost::shared_ptr<Array> arr = boost::shared_polymorphic_downcast<Array>(varType);
+					_type = arr->getElemType();
+				}
+			} else if (baseName == "Variable") {
+				boost::shared_ptr<Variable> var = boost::shared_polymorphic_downcast<Variable>(varIdent);
+				_type = var->getTypeName();
+			} else {
+				cerr << varName << " is not a variable. It is a " << varIdent->getBaseName() << "." << endl;
+			}
 		}
 	} else if (tok == "ARRMEMBER") {
 		// Array member reference, evaluates to array's element type
@@ -119,14 +132,15 @@ void ExprAST::check() {
 		string arrName = createStringFromTree(childByNum(root, 0));
 
 		boost::shared_ptr<Identifier> arrIdent = _st->lookupCurrLevelAndEnclosingLevels(arrName);
+
 		if (!arrIdent) {
 			cerr << "Line " << _lineNo << " - " << arrName << " is not in scope" << endl;
 		} else if (arrIdent->getBaseName() != "Type") {
-			cerr << "Line " << _lineNo << " - " << arrName << " is not an array" << endl;
+			cerr << "Line " << _lineNo << " - " << arrName << " is not an array (expected BaseName of Type, got " << arrIdent->getBaseName() << ")" << endl;
 		} else {
 			boost::shared_ptr<Type> arrType = boost::shared_polymorphic_downcast<Type>(arrIdent);
 			if (arrType->getTypeName() != "Array") {
-				cerr << "Line " << _lineNo << " - " << arrName << " is not an array" << endl;
+				cerr << "Line " << _lineNo << " - " << arrName << " is not an array (expected TypeName of Array, got "<< arrType->getTypeName() << ")" << endl;
 			} else {
 				boost::shared_ptr<Array> arr = boost::shared_polymorphic_downcast<Array>(arrIdent);
 

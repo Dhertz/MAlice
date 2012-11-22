@@ -13,16 +13,17 @@ void ArrayDecAST::check() {
 	boost::shared_ptr<Identifier> type = _st->lookupCurrLevelAndEnclosingLevels(_elemType);
 	boost::shared_ptr<Identifier> name = _st->lookupCurrLevelOnly(_name);
 	
+	// Not sure if I fixed this merge conflict correctly - may have deleted some error cases by mistake - Owen
 	if (!type) {
 		cerr << "Line " << _lineNo << " - " << "Unknown identifier used as type." << endl;
 	} else if (type->getBaseName() != "Type") {
 		cerr << "Line " << _lineNo << " - " << "Not a type" << endl;
 	} else if (name) {
 		cerr << "Line " << _lineNo << " - " << "Variable already declared" << endl;
-	} else if(!_length || !_length->getTypeName()) {
+	} else if (!_length) {
 		cerr << "Line " << _lineNo << " - " << "Array " << _name << " has no length." << endl;
-
-	// Charlie: is the double getTypeName safe here without casting to Type first?
+	} else if (!_length->getTypeName()) {
+		cerr << "Line " << _lineNo << " - " << "Array " << _name << " has no length." << endl;
 	} else if ("Number" != _length->getTypeName()->getTypeName()) {
 		cerr << "Line " << _lineNo << " - " << "Invalid array length";
 	} else {

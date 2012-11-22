@@ -5,6 +5,7 @@
 #include "CallParamsAST.hpp"
 #include "../idents/Param.hpp"
 #include "../idents/Function.hpp"
+#include <algorithm>
 #include <vector>
 #include <iostream>
 

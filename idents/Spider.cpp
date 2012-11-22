@@ -15,5 +15,5 @@ boost::shared_ptr<Type> Spider::getElemType() {
 }
 
 string Spider::getTypeName() {
-	return "Array";
+	return "Spider";
 }
