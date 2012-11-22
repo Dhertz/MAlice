@@ -20,11 +20,11 @@ HeaderParamsAST::HeaderParamsAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE
 
 void HeaderParamsAST::check() {
 
-	for (int i = 0; i+1 < _tree->getChildCount(_tree); i=2+i) {
+	for (int i = 0; i + 1 < _tree->getChildCount(_tree); i += 2) {
 
 		string typeString = createStringFromTree(childByNum(_tree, i));
-		if(typeString == "spider") {
-			i++;
+		if (typeString == "spider") {
+			++i;
 			typeString = createStringFromTree(childByNum(_tree, i));
 			string nameString = createStringFromTree(childByNum(_tree, i+1));
 			boost::shared_ptr<Identifier> type = _st->lookupCurrLevelAndEnclosingLevels(typeString);
