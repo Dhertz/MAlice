@@ -14,6 +14,7 @@ class Function : public Callable {
 public:
 	Function(boost::shared_ptr<SymbolTable> st, vector< boost::shared_ptr<Param> > params, boost::shared_ptr<Type> returnType);
 	boost::shared_ptr<Type> getTypeName();
+	string getCallableFuncOrProc();
 };
 
 #endif

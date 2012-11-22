@@ -16,3 +16,7 @@ SymbolTable Callable::getTable() {
 string Callable::getBaseName() {
     return "Callable";
 }
+
+string Callable::getCallableFuncOrProc() {
+	return "Callable";
+}

@@ -2,3 +2,4 @@ TODO list:
 Part 2:
 	- Write tool for semantic analysis
 	- Replace string getID() methods with enum return type, and better method name
+	- Make sure strings can't be in the base case of recursive ExprAST

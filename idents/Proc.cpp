@@ -4,3 +4,7 @@ Proc::Proc(boost::shared_ptr<SymbolTable> st, vector< boost::shared_ptr<Param> >
 	_params = params;
 	_st = st;
 }
+
+string Proc::getCallableFuncOrProc() {
+	return "Proc";
+}

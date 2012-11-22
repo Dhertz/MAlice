@@ -11,6 +11,7 @@ class Proc : public Callable {
 
 public:
 	Proc(boost::shared_ptr<SymbolTable> st, vector< boost::shared_ptr<Param> > params);
+	string getCallableFuncOrProc();
 };
 
 #endif
