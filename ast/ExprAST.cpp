@@ -119,14 +119,15 @@ void ExprAST::check() {
 		string arrName = createStringFromTree(childByNum(root, 0));
 
 		boost::shared_ptr<Identifier> arrIdent = _st->lookupCurrLevelAndEnclosingLevels(arrName);
+		cout << "Array identifier is at " << arrIdent << endl;
 		if (!arrIdent) {
 			cerr << arrName << " is not in scope" << endl;
 		} else if (arrIdent->getBaseName() != "Type") {
-			cerr << arrName << " is not an array" << endl;
+			cerr << arrName << " is not an array (expected BaseName of Type, got " << arrIdent->getBaseName() << ")" << endl;
 		} else {
 			boost::shared_ptr<Type> arrType = boost::shared_polymorphic_downcast<Type>(arrIdent);
 			if (arrType->getTypeName() != "Array") {
-				cerr << arrName << " is not an array" << endl;
+				cerr << arrName << " is not an array (expected TypeName of Array, got "<< arrType->getTypeName() << ")" << endl;
 			} else {
 				boost::shared_ptr<Array> arr = boost::shared_polymorphic_downcast<Array>(arrIdent);
 
