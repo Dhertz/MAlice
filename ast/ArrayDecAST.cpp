@@ -18,6 +18,8 @@ void ArrayDecAST::check() {
 		cerr << "Not a type" << endl;
 	} else if (name) {
 		cerr << "Variable already declared" << endl;
+	} else if(!_length || !_length->getTypeName()) {
+		cerr << "Array " << _name << " has no length." << endl;
 
 	// Charlie: is the double getTypeName safe here without casting to Type first?
 	} else if ("Number" != _length->getTypeName()->getTypeName()) {

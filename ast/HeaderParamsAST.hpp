@@ -5,6 +5,7 @@
 #include <antlr3.h>
 #include <vector>
 #include "../idents/Param.hpp"
+#include "../idents/Spider.hpp"
 
 class HeaderParamsAST : public ASTNode {
 	boost::shared_ptr<SymbolTable> _st;

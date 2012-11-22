@@ -34,6 +34,8 @@ void FuncAST::parametersTypeCheck(boost::shared_ptr<Callable> function) {
 	for (; j != paramTypes.end(); ++j) {
 		if(!(*i)) {
 			cerr << "Bad parameter type." << endl;
+		} else if(!(*j)) {
+			cerr << "Bad parameter type." << endl;
 		} else if ((*i)->getTypeName()->getBaseName() != (*j)->getBaseName()) {
 			cerr << "Type mismatch for " << _name << "." << endl;
 		}
