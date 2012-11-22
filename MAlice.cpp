@@ -68,7 +68,8 @@ void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
 	pANTLR3_BASE_TREE tree = r.tree;
 
 	if (parser->pParser->rec->getNumberOfSyntaxErrors(parser->pParser->rec) > 0) {
-		printError("Syntax errors found. Stopping.");
+		cerr << "Syntax errors found. Stopping." << endl;
+		return;
 	}
 
 	if (doPrintTree) {
@@ -92,7 +93,7 @@ void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
 
 int main(int argc, char* argv[]) {
 	for (int i = 1; i < argc; i++) {
-		parseFile((pANTLR3_UINT8) argv[i], false);
+		parseFile((pANTLR3_UINT8) argv[i], true);
 		cout << endl;
 	}
 

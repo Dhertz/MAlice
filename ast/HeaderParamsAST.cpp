@@ -39,26 +39,27 @@ void HeaderParamsAST::check() {
 				cerr << "Duplicate parameters " << nameString << "." << endl;
 			} else {
 				boost::shared_ptr<Type> typeCasted = boost::shared_polymorphic_downcast<Type>(type);
-				boost::shared_ptr<Type> spider(new Spider(typeCasted));
-				boost::shared_ptr<Param> p(new Param(spider, nameString));
+				boost::shared_ptr<Type> array(new Array(typeCasted));
+				boost::shared_ptr<Param> p(new Param(array, nameString));
 				_params.push_back(p);
 			}
-		}
-		string nameString = createStringFromTree(childByNum(_tree, i+1));
-		boost::shared_ptr<Identifier> type = _st->lookupCurrLevelAndEnclosingLevels(typeString);
-		boost::shared_ptr<Identifier> name = _st->lookupCurrLevelOnly(nameString);
-		if(!type) {
-			cerr << "Header type " << typeString << " doesn't exist." << endl;
-		} else if (type->getBaseName() != "Type") {
-			cerr << "Can't have a " << typeString << " parameter." << endl;
-		} else if (name) {
-			cerr << nameString << " has already been declared." << endl;
-		} else if (duplicate(i, nameString)) {
-			cerr << "Duplicate parameters " << nameString << "." << endl;
 		} else {
-			boost::shared_ptr<Type> typeCasted = boost::shared_polymorphic_downcast<Type>(type);
-			boost::shared_ptr<Param> p(new Param(typeCasted, nameString));
-			_params.push_back(p);
+			string nameString = createStringFromTree(childByNum(_tree, i+1));
+			boost::shared_ptr<Identifier> type = _st->lookupCurrLevelAndEnclosingLevels(typeString);
+			boost::shared_ptr<Identifier> name = _st->lookupCurrLevelOnly(nameString);
+			if(!type) {
+				cerr << "Header type " << typeString << " doesn't exist." << endl;
+			} else if (type->getBaseName() != "Type") {
+				cerr << "Can't have a " << typeString << " parameter." << endl;
+			} else if (name) {
+				cerr << nameString << " has already been declared." << endl;
+			} else if (duplicate(i, nameString)) {
+				cerr << "Duplicate parameters " << nameString << "." << endl;
+			} else {
+				boost::shared_ptr<Type> typeCasted = boost::shared_polymorphic_downcast<Type>(type);
+				boost::shared_ptr<Param> p(new Param(typeCasted, nameString));
+				_params.push_back(p);
+			}
 		}
 	}
 }

@@ -1,6 +1,6 @@
 #include "Spider.hpp"
 
-Spider::Spider(boost::shared_ptr<Type> elemType) : Variable(elemType) {
+Spider::Spider(boost::shared_ptr<Type> elemType) {
 	_elemType = elemType;
 	boost::shared_ptr<Array> a(new Array(_elemType));
 	_array = a;
@@ -15,9 +15,5 @@ boost::shared_ptr<Type> Spider::getElemType() {
 }
 
 string Spider::getTypeName() {
-	return "Array";
-}
-
-string Spider::getBaseName() {
-	return "Type";
+	return "Spider";
 }
