@@ -1,12 +1,16 @@
 #include "ExprAST.hpp"
-#include "../idents/Variable.hpp"
-#include "../idents/Letter.hpp"
-#include "../idents/Sentence.hpp"
-#include "../idents/Number.hpp"
+#include "CallParamsAST.hpp"
+#include "FuncAST.hpp"
 #include "../idents/Array.hpp"
 #include "../idents/Boolean.hpp"
-#include "../idents/Function.hpp"
 #include "../idents/Callable.hpp"
+#include "../idents/Function.hpp"
+#include "../idents/Letter.hpp"
+#include "../idents/Number.hpp"
+#include "../idents/Sentence.hpp"
+#include "../idents/Variable.hpp"
+
+#include <iostream>
 
 ExprAST::ExprAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree, boost::shared_ptr<ASTNode> parent, int lineNo) : ASTNode(st, parent, lineNo) {
 	_boolArgBoolRet.insert("!");

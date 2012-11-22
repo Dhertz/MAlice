@@ -5,7 +5,6 @@
 
 class Sentence : public Type {
 public:
-	Sentence();
 	string getTypeName();
 };
 

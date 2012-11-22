@@ -1,4 +1,5 @@
 #include "HeaderParamsAST.hpp"
+#include "../idents/Array.hpp"
 
 HeaderParamsAST::HeaderParamsAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree, boost::shared_ptr<ASTNode> parent, int lineNo) : ASTNode(st, parent, lineNo) {
 	_st = st;
@@ -9,7 +10,6 @@ HeaderParamsAST::HeaderParamsAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE
 
 
 void HeaderParamsAST::check() {
-
 	for (int i = 0; i + 1 < _tree->getChildCount(_tree); i += 2) {
 
 		string typeString = TreeUtils::createStringFromTree(TreeUtils::childByNum(_tree, i));

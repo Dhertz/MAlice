@@ -1,9 +1,7 @@
-#ifndef Proc_H
-#define Proc_H
+#ifndef PROC_H
+#define PROC_H
 
 #include "Callable.hpp"
-
-using namespace std;
 
 class Proc : public Callable {
 	vector< boost::shared_ptr<Param> > _params;

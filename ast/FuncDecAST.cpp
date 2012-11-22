@@ -1,4 +1,5 @@
 #include "FuncDecAST.hpp"
+#include "../idents/Array.hpp"
 #include "../idents/Variable.hpp"
 
 FuncDecAST::FuncDecAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_ptr<HeaderParamsAST> params, string returnType, boost::shared_ptr<ASTNode> parent, int lineNo) : ASTNode(st, parent, lineNo) {

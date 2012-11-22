@@ -2,9 +2,6 @@
 #define FUNCTION_H
 
 #include "Callable.hpp"
-#include "Type.hpp"
-
-using namespace std;
 
 class Function : public Callable {
 	boost::shared_ptr<Type> _returnType;

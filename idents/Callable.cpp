@@ -13,10 +13,8 @@ SymbolTable Callable::getTable() {
     return _st;
 }
 
+// TODO: looks like these both have a similar purpose, are they both needed? ~Charlie
+
 string Callable::getBaseName() {
     return "Callable";
-}
-
-string Callable::getCallableFuncOrProc() {
-	return "Callable";
 }

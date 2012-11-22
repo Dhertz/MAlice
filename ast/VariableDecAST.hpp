@@ -11,9 +11,9 @@ class VariableDecAST : public ASTNode {
 	string _varName;
 	boost::shared_ptr<Variable> _varObj;
     int _lineNo;
+	void check();
 public:
 	VariableDecAST(boost::shared_ptr<SymbolTable> st, string typeName, string varName, boost::shared_ptr<ASTNode> parent, int lineNo);
-	void check();
 };
 
 #endif
