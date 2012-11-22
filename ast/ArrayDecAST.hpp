@@ -12,9 +12,9 @@ class ArrayDecAST : public ASTNode {
 	string _elemType;
 	boost::shared_ptr<Array> _arrObj;
     int _lineNo;
+	void check();
 public:
 	ArrayDecAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr, string name, string typeName, boost::shared_ptr<ASTNode> parent, int lineNo);
-	void check();
 };
 
 #endif

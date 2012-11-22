@@ -22,11 +22,11 @@ void FuncAST::check() {
 }
 
 void FuncAST::parametersTypeCheck(boost::shared_ptr<Callable> function) {
-	vector<boost::shared_ptr<Param> > params = function->getParams();
-	vector<boost::shared_ptr<Param> >::iterator i = params.begin();
+	vector< boost::shared_ptr<Param> > params = function->getParams();
+	vector< boost::shared_ptr<Param> >::iterator i = params.begin();
 	
-	vector<boost::shared_ptr<Type> > paramTypes = _params->getTypes();
-	vector<boost::shared_ptr<Type> >::iterator j = paramTypes.begin();
+	vector< boost::shared_ptr<Type> > paramTypes = _params->getTypes();
+	vector< boost::shared_ptr<Type> >::iterator j = paramTypes.begin();
 	
 	if (params.size() != paramTypes.size()) {
 		cerr << "Invalid number of arguments for " << _name << "(expected " 

@@ -6,3 +6,7 @@ Part 2:
 	- Check EXACTLY ONE hatta exists, has no arguments, and is void
 	- Check all things that require a "Number" and see if they can actually take a "Letter" too
 	  (Inc/Dec spring to mind)
+	- Order makefile objects more logically
+	- Lose the constructor arguments on Number?
+	- Owen's comment in ASTNode.cpp?
+	- PrintAST check() looks a bit sparse?

@@ -5,7 +5,6 @@
 
 class Boolean : public Type {
 public:
-	Boolean();
 	string getTypeName();
 };
 

@@ -1,26 +1,18 @@
 #ifndef FUNC_AST
 #define FUNC_AST
 
-#include "ASTNode.hpp"
 #include "CallParamsAST.hpp"
-#include "../idents/Param.hpp"
-#include "../idents/Function.hpp"
-#include <algorithm>
-#include <vector>
-#include <iostream>
-
-// Forward declartion needed to avoid circular class declaration in ExprAST
-class CallParamsAST;
+#include "../idents/Callable.hpp"
 
 class FuncAST : public ASTNode {
 	boost::shared_ptr<SymbolTable> _st;
 	string _name;
 	boost::shared_ptr<CallParamsAST> _params;
     int _lineNo;
+	void parametersTypeCheck(boost::shared_ptr<Callable> function);
+	void check();
 public:
 	FuncAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_ptr<CallParamsAST> params, boost::shared_ptr<ASTNode> parent, int lineNo);
-	void check();
-	void parametersTypeCheck(boost::shared_ptr<Callable> function);
 };
 
 #endif

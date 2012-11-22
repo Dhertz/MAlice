@@ -5,7 +5,6 @@
 
 class Letter : public Type {
 public:
-	Letter();
 	string getTypeName();
 };
 
