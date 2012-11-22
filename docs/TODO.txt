@@ -1,11 +1,8 @@
 TODO list:
 Part 2:
-	- Write tool for semantic analysis
-	- Replace string getID() methods with enum return type, and better method name
+	- Better method names (getTypeName on Expr should be getType, for eg)
 	- Make sure strings can't be in the base case of recursive ExprAST
-	- Check EXACTLY ONE hatta exists, has no arguments, and is void
-	- Check all things that require a "Number" and see if they can actually take a "Letter" too
-	  (Inc/Dec spring to mind)
+	- Check all things that require a "Number" and see if they can actually take a "Letter" too (Inc/Dec spring to mind)
 	- Order makefile objects more logically
 	- Lose the constructor arguments on Number?
 	- Owen's comment in ASTNode.cpp?
@@ -13,3 +10,7 @@ Part 2:
 	- ReturnAST - check safety, the comment scares me :p
 	- Stdin check needs much more work (check it's assignable, so variable or array member I think). Current cerr makes no sense either
 	- See comment in VarAssign
+	- Better var names when adding to top ST
+	- Watch out for comments that we won't want to submit (eg "These includes are well ugly")
+	- General style standardisation
+	- Cheeky global Ctrl+F to check all Boost constructions are safe
