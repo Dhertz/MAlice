@@ -29,7 +29,7 @@ void VarAssignAST::check() {
 		} else if (_expr->getTypeName()) {
 			// _expr points to a type, so we can check it properly
 			if (_expr->getTypeName()->getTypeName() != varCasted->getTypeName()->getTypeName()) {
-				cerr << "lhs (" << varCasted->getTypeName()->getTypeName() << ") and rhs (" << _expr->getTypeName() << ") not type compatible" << endl;		
+				cerr << "lhs (" << varCasted->getTypeName()->getTypeName() << ") and rhs (" << _expr->getTypeName()->getTypeName() << ") not type compatible" << endl;		
 			} else {
 				_varObj = varCasted;
 			}

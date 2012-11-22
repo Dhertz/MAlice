@@ -147,7 +147,6 @@ void ExprAST::check() {
 		// Recursive case, will resolve to a boolean or number
 
 		boost::shared_ptr<Type> retType = recurseTree(root, "*");
-		assert(retType);
 		_type = retType;
 	}
 }

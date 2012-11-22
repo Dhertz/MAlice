@@ -38,3 +38,11 @@ void FuncDecAST::check() {
 string FuncDecAST::getNodeName() {
 	return "FuncDec";
 }
+
+string FuncDecAST::getReturnType() {
+	return _returnType;
+}
+
+string FuncDecAST::getFuncName() {
+	return _name;
+}

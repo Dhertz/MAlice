@@ -16,6 +16,8 @@ public:
 	FuncDecAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_ptr<HeaderParamsAST> params, string returnType, boost::shared_ptr<ASTNode> parent);
 	void check();
 	string getNodeName();
+	string getReturnType();
+	string getFuncName();
 };
 
 #endif

@@ -10,7 +10,7 @@ void WhileAST::check() {
  	if(!_expr){
  		cerr << "Invalid conditional in while header." << endl;
  	} else if(_expr->getTypeName()->getTypeName() != "Boolean") {
- 		cerr << "While condition must be a boolean, not a " 
- 			<< _expr->getTypeName()->getTypeName() << "." << endl;
+ 		cerr << "While condition must be a boolean, currently it's a " 
+ 			<< _expr->getTypeName()->getBaseName() << "." << endl;
  	}
  }

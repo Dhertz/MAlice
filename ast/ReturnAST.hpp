@@ -10,6 +10,7 @@ class ReturnAST : public ASTNode {
 public:
 	ReturnAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr, boost::shared_ptr<ASTNode> parent);
 	void check();
+	void checkFunctionType(boost::shared_ptr<ASTNode> parent);
 };
 
 #endif
