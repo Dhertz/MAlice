@@ -35,6 +35,7 @@ tokens {
       ELSEIF;
     EXPR;
     VAR;
+    CHAR;
     NS;
 }
 
@@ -324,8 +325,8 @@ atom: (ID APOSTROPHE) => ID APOSTROPHE 's' expression 'piece' -> ^(ARRMEMBER ID 
       (ID callParams) => ID callParams -> ^(FUNC ID callParams) |
       ID -> ^(VAR ID) | 
       INT | 
-      (APOSTROPHE) (.) (APOSTROPHE) | 
-      STRING | 
+      (APOSTROPHE^) (.) (APOSTROPHE!) | 
+      (DQ^) ( ~('"') )* (DQ!) | 
       '(' prec11 ')' -> prec11;
            
 delimiter: '.' | ',' | 'and' | 'but' | 'then';
@@ -341,7 +342,7 @@ COMMENT: '###' ~('\n'|'\r')* '\r'? '\n' {$channel=HIDDEN;};
 
 WS: (' ' | '\t' | '\r' | '\n') {$channel=HIDDEN;};
 
-STRING: '"' ( ~('"') )* '"';
+DQ: '"';
 
 APOSTROPHE: '\'';
 
