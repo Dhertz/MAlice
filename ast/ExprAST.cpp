@@ -211,6 +211,11 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree, string expe
 		}
 
 		evaluatedType = recurseTree(arg, expEvalType);
+		if (!evaluatedType) {
+			// Error has already been outputted, we just need to break out of the parent call too
+			return boost::shared_ptr<Type>();
+		}
+
 
 		if (expectedType != "*" && expectedType != evaluatedType->getTypeName()) {
 			cerr << "Line " << _lineNo << " - " << "Argument to " << op << " should be a " << expectedType << ", but got " << evaluatedType->getTypeName() << endl;
@@ -234,6 +239,11 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree, string expe
 			// return type is type of either arg
 			lhsType = recurseTree(lhs, "*");
 			rhsType = recurseTree(rhs, "*");
+			if (!lhsType || !rhsType) {
+				// Error has already been outputted, we just need to break out of the parent call too
+				return boost::shared_ptr<Type>();
+			}
+
 			if (lhsType->getTypeName() != rhsType->getTypeName()) {
 				cerr << "Line " << _lineNo << " - " << "Operand type mismatch in " << lhsTok << " " << op << " " << rhsTok
 					<< " (" << lhsType->getTypeName() << " isn't the same as " << rhsType->getTypeName() << ")" << endl;
@@ -253,6 +263,12 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree, string expe
 			} else {
 				lhsType = recurseTree(lhs, "*");
 				rhsType = recurseTree(rhs, "*");
+
+				if (!lhsType || !rhsType) {
+					// Error has already been outputted, we just need to break out of the parent call too
+					return boost::shared_ptr<Type>();
+				}
+
 				if (lhsType->getTypeName() != rhsType->getTypeName()) {
 					cerr << "Line " << _lineNo << " - " << "Operand type mismatch in " << lhsTok << " " << op << " " << rhsTok
 						<< " (" << lhsType->getTypeName() << " isn't the same as " << rhsType->getTypeName() << ")" << endl;
