@@ -65,18 +65,19 @@ void ExprAST::check() {
 		boost::shared_ptr<CallParamsAST> callParamsNode = boost::shared_ptr<CallParamsAST>(new CallParamsAST(_st, cplTree, _parent, _lineNo));
 		FuncAST funcCheck(_st, funcName, callParamsNode, _parent, _lineNo);
 
-		// Charlie: is this cast actually safe?
-		// If FuncAST doesn't return any errors it is, but this cast kind of works on the assumption that there'd
-		// be an exit(1) or something if FuncAST errors. What if funcName is a variable, for example?
 		boost::shared_ptr<Identifier> funcIdent = _st->lookupCurrLevelAndEnclosingLevels(funcName);
-		boost::shared_ptr<Callable> funcCallable = boost::shared_polymorphic_downcast<Callable>(funcIdent);
+		if (funcIdent->getBaseName() == "Callable") {
+			boost::shared_ptr<Callable> funcCallable = boost::shared_polymorphic_downcast<Callable>(funcIdent);
 
-		if (funcCallable->getCallableFuncOrProc() == "Proc") {
-			// Error case - expression can't be a proc
-			cerr << "Line " << _lineNo << " - " << "Procedure " << funcName << " cannot be an expression, since it has no return type" << endl;
-		} else if (funcCallable->getCallableFuncOrProc() == "Function") {
-			boost::shared_ptr<Function> func = boost::shared_polymorphic_downcast<Function>(funcIdent);
-			_type = func->getTypeName();
+			if (funcCallable->getCallableFuncOrProc() == "Proc") {
+				// Error case - expression can't be a proc
+				cerr << "Line " << _lineNo << " - " << "Procedure " << funcName << " cannot be an expression, since it has no return type" << endl;
+			} else if (funcCallable->getCallableFuncOrProc() == "Function") {
+				boost::shared_ptr<Function> func = boost::shared_polymorphic_downcast<Function>(funcIdent);
+				_type = func->getTypeName();
+			}
+		} else {
+			// Don't think we need anything here, since the error will have already been outputted by FuncAST?
 		}
 	} else if (tok == "VAR") {
 		// Variable reference, evaluates to variable's type
@@ -126,12 +127,15 @@ void ExprAST::check() {
 				pANTLR3_BASE_TREE index = TreeUtils::childByNum(root, 1);
 				ExprAST indexCheck(_st, index, _parent, _lineNo);
 
-				// Charlie: as with the comment on line 68 above, should probably check that indexCheck isn't null
-				// before calling getType on it
-				if (indexCheck.getTypeName()->getTypeName() != "Number") {
-					cerr << "Line " << _lineNo << " - " << "Array index must evaluate to a Number." << endl;
+				if (indexCheck.getTypeName()) {
+					if (indexCheck.getTypeName()->getTypeName() != "Number") {
+						cerr << "Line " << _lineNo << " - " << "Array index must evaluate to a Number." << endl;
+					} else {
+						_type = arr->getElemType();
+					}
 				} else {
-					_type = arr->getElemType();
+					// Don't think we need anything here, because an error will have already
+					// been outputted by indexCheck if it ends up being null
 				}
 			}
 		}
@@ -198,9 +202,13 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree, string expe
 			cerr << "Line " << _lineNo << " - can't have strings as operator arguments!" << endl;
 			return boost::shared_ptr<Type>();
 		} else {
-			cout << "Dealing with unary operator " << op << endl;
 			ExprAST checkExp(_st, tree, _parent, _lineNo);
 			evaluatedType = checkExp.getTypeName();
+
+			if (!evaluatedType) {
+				// Error has already been outputted, we just need to break out of the parent call too
+				return boost::shared_ptr<Type>();
+			}
 
 			if (expectedType != "*" && expectedType != evaluatedType->getTypeName()) {
 				cerr << "Line " << _lineNo << " - " << "Expected argument expression to " << op << " to evaluate to a " << expectedType << ", but got a " << evaluatedType->getTypeName() << endl;
@@ -215,7 +223,6 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree, string expe
 			// Error has already been outputted, we just need to break out of the parent call too
 			return boost::shared_ptr<Type>();
 		}
-
 
 		if (expectedType != "*" && expectedType != evaluatedType->getTypeName()) {
 			cerr << "Line " << _lineNo << " - " << "Argument to " << op << " should be a " << expectedType << ", but got " << evaluatedType->getTypeName() << endl;
@@ -297,6 +304,11 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree, string expe
 		} else {
 			ExprAST checkExp(_st, tree, _parent, _lineNo);
 			boost::shared_ptr<Type> evaluatedType = checkExp.getTypeName();
+
+			if (!evaluatedType) {
+				// Error has already been outputted, we just need to break out of the parent call too
+				return boost::shared_ptr<Type>();
+			}
 
 			if (expectedType != "*" && expectedType != evaluatedType->getTypeName()) {
 				cerr << "Line " << _lineNo << " - " << "Expected argument expression to " << op << " to evaluate to a " << expectedType << ", but got a " << evaluatedType->getTypeName() << endl;
