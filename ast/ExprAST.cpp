@@ -142,8 +142,13 @@ void ExprAST::check() {
 		
 	} else if (tok == "'") {
 		// Char of form 'x', evaluates to a Letter
-		boost::shared_ptr<Type> letter = boost::shared_ptr<Type>(new Letter);
-		_type = letter;
+		string let = TreeUtils::createStringFromTree(TreeUtils::childByNum(root, 0));
+		if (let.length() != 1) {
+			cerr << "Line " << _lineNo << " - expected letter inside single quotes, got a sentence" << endl;
+		} else {
+			boost::shared_ptr<Type> letter = boost::shared_ptr<Type>(new Letter);
+			_type = letter;
+		}
 	} else if (tok == "\"") {
 		// String of form "foo", evaluates to a Sentence
 		boost::shared_ptr<Type> sentence = boost::shared_ptr<Type>(new Sentence);
@@ -187,8 +192,12 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree, string expe
 			expEvalType = "Boolean";
 		} else if (op == "'") {
 			// Letter base case
-			// Character is at TreeUtils::createStringFromTree(arg) when we come back for code gen
-			boost::shared_ptr<Type> letter = boost::shared_ptr<Type>(new Letter);
+
+			string let = TreeUtils::createStringFromTree(arg);
+			if (let.length() != 1) {
+				cerr << "Line " << _lineNo << " - expected letter inside single quotes, got a sentence" << endl;
+				return boost::shared_ptr<Type>();
+			}
 
 			if (expectedType != "*" && expectedType != "Letter") {
 				// Obviously the op bit here needs improving in the error message
@@ -196,6 +205,7 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree, string expe
 				return boost::shared_ptr<Type>();
 			}
 
+			boost::shared_ptr<Type> letter = boost::shared_ptr<Type>(new Letter);
 			return letter;
 		} else if (op == "\"") {
 			// String base case, error case
