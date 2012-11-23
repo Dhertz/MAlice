@@ -11,7 +11,7 @@ ProcDecAST::ProcDecAST(boost::shared_ptr<SymbolTable> st, string name, boost::sh
 
 void ProcDecAST::check() {
 	// Needs checking (may have to be more levels)
-	boost::shared_ptr<Identifier> name = _st->lookupCurrLevelOnly(_name);
+	boost::shared_ptr<Identifier> name = _st->getEncSymTable()->lookupCurrLevelOnly(_name);
 
 	if (name) {
 		cerr << "Line " << _lineNo << " - " << "Procedure name " << _name << " already exists." << endl;

@@ -29,12 +29,11 @@ void FuncAST::parametersTypeCheck(boost::shared_ptr<Callable> function) {
 	vector< boost::shared_ptr<Type> >::iterator j = paramTypes.begin();
 	
 	if (params.size() != paramTypes.size()) {
-		cerr << "Invalid number of arguments for " << _name << "(expected " 
+		cerr << "Line " << _lineNo << " - " << "Invalid number of arguments for " << _name << " (expected " 
 			<< params.size() << ", got " << paramTypes.size() << ")." << endl;
 	}
 	
 	int minimum = min(params.size(), paramTypes.size());
-	
 	for (int k = 0; k < minimum; ++i, ++j, ++k) {
 		if (!(*i)) {
 			cerr << "Line " << _lineNo << " - " << "Bad parameter type." << endl;
@@ -42,8 +41,8 @@ void FuncAST::parametersTypeCheck(boost::shared_ptr<Callable> function) {
 			cerr << "Line " << _lineNo << " - " << "Bad parameter type." << endl;
 		} else if (!(*i)->getTypeName()) {
 			cerr << "Line " << _lineNo << " - " << "Parameter has no type." << endl;
-		} else if ((*i)->getTypeName()->getBaseName() != (*j)->getBaseName()) {
-			cerr << "Line " << _lineNo << " - " << "Type mismatch for " << _name << "." << endl;
+		} else if ((*i)->getTypeName()->getTypeName() != (*j)->getTypeName()) {
+			cerr << "Line " << _lineNo << " - " << "Type mismatch for " << _name << ": argument " << k + 1 << " expects a " << (*i)->getTypeName()->getTypeName() << " but the call was made with a " << (*j)->getTypeName() << endl;
 		}
 	}
 }

@@ -93,7 +93,7 @@ void ExprAST::check() {
 					cerr << varName << " is not a variable. It is a " << varIdent->getBaseName() << "." << endl;
 				} else {
 					boost::shared_ptr<Array> arr = boost::shared_polymorphic_downcast<Array>(varType);
-					_type = arr->getElemType();
+					_type = arr;
 				}
 			} else if (baseName == "Variable") {
 				boost::shared_ptr<Variable> var = boost::shared_polymorphic_downcast<Variable>(varIdent);

@@ -13,7 +13,7 @@ void IfAST::check() {
 	if (!_expr) {
 		cerr << "Line " << _lineNo << " - " << "If conditional is not a proper expression." << endl;
 	} else if (_expr->getTypeName()->getTypeName() != "Boolean") {
-		cerr << "Line " << _lineNo << " - " << "If statement conditional must be of type Boolean, it's of type" <<
+		cerr << "Line " << _lineNo << " - " << "If statement conditional must be of type Boolean, it's of type " <<
 			_expr->getTypeName()->getTypeName() << "." << endl;
 	}
 }
