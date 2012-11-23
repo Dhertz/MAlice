@@ -65,6 +65,9 @@ void ExprAST::check() {
 		boost::shared_ptr<CallParamsAST> callParamsNode = boost::shared_ptr<CallParamsAST>(new CallParamsAST(_st, cplTree, _parent, _lineNo));
 		FuncAST funcCheck(_st, funcName, callParamsNode, _parent, _lineNo);
 
+		// Charlie: is this cast actually safe?
+		// If FuncAST doesn't return any errors it is, but this cast kind of works on the assumption that there'd
+		// be an exit(1) or something if FuncAST errors. What if funcName is a variable, for example?
 		boost::shared_ptr<Identifier> funcIdent = _st->lookupCurrLevelAndEnclosingLevels(funcName);
 		boost::shared_ptr<Callable> funcCallable = boost::shared_polymorphic_downcast<Callable>(funcIdent);
 
@@ -123,7 +126,8 @@ void ExprAST::check() {
 				pANTLR3_BASE_TREE index = TreeUtils::childByNum(root, 1);
 				ExprAST indexCheck(_st, index, _parent, _lineNo);
 
-				// Need to cast to Type before second getTypeName()?
+				// Charlie: as with the comment on line 68 above, should probably check that indexCheck isn't null
+				// before calling getType on it
 				if (indexCheck.getTypeName()->getTypeName() != "Number") {
 					cerr << "Line " << _lineNo << " - " << "Array index must evaluate to a Number." << endl;
 				} else {
@@ -132,11 +136,11 @@ void ExprAST::check() {
 			}
 		}
 		
-	} else if (tok[0] == '\'') {
+	} else if (tok == "'") {
 		// Char of form 'x', evaluates to a Letter
 		boost::shared_ptr<Type> letter = boost::shared_ptr<Type>(new Letter);
 		_type = letter;
-	} else if (tok[0] == '"') {
+	} else if (tok == "\"") {
 		// String of form "foo", evaluates to a Sentence
 		boost::shared_ptr<Type> sentence = boost::shared_ptr<Type>(new Sentence);
 		_type = sentence;
@@ -151,11 +155,19 @@ void ExprAST::check() {
 boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree, string expectedType) {
 	int children = tree->getChildCount(tree);
 	assert (0 <= children && children < 3);
+
 	if (children == 0) {
-		// Base case
+		// Number base case
 
 		// TODO: remove need for constructor arguments here
 		boost::shared_ptr<Type> number = boost::shared_ptr<Type>(new Number(0, 1));
+
+		if (expectedType != "*" && expectedType != "Number") {
+			// Obviously the op bit here needs improving in the error message
+			cerr << "Line " << _lineNo << " - " << "Expected argument expression to evaluate to a " << expectedType << ", but got a Number" << endl;
+			return boost::shared_ptr<Type>();
+		}
+
 		return number;
 	} else if (children == 1) {
 		// Unary operator
@@ -169,7 +181,24 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree, string expe
 			expEvalType = "Number";
 		} else if (_boolArgBoolRet.find(op) != _boolArgBoolRet.end()) {
 			expEvalType = "Boolean";
+		} else if (op == "'") {
+			// Letter base case
+			// Character is at TreeUtils::createStringFromTree(arg) when we come back for code gen
+			boost::shared_ptr<Type> letter = boost::shared_ptr<Type>(new Letter);
+
+			if (expectedType != "*" && expectedType != "Letter") {
+				// Obviously the op bit here needs improving in the error message
+				cerr << "Line " << _lineNo << " - " << "Expected argument expression to " << op << " to evaluate to a " << expectedType << ", but got a Letter" << endl;
+				return boost::shared_ptr<Type>();
+			}
+
+			return letter;
+		} else if (op == "\"") {
+			// String base case, error case
+			cerr << "Line " << _lineNo << " - can't have strings as operator arguments!" << endl;
+			return boost::shared_ptr<Type>();
 		} else {
+			cout << "Dealing with unary operator " << op << endl;
 			ExprAST checkExp(_st, tree, _parent, _lineNo);
 			evaluatedType = checkExp.getTypeName();
 
