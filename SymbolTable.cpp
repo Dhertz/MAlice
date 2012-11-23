@@ -39,7 +39,7 @@ void SymbolTable::printCurrLevelOnly() {
 		boost::shared_ptr<Identifier> obj = it->second;
 		cout << name << ": " << obj << endl;
 	}
-	cout << "Done." << endl;
+	cout << "Done." << endl << endl;
 }
 
 void SymbolTable::printCurrLevelAndEnclosingLevels() {
@@ -47,6 +47,7 @@ void SymbolTable::printCurrLevelAndEnclosingLevels() {
 	for (boost::shared_ptr<SymbolTable> st = shared_from_this(); st; st = st->_encSymTable) {
 		st->printCurrLevelOnly();
 	}
+	cout << "Done." << endl << endl;
 }
 
 boost::shared_ptr<SymbolTable> SymbolTable::getEncSymTable() {

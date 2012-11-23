@@ -35,6 +35,7 @@ tokens {
       ELSEIF;
     EXPR;
     VAR;
+    CHAR;
     NS;
 }
 
@@ -69,12 +70,11 @@ tokens {
             }
         } else {
             fileName = exception->streamName->to8(exception->streamName);
-            ANTLR3_FPRINTF(stderr, "\%s(", fileName->chars);
         }
 
         // Print the line number next
-        ANTLR3_FPRINTF(stderr, "\%i) ", exception->line);
-        ANTLR3_FPRINTF(stderr, " - error \%i : \%s", exception->type, (pANTLR3_UINT8) exception->message);
+        ANTLR3_FPRINTF(stderr, "Line \%i", exception->line);
+        ANTLR3_FPRINTF(stderr, " - \%s", (pANTLR3_UINT8) exception->message);
 
         parser       = (pANTLR3_PARSER) recognizer->super;
         stream       = parser->tstream->istream;
@@ -325,8 +325,8 @@ atom: (ID APOSTROPHE) => ID APOSTROPHE 's' expression 'piece' -> ^(ARRMEMBER ID 
       (ID callParams) => ID callParams -> ^(FUNC ID callParams) |
       ID -> ^(VAR ID) | 
       INT | 
-      (APOSTROPHE) (.) (APOSTROPHE) | 
-      STRING | 
+      (APOSTROPHE^) (.) (APOSTROPHE!) | 
+      (DQ^) ( ~('"') )* (DQ!) | 
       '(' prec11 ')' -> prec11;
            
 delimiter: '.' | ',' | 'and' | 'but' | 'then';
@@ -342,7 +342,7 @@ COMMENT: '###' ~('\n'|'\r')* '\r'? '\n' {$channel=HIDDEN;};
 
 WS: (' ' | '\t' | '\r' | '\n') {$channel=HIDDEN;};
 
-STRING: '"' ( ~('"') )* '"';
+DQ: '"';
 
 APOSTROPHE: '\'';
 

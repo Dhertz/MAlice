@@ -15,8 +15,8 @@ void VarAssignAST::check() {
 	if (!var) {
 		cerr << "Line " << _lineNo << " - " << "Cannot assign to non-exisitant variable " << _varName  << "." << endl;
 	} else if (var->getBaseName() != "Variable") {
-		cerr << "Line " << _lineNo << " - " << "Cannot declare to " << _varName << " as it is a" 
-			<< var->getBaseName() << "." << endl;
+		cerr << "Line " << _lineNo << " - " << "Cannot declare to " << _varName << " as it is a " 
+			<< var->getBaseName() << ", which is not an r-value" << endl;
 	} else {
 		boost::shared_ptr<Variable> varCasted = boost::shared_polymorphic_downcast<Variable>(var);
 

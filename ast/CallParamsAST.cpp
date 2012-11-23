@@ -15,7 +15,6 @@ vector< boost::shared_ptr<Type> > CallParamsAST::getTypes() {
 
 void CallParamsAST::check() {
 	for (int i = 0; i < _tree->getChildCount(_tree); ++i) {
-		// This line number is probably correct, might be worht checking though - Owen
 		boost::shared_ptr<ExprAST> e(new ExprAST(_st, TreeUtils::childByNum(_tree, i), _parent, _lineNo));
 		_types.push_back(e->getTypeName());
 	}

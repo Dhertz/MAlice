@@ -68,7 +68,7 @@ void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
 	lex->free(lex);
 	input->close(input);
 
-	cout << "Done." << endl;
+	cout << endl << "Done." << endl;
 }
 
 int main(int argc, char* argv[]) {

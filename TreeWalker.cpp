@@ -1,4 +1,3 @@
-// These includes are well ugly...
 #include "TreeWalker.hpp"
 #include "TreeUtils.hpp"
 #include "ast/VariableDecAST.hpp"
