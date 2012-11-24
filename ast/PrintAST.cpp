@@ -4,20 +4,7 @@ PrintAST::PrintAST(boost::shared_ptr<SymbolTable> st, string arrayName, boost::s
 	_st = st;
 	_name = arrayName;
 	_element = element;
-}
 
-PrintAST::PrintAST(boost::shared_ptr<SymbolTable> st, string funcName, boost::shared_ptr<CallParamsAST> params, boost::shared_ptr<ASTNode> parent, int lineNo) : ASTNode(st, parent, lineNo) {
-	_st = st;
-	_name = funcName;
-	_params = params;
-}
-
-PrintAST::PrintAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr, boost::shared_ptr<ASTNode> parent, int lineNo) : ASTNode(st, parent, lineNo) {
-	_st = st;
-	_expr = expr;
-}
-
-void PrintAST::check() {
 	boost::shared_ptr<Identifier> object = _st->lookupCurrLevelAndEnclosingLevels(_name);
 	if (!object) {
 		cerr << "Line " << _lineNo << " - " << "Cannot print " << _name << " as it doesn't exist." << endl;
@@ -26,6 +13,36 @@ void PrintAST::check() {
 	}
 }
 
+PrintAST::PrintAST(boost::shared_ptr<SymbolTable> st, string funcName, boost::shared_ptr<CallParamsAST> params, boost::shared_ptr<ASTNode> parent, int lineNo) : ASTNode(st, parent, lineNo) {
+	_st = st;
+	_name = funcName;
+	_params = params;
+	boost::shared_ptr<Identifier> func = _st->lookupCurrLevelAndEnclosingLevels(_name);
+	if(!func) {
+		cerr << "Line " << _lineNo << " - "<< "Cannot print " << _name << " as it doesn't exist." << endl;
+	} else if(!_params) {
+		cerr << "Line " << _lineNo << " - " << "Cannot print " << _name << " as it has no parameters." << endl;
+	} else {
+		_type = func;
+	}
+}
+
+PrintAST::PrintAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr, boost::shared_ptr<ASTNode> parent, int lineNo) : ASTNode(st, parent, lineNo) {
+	_st = st;
+	if (!expr) {
+		cerr << "Line " << _lineNo << " - " << "Cannot print bad expression." << endl;
+	} else if (expr->getTypeName()->getTypeName() == "Array"){
+		cerr << "Line " << _lineNo << " - " << "Cannot print an array." << endl;
+	} else { 
+		_expr = expr;
+	}
+}
+
 boost::shared_ptr<Identifier> PrintAST::getTypeName() {
 	return _type;
 }
+
+boost::shared_ptr<ExprAST> PrintAST::getExpr() {
+	return _expr;
+}
+

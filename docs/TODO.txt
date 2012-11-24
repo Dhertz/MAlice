@@ -6,7 +6,7 @@ Part 2:
 	- Order makefile objects more logically
 	- Lose the constructor arguments on Number?
 	- PrintAST check() looks a bit sparse?
-	- Stdin check needs much more work (check it's assignable, so variable or array member I think). Current cerr makes no sense either
+	- Stdin check needs much more work (check it's assignable, so variable or array member I think, but there is no way to check this). Current cerr makes no sense either
 	- Better var names when adding to top ST
 	- General style standardisation
 	- Cheeky global Ctrl+F to check all Boost constructions are safe
