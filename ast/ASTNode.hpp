@@ -6,11 +6,11 @@
 
 class ASTNode {
 	vector< boost::shared_ptr<ASTNode> > _children;
+	virtual void check();
 protected:
 	boost::shared_ptr<SymbolTable> _st;
 	boost::shared_ptr<ASTNode> _parent;
 	int _lineNo;
-	virtual void check();
 public:
 	ASTNode(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ASTNode> parent, int lineNo);
 	vector< boost::shared_ptr<ASTNode> > getChildren();
