@@ -169,7 +169,7 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree, string expe
 		// Number base case
 
 		// TODO: remove need for constructor arguments here
-		boost::shared_ptr<Type> number = boost::shared_ptr<Type>(new Number(0, 1));
+		boost::shared_ptr<Type> number = boost::shared_ptr<Type>(new Number());
 
 		if (expectedType != "*" && expectedType != "Number") {
 			// Obviously the op bit here needs improving in the error message

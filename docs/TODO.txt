@@ -3,9 +3,6 @@ Part 2:
 	- Better method names (getTypeName on Expr should be getType, for eg)
 	- Make sure strings can't be in the base case of recursive ExprAST
 	- Check all things that require a "Number" and see if they can actually take a "Letter" too (Inc/Dec spring to mind)
-	- Order makefile objects more logically
-	- Lose the constructor arguments on Number?
-	- PrintAST check() looks a bit sparse?
 	- Stdin check needs much more work (check it's assignable, so variable or array member I think, but there is no way to check this). Current cerr makes no sense either
 	- Better var names when adding to top ST
 	- General style standardisation
