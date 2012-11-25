@@ -63,7 +63,7 @@ void ExprAST::check() {
 
 		// Check that function call and parameters type-check
 		// i.e. function name in scope, and parameters exprs match expected type
-		boost::shared_ptr<CallParamsAST> callParamsNode = boost::shared_ptr<CallParamsAST>(new CallParamsAST(_st, cplTree, _parent, _lineNo));
+		boost::shared_ptr<CallParamsAST> callParamsNode(new CallParamsAST(_st, cplTree, _parent, _lineNo));
 		FuncAST funcCheck(_st, funcName, callParamsNode, _parent, _lineNo);
 
 		boost::shared_ptr<Identifier> funcIdent = _st->lookupCurrLevelAndEnclosingLevels(funcName);
@@ -149,12 +149,12 @@ void ExprAST::check() {
 		if (let.length() != 1) {
 			cerr << "Line " << _lineNo << " - expected letter inside single quotes, got a sentence" << endl;
 		} else {
-			boost::shared_ptr<Type> letter = boost::shared_ptr<Type>(new Letter);
+			boost::shared_ptr<Type> letter(new Letter);
 			_type = letter;
 		}
 	} else if (tok == "\"") {
 		// String of form "foo", evaluates to a Sentence
-		boost::shared_ptr<Type> sentence = boost::shared_ptr<Type>(new Sentence);
+		boost::shared_ptr<Type> sentence(new Sentence);
 		_type = sentence;
 	} else {
 		// Recursive case, will resolve to a boolean or number
@@ -171,8 +171,7 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree, string expe
 	if (children == 0) {
 		// Number base case
 
-		// TODO: remove need for constructor arguments here
-		boost::shared_ptr<Type> number = boost::shared_ptr<Type>(new Number());
+		boost::shared_ptr<Type> number(new Number());
 
 		if (expectedType != "*" && expectedType != "Number") {
 			// Obviously the op bit here needs improving in the error message
@@ -208,7 +207,7 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree, string expe
 				return boost::shared_ptr<Type>();
 			}
 
-			boost::shared_ptr<Type> letter = boost::shared_ptr<Type>(new Letter);
+			boost::shared_ptr<Type> letter(new Letter);
 			return letter;
 		} else if (op == "\"") {
 			// String base case, error case
@@ -296,7 +295,7 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree, string expe
 				}
 
 				// return new boolean
-				boost::shared_ptr<Type> evaluatedType = boost::shared_ptr<Type>(new Boolean);
+				boost::shared_ptr<Type> evaluatedType(new Boolean);
 				return evaluatedType;
 			}
 		} else if (_boolArgsBoolRet.find(op) != _boolArgsBoolRet.end()) {
@@ -311,7 +310,7 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree, string expe
 				rhsType = recurseTree(rhs, "Boolean");
 
 				// return new boolean
-				boost::shared_ptr<Type> evaluatedType = boost::shared_ptr<Type>(new Boolean);
+				boost::shared_ptr<Type> evaluatedType(new Boolean);
 				return evaluatedType;
 			}
 		} else {

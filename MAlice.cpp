@@ -14,7 +14,7 @@ void printError(string message) {
 }
 
 void initST(boost::shared_ptr<SymbolTable> top) {
-	boost::shared_ptr<Number> iN(new Number(-(2^31), (2^31 - 1))); // TODO: remove magic numbers
+	boost::shared_ptr<Number> iN(new Number()); // TODO: remove magic numbers
 	top->add("number", iN);
 
 	boost::shared_ptr<Sentence> iS(new Sentence());

@@ -6,13 +6,10 @@ SymbolTable::SymbolTable(boost::shared_ptr<SymbolTable> st) {
 }
 
 void SymbolTable::add(string name, boost::shared_ptr<Identifier> obj) {
-	// cout << "Setting _dict[" << name << "] to " << obj << " in ST " << this << endl;
-	_dict[name] = obj;
-	// printCurrLevelOnly();	
+	_dict[name] = obj;	
 }
 
 boost::shared_ptr<Identifier> SymbolTable::lookupCurrLevelOnly(string name) {
-	// cout << "Looking for " << name << " in " << this << " ..." << endl;
 	if (_dict.find(name) == _dict.end()) {
 		return boost::shared_ptr<Identifier>();
 	} else {
