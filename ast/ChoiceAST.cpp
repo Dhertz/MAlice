@@ -9,7 +9,7 @@ ChoiceAST::ChoiceAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAS
 }
 
 void ChoiceAST::check() {
-	if (!_expr) {
+	if (!_expr || !_expr->getTypeName()) {
 		cerr << "Line " << _lineNo << " - " << "Bad choice expression." << endl;
 	} else if (_expr->getTypeName()->getTypeName() != "Boolean") {
 		cerr << "Line " << _lineNo << " - " << "Conditional must be a boolean, its a " 

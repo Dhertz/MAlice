@@ -20,14 +20,8 @@ void ProcDecAST::check() {
 		vector< boost::shared_ptr<Param> >::iterator param;
 
 		for (param=v.begin(); param != v.end(); param++) {
+            // No need to do null checks here since that is covered in HeaderParamsAST
 			if((*param)->getTypeName()->getTypeName() == "Array") {
-				// Charlie: old version, in case the below shortcut ends up breaking
-				// Basically an array is already created in HeaderParamsAST, so there's no point making a new one here
-
-				// boost::shared_ptr<Type> paramType = (*param)->getTypeName();
-				// boost::shared_ptr<Array> paramArray = boost::shared_polymorphic_downcast<Array>(paramType);
-				// boost::shared_ptr<Identifier> arr(new Array(paramArray->getElemType()));
-
 				_st->add((*param)->getName(), (*param)->getTypeName());
 			} else {
 				boost::shared_ptr<Identifier> var(new Variable((*param)->getTypeName()));

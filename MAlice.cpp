@@ -14,14 +14,14 @@ void printError(string message) {
 }
 
 void initST(boost::shared_ptr<SymbolTable> top) {
-	boost::shared_ptr<Number> iN(new Number(-(2^31), (2^31 - 1))); // TODO: remove magic numbers
-	top->add("number", iN);
+	boost::shared_ptr<Number> numberTypeDef(new Number(-(2^31), (2^31 - 1)));
+	top->add("number", numberTypeDef);
 
-	boost::shared_ptr<Sentence> iS(new Sentence());
-	top->add("sentence", iS);
+	boost::shared_ptr<Sentence> sentenceTypeDef(new Sentence());
+	top->add("sentence", sentenceTypeDef);
 
-	boost::shared_ptr<Letter> iL(new Letter());
-	top->add("letter", iL);
+	boost::shared_ptr<Letter> letterTypeDef(new Letter());
+	top->add("letter", letterTypeDef);
 }
 
 void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {

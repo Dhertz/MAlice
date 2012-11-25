@@ -16,6 +16,10 @@ vector< boost::shared_ptr<Type> > CallParamsAST::getTypes() {
 void CallParamsAST::check() {
 	for (int i = 0; i < _tree->getChildCount(_tree); ++i) {
 		boost::shared_ptr<ExprAST> e(new ExprAST(_st, TreeUtils::childByNum(_tree, i), _parent, _lineNo));
-		_types.push_back(e->getTypeName());
+        if (!e->getTypeName()) {
+            cerr << "Line " << _lineNo << " - " << "Cannot use an invalid expression in a function call" << endl;
+        } else {
+		    _types.push_back(e->getTypeName());
+        }
 	}
 }

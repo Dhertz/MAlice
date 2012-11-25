@@ -23,7 +23,6 @@ void ReturnAST::checkFunctionType(boost::shared_ptr<ASTNode> parent) {
 	} else {
 		if (parent->getNodeName() == "FuncDec") {
 			boost::shared_ptr<FuncDecAST> funcDec = boost::shared_polymorphic_downcast<FuncDecAST>(parent);
-			// May need to be more rigerous here
 
 			string funcName = funcDec->getFuncName();
 
