@@ -17,10 +17,12 @@ class ExprAST : public ASTNode {
 	pANTLR3_BASE_TREE _tree;
 	boost::shared_ptr<Type> recurseTree(pANTLR3_BASE_TREE tree, string expectedType);
 	int _lineNo;
+	bool _isDeclarable;
 	void check();
 public:
 	ExprAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree, boost::shared_ptr<ASTNode> parent, int lineNo);
 	boost::shared_ptr<Type> getTypeName();
+	bool isDeclarable();
 };
 
 #endif

@@ -44,6 +44,7 @@ ExprAST::ExprAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree, boos
 	_type = boost::shared_ptr<Type>();
 	_tree = tree;
 	_lineNo = lineNo;
+	_isDeclarable = false;
 	check();
 }
 
@@ -101,6 +102,7 @@ void ExprAST::check() {
 				}
 			} else if (baseName == "Variable") {
 				boost::shared_ptr<Variable> var = boost::shared_polymorphic_downcast<Variable>(varIdent);
+				_isDeclarable = true;
 				_type = var->getTypeName();
 			} else {
 				cerr << varName << " is not a variable. It is a " << varIdent->getBaseName() << "." << endl;
@@ -131,6 +133,7 @@ void ExprAST::check() {
 					if (indexCheck.getTypeName()->getTypeName() != "Number") {
 						cerr << "Line " << _lineNo << " - " << "Array index must evaluate to a Number." << endl;
 					} else {
+						_isDeclarable = true;
 						_type = arr->getElemType();
 					}
 				} else {
@@ -332,4 +335,8 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree, string expe
 
 boost::shared_ptr<Type> ExprAST::getTypeName() {
 	return _type;
+}
+
+bool ExprAST::isDeclarable() {
+	return _isDeclarable;
 }
