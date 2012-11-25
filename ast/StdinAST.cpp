@@ -9,7 +9,7 @@ StdinAST::StdinAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST>
 }
 
 void StdinAST::check() {
-	if (!_expr) {
+	if (!_expr || !_expr->getTypeName()) {
 		cerr << "Line " << _lineNo << " - " << "Stdin has bad expression." << endl;
 	} else if (!_expr->isDeclarable()) {
 		cerr << "Line " << _lineNo << " - " 
