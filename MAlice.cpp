@@ -14,7 +14,7 @@ void printError(string message) {
 }
 
 void initST(boost::shared_ptr<SymbolTable> top) {
-	boost::shared_ptr<Number> numberTypeDef(new Number(-(2^31), (2^31 - 1)));
+	boost::shared_ptr<Number> numberTypeDef(new Number());
 	top->add("number", numberTypeDef);
 
 	boost::shared_ptr<Sentence> sentenceTypeDef(new Sentence());

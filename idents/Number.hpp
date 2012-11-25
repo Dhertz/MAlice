@@ -7,9 +7,7 @@ class Number : public Type {
 	int _min, _max;
 
 public:
-	Number(int min, int max);
-	int getMin();
-	int getMax();
+	Number();
 	string getTypeName();
 };
 
