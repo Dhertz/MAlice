@@ -7,3 +7,5 @@ Part 2:
 	- General style standardisation
 	- Cheeky global Ctrl+F to check all Boost constructions are safe
 	- Don't like the way PrintAST handles the multiple cases
+	- Watch out for circular references, and general memory leak tests
+	- Rename isDeclarable?
