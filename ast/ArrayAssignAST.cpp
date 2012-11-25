@@ -15,6 +15,8 @@ void ArrayAssignAST::check() {
 	
 	if (!array) {
 		cerr << "Line " << _lineNo << " - " << "Can't assign to " << _name << " as its not in scope." << endl;
+	} else if (!_element->getTypeName()) {
+		cerr << "Line " << _lineNo << " - " << "Bad array index expression." << endl;
 	} else if (_element->getTypeName()->getTypeName() != "Number") {
 		cerr << "Line " << _lineNo << " - " << "Not a valid element number." << endl;
 	} else if (!array) {
@@ -28,7 +30,11 @@ void ArrayAssignAST::check() {
 		} else {
 			boost::shared_ptr<Array> arrCasted = boost::shared_polymorphic_downcast<Array>(array);
 
-			if(_value->getTypeName()->getTypeName() != arrCasted->getElemType()->getTypeName()) {
+			if (!_value->getTypeName()) {
+				cerr << "Line " << _lineNo << " - " << "Bad array member value expression." << endl;
+			} else if (!arrCasted->getElemType()) {
+				cerr << "Line " << _lineNo << " - " << "Bad array element type." << endl;
+			} else if(_value->getTypeName()->getTypeName() != arrCasted->getElemType()->getTypeName()) {
 				cerr << "Line " << _lineNo << " - " << "Type error. (" << _value->getTypeName()->getTypeName() << " != " << arrCasted->getElemType()->getTypeName() << ")" << endl;
 				cerr << "Line " << _lineNo << " - " << "Array " << _name << " has address " << array << " in ST" << endl;
 			} else {
