@@ -4,12 +4,12 @@
 #include "ExprAST.hpp"
 
 class WhileAST : public ASTNode {
-	boost::shared_ptr<SymbolTable> _st;
-	boost::shared_ptr<ExprAST> _expr;
+    boost::shared_ptr<SymbolTable> _st;
+    boost::shared_ptr<ExprAST> _expr;
     int _lineNo;
-	void check();
+    void check();
 public:
-	WhileAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr, boost::shared_ptr<ASTNode> parent, int lineNo);
+    WhileAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr, boost::shared_ptr<ASTNode> parent, int lineNo);
 };
 
 #endif

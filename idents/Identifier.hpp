@@ -7,8 +7,8 @@
 using namespace std;
 
 class Identifier {
-	public:
-		virtual string getBaseName() = 0;
+    public:
+        virtual string getBaseName() = 0;
 };
 
 #endif

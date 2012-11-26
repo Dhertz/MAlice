@@ -2,80 +2,83 @@
 #include "idents/Number.hpp"
 #include "idents/Sentence.hpp"
 #include "TreeWalker.hpp"
-#include "TreeUtils.hpp"
+#include "Utils.hpp"
 #include "MAliceLexer.h"
 #include "MAliceParser.h"
 
 using namespace std;
 
 void printError(string message) {
-	cerr << message << endl << endl;
-	exit(1);
+    cerr << message << endl << endl;
+    exit(1);
 }
 
 void initST(boost::shared_ptr<SymbolTable> top) {
-	boost::shared_ptr<Number> numberTypeDef(new Number());
-	top->add("number", numberTypeDef);
+    boost::shared_ptr<Number> numberTypeDef(new Number());
+    top->add("number", numberTypeDef);
 
-	boost::shared_ptr<Sentence> sentenceTypeDef(new Sentence());
-	top->add("sentence", sentenceTypeDef);
+    boost::shared_ptr<Sentence> sentenceTypeDef(new Sentence());
+    top->add("sentence", sentenceTypeDef);
 
-	boost::shared_ptr<Letter> letterTypeDef(new Letter());
-	top->add("letter", letterTypeDef);
+    boost::shared_ptr<Letter> letterTypeDef(new Letter());
+    top->add("letter", letterTypeDef);
 }
 
 void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
-	cout << endl << "Parsing File " << filename << "..." << endl << endl;
+    cout << endl << "Parsing File " << filename << "..." << endl << endl;
 
-	pANTLR3_INPUT_STREAM input;
-	pMAliceLexer lex;
-	pANTLR3_COMMON_TOKEN_STREAM tokens;
-	pMAliceParser parser;
+    pANTLR3_INPUT_STREAM input;
+    pMAliceLexer lex;
+    pANTLR3_COMMON_TOKEN_STREAM tokens;
+    pMAliceParser parser;
 
-	input = antlr3AsciiFileStreamNew(filename);
-	if (input == NULL) printError("Unable to open file.");
+    input = antlr3AsciiFileStreamNew(filename);
+    if (input == NULL)
+        printError("Unable to open file.");
 
-	lex = MAliceLexerNew(input);
-	if (lex == NULL) printError("Unable to create lexer.");
+    lex = MAliceLexerNew(input);
+    if (lex == NULL)
+        printError("Unable to create lexer.");
 
-	tokens = antlr3CommonTokenStreamSourceNew(ANTLR3_SIZE_HINT, TOKENSOURCE(lex));
-	if (tokens == NULL) printError("Unable to create tokenstream.");
+    tokens = antlr3CommonTokenStreamSourceNew(ANTLR3_SIZE_HINT, TOKENSOURCE(lex));
+    if (tokens == NULL)
+        printError("Unable to create tokenstream.");
 
-	parser = MAliceParserNew(tokens);
-	if (parser == NULL) printError("Unable to create parser.");
+    parser = MAliceParserNew(tokens);
+    if (parser == NULL)
+        printError("Unable to create parser.");
 
-	MAliceParser_program_return r = parser->program(parser);
-	pANTLR3_BASE_TREE tree = r.tree;
+    MAliceParser_program_return r = parser->program(parser);
+    pANTLR3_BASE_TREE tree = r.tree;
 
-	if (parser->pParser->rec->getNumberOfSyntaxErrors(parser->pParser->rec) > 0) {
-		cerr << "Syntax errors found. Stopping." << endl;
-		return;
-	}
+    if (parser->pParser->rec->getNumberOfSyntaxErrors(parser->pParser->rec) > 0) {
+        cerr << "Syntax errors found. Stopping." << endl;
+        return;
+    }
 
-	if (doPrintTree) {
-		TreeUtils::printTree(tree);
-	}
+    if (doPrintTree)
+        Utils::printTree(tree);
 
-	boost::shared_ptr<SymbolTable> top(new SymbolTable(boost::shared_ptr<SymbolTable>()));
-	initST(top);
+    boost::shared_ptr<SymbolTable> top(new SymbolTable(boost::shared_ptr<SymbolTable>()));
+    initST(top);
 
-	boost::shared_ptr<AST> semanticTree(new AST());
+    boost::shared_ptr<AST> semanticTree(new AST());
 
-	TreeWalker walker(top, tree, semanticTree);
+    TreeWalker walker(top, tree, semanticTree);
 
-	parser->free(parser);
-	tokens->free(tokens);
-	lex->free(lex);
-	input->close(input);
+    parser->free(parser);
+    tokens->free(tokens);
+    lex->free(lex);
+    input->close(input);
 
-	cout << endl << "Done." << endl;
+    cout << endl << "Done." << endl;
 }
 
 int main(int argc, char* argv[]) {
-	for (int i = 1; i < argc; i++) {
-		parseFile((pANTLR3_UINT8) argv[i], false);
-		cout << endl;
-	}
+    for (int i = 1; i < argc; i++) {
+        parseFile((pANTLR3_UINT8) argv[i], false);
+        cout << endl;
+    }
 
-	return 0;
+    return 0;
 }

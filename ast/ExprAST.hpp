@@ -8,21 +8,24 @@
 #include "../idents/Type.hpp"
 
 class ExprAST : public ASTNode {
-	set<string> _boolArgBoolRet;
-	set<string> _intArgIntRet;
-	set<string> _boolArgsBoolRet;
-	set<string> _mixedArgsMixedRet;
-	set<string> _mixedArgsBoolRet;
-	boost::shared_ptr<Type> _type;
-	pANTLR3_BASE_TREE _tree;
-	boost::shared_ptr<Type> recurseTree(pANTLR3_BASE_TREE tree, string expectedType);
-	int _lineNo;
-	bool _isDeclarable;
-	void check();
+    set<string> _boolArgBoolRet;
+    set<string> _intArgIntRet;
+    set<string> _boolArgsBoolRet;
+    set<string> _mixedArgsMixedRet;
+    set<string> _mixedArgsBoolRet;
+    boost::shared_ptr<Type> _type;
+    pANTLR3_BASE_TREE _tree;
+    int _lineNo;
+    bool _isDeclarable;
+	bool _hasExprTok;
+    void check();
+    boost::shared_ptr<Type> recurseTree(pANTLR3_BASE_TREE tree,
+                                          string expectedType);
 public:
-	ExprAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree, boost::shared_ptr<ASTNode> parent, int lineNo);
-	boost::shared_ptr<Type> getType();
-	bool isDeclarable();
+    ExprAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree,
+              boost::shared_ptr<ASTNode> parent, int lineNo, bool hasExprTok);
+    boost::shared_ptr<Type> getType();
+    bool isDeclarable();
 };
 
 #endif

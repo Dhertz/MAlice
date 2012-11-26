@@ -1,12 +1,13 @@
 TODO list:
 Part 2:
 	- Better method names (getTypeName on Expr should be getType, for eg)
-	- Check all things that require a "Number" and see if they can actually take a "Letter" too (Inc/Dec spring to mind)
-	- Stdin check needs much more work (check it's assignable, so variable or array member I think, but there is no way to check this). Current cerr makes no sense either
-	- Better var names when adding to top ST
 	- General style standardisation
-	- Cheeky global Ctrl+F to check all Boost constructions are safe
-	- Don't like the way PrintAST handles the multiple cases
 	- Watch out for circular references, and general memory leak tests
 	- Rename isDeclarable?
 	- Rename Stdin? And standardise the VariableAssign/VarDec ones
+	- Global error count?
+	- Make all error messages better, and put it in a Utils method
+	- How does CallParams work when errored cases arent added to the vector?
+	- Make type strings lower case to match top level ST
+	- Check no tabs
+	- Make sure arrays can't be in the base of an expression due to VAR tok

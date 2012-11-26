@@ -1,5 +1,5 @@
 #include "Boolean.hpp"
 
 string Boolean::getTypeName() {
-	return "Boolean";
+    return "Boolean";
 }

@@ -4,13 +4,13 @@
 #include "Type.hpp"
 
 class Param : public Identifier {
-	boost::shared_ptr<Type> _type;
-	string _name;
+    boost::shared_ptr<Type> _type;
+    string _name;
 public:
-	Param(boost::shared_ptr<Type> type, string name);
-	boost::shared_ptr<Type> getTypeName();
-	string getName();
-	string getBaseName();
+    Param(boost::shared_ptr<Type> type, string name);
+    boost::shared_ptr<Type> getTypeName();
+    string getName();
+    string getBaseName();
 };
 
 #endif

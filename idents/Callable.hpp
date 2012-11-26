@@ -13,7 +13,7 @@ public:
     vector< boost::shared_ptr<Param> > getParams();
     SymbolTable getTable();
     string getBaseName();
-	virtual string getCallableFuncOrProc() = 0;
+    virtual string getCallableFuncOrProc() = 0;
 };
 
 #endif

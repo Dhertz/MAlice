@@ -5,7 +5,7 @@
 
 class Letter : public Type {
 public:
-	string getTypeName();
+    string getTypeName();
 };
 
 #endif

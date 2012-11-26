@@ -1,10 +1,10 @@
 #include "Proc.hpp"
 
 Proc::Proc(boost::shared_ptr<SymbolTable> st, vector< boost::shared_ptr<Param> > params) : Callable(st, params) {
-	_params = params;
-	_st = st;
+    _params = params;
+    _st = st;
 }
 
 string Proc::getCallableFuncOrProc() {
-	return "Proc";
+    return "Proc";
 }

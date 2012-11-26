@@ -4,5 +4,5 @@ Number::Number() {
 }
 
 string Number::getTypeName() {
-	return "Number";
+    return "Number";
 }

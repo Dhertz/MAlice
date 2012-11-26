@@ -4,11 +4,11 @@
 #include "Type.hpp"
 
 class Number : public Type {
-	int _min, _max;
+    int _min, _max;
 
 public:
-	Number();
-	string getTypeName();
+    Number();
+    string getTypeName();
 };
 
 #endif

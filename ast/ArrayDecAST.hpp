@@ -6,15 +6,17 @@
 #include "../idents/Array.hpp"
 
 class ArrayDecAST : public ASTNode {
-	boost::shared_ptr<SymbolTable> _st;
-	boost::shared_ptr<ExprAST> _length;
-	string _name;
-	string _elemType;
-	boost::shared_ptr<Array> _arrObj;
+    boost::shared_ptr<SymbolTable> _st;
+    boost::shared_ptr<ExprAST> _length;
+    string _name;
+    string _elemType;
     int _lineNo;
-	void check();
+    void check();
 public:
-	ArrayDecAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr, string name, string typeName, boost::shared_ptr<ASTNode> parent, int lineNo);
+    ArrayDecAST(boost::shared_ptr<SymbolTable> st,
+                  boost::shared_ptr<ExprAST> expr, string name,
+                  string typeName, boost::shared_ptr<ASTNode> parent,
+                  int lineNo);
 };
 
 #endif
