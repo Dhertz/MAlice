@@ -20,12 +20,12 @@ void VarAssignAST::check() {
 	} else {
 		boost::shared_ptr<Variable> varCasted = boost::shared_polymorphic_downcast<Variable>(var);
 
-		if(!_expr || !_expr->getTypeName()) {
+		if(!_expr || !_expr->getType()) {
 			cerr << "Line " << _lineNo << " - " << "Cannot assign variable" << _varName << "to bad expression." << endl;
 		} else if (!varCasted->getTypeName()) {
 			cerr << "Line " << _lineNo << " - " << "Variable " << _varName << " has bad type" << endl;
-		} else if (_expr->getTypeName()->getTypeName() != varCasted->getTypeName()->getTypeName()) {
-				cerr << "Line " << _lineNo << " - " << "lhs (" << varCasted->getTypeName()->getTypeName() << ") and rhs (" << _expr->getTypeName()->getTypeName() << ") not type compatible" << endl;		
+		} else if (_expr->getType()->getTypeName() != varCasted->getTypeName()->getTypeName()) {
+				cerr << "Line " << _lineNo << " - " << "lhs (" << varCasted->getTypeName()->getTypeName() << ") and rhs (" << _expr->getType()->getTypeName() << ") not type compatible" << endl;		
 		} else {
 				_varObj = varCasted;
 		}

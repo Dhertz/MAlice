@@ -6,7 +6,7 @@ Function::Function(boost::shared_ptr<SymbolTable> st, vector< boost::shared_ptr<
 	_st = st;
 }
 
-boost::shared_ptr<Type> Function::getTypeName() {
+boost::shared_ptr<Type> Function::getType() {
 	return _returnType;
 }
 

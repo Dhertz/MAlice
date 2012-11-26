@@ -75,7 +75,7 @@ void ExprAST::check() {
 				cerr << "Line " << _lineNo << " - " << "Procedure " << funcName << " cannot be an expression, since it has no return type" << endl;
 			} else if (funcCallable->getCallableFuncOrProc() == "Function") {
 				boost::shared_ptr<Function> func = boost::shared_polymorphic_downcast<Function>(funcIdent);
-				_type = func->getTypeName();
+				_type = func->getType();
 			}
 		} else {
 			// Don't think we need anything here, since the error will have already been outputted by FuncAST?
@@ -129,8 +129,8 @@ void ExprAST::check() {
 				pANTLR3_BASE_TREE index = TreeUtils::childByNum(root, 1);
 				ExprAST indexCheck(_st, index, _parent, _lineNo);
 
-				if (indexCheck.getTypeName()) {
-					if (indexCheck.getTypeName()->getTypeName() != "Number") {
+				if (indexCheck.getType()) {
+					if (indexCheck.getType()->getTypeName() != "Number") {
 						cerr << "Line " << _lineNo << " - " << "Array index must evaluate to a Number." << endl;
 					} else {
 						_isDeclarable = true;
@@ -215,7 +215,7 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree, string expe
 			return boost::shared_ptr<Type>();
 		} else {
 			ExprAST checkExp(_st, tree, _parent, _lineNo);
-			evaluatedType = checkExp.getTypeName();
+			evaluatedType = checkExp.getType();
 
 			if (!evaluatedType) {
 				// Error has already been outputted, we just need to break out of the parent call too
@@ -315,7 +315,7 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree, string expe
 			}
 		} else {
 			ExprAST checkExp(_st, tree, _parent, _lineNo);
-			boost::shared_ptr<Type> evaluatedType = checkExp.getTypeName();
+			boost::shared_ptr<Type> evaluatedType = checkExp.getType();
 
 			if (!evaluatedType) {
 				// Error has already been outputted, we just need to break out of the parent call too
@@ -332,7 +332,7 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree, string expe
 	}
 }
 
-boost::shared_ptr<Type> ExprAST::getTypeName() {
+boost::shared_ptr<Type> ExprAST::getType() {
 	return _type;
 }
 

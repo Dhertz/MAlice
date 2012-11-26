@@ -21,11 +21,9 @@ void ArrayDecAST::check() {
 		cerr << "Line " << _lineNo << " - " << "Not a type" << endl;
 	} else if (name) {
 		cerr << "Line " << _lineNo << " - " << "Variable already declared" << endl;
-	} else if (!_length) {
+	} else if (!_length || !_length->getType()) {
 		cerr << "Line " << _lineNo << " - " << "Array " << _name << " has no length." << endl;
-	} else if (!_length->getTypeName()) {
-		cerr << "Line " << _lineNo << " - " << "Array " << _name << " has no length." << endl;
-	} else if ("Number" != _length->getTypeName()->getTypeName()) {
+	} else if (_length->getType()->getTypeName() != "Number") {
 		cerr << "Line " << _lineNo << " - " << "Invalid array length";
 	} else {
 		boost::shared_ptr<Type> typeCasted = boost::shared_polymorphic_downcast<Type>(type);

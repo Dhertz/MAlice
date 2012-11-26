@@ -9,9 +9,9 @@ WhileAST::WhileAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST>
 }
 
 void WhileAST::check() {
-	if (!_expr->getTypeName()) {
+	if (!_expr || !_expr->getType()) {
 		cerr << "Line " << _lineNo << " - " << "Invalid conditional in while header." << endl;
-	} else if (_expr->getTypeName()->getTypeName() != "Boolean") {
-		cerr << "Line " << _lineNo << " - " << "While condition must be a boolean, currently it's a " << _expr->getTypeName()->getBaseName() << "." << endl;
+	} else if (_expr->getType()->getTypeName() != "Boolean") {
+		cerr << "Line " << _lineNo << " - " << "While condition must be a boolean, currently it's a " << _expr->getType()->getBaseName() << "." << endl;
 	}
 }

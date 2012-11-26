@@ -9,3 +9,4 @@ Part 2:
 	- Don't like the way PrintAST handles the multiple cases
 	- Watch out for circular references, and general memory leak tests
 	- Rename isDeclarable?
+	- Rename Stdin? And standardise the VariableAssign/VarDec ones

@@ -21,7 +21,7 @@ class ExprAST : public ASTNode {
 	void check();
 public:
 	ExprAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree, boost::shared_ptr<ASTNode> parent, int lineNo);
-	boost::shared_ptr<Type> getTypeName();
+	boost::shared_ptr<Type> getType();
 	bool isDeclarable();
 };
 

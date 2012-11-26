@@ -9,11 +9,11 @@ StdinAST::StdinAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST>
 }
 
 void StdinAST::check() {
-	if (!_expr || !_expr->getTypeName()) {
+	if (!_expr || !_expr->getType()) {
 		cerr << "Line " << _lineNo << " - " << "Stdin has bad expression." << endl;
 	} else if (!_expr->isDeclarable()) {
 		cerr << "Line " << _lineNo << " - " 
 			<< "Stdin can only write to variables or arrays, not " 
-				<< _expr->getTypeName()->getTypeName() << "." << endl;
+				<< _expr->getType()->getTypeName() << "." << endl;
 	}
 }

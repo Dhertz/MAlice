@@ -33,19 +33,11 @@ PrintAST::PrintAST(boost::shared_ptr<SymbolTable> st, string funcName, boost::sh
 
 PrintAST::PrintAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr, boost::shared_ptr<ASTNode> parent, int lineNo) : ASTNode(st, parent, lineNo) {
 	_st = st;
-	if (!expr || !expr->getTypeName()) {
+	if (!expr || !expr->getType()) {
 		cerr << "Line " << _lineNo << " - " << "Cannot print bad expression." << endl;
-	} else if (expr->getTypeName()->getTypeName() == "Array") {
+	} else if (expr->getType()->getTypeName() == "Array") {
 		cerr << "Line " << _lineNo << " - " << "Cannot print an array." << endl;
 	} else {
 		_expr = expr;
 	}
-}
-
-boost::shared_ptr<Identifier> PrintAST::getTypeName() {
-	return _type;
-}
-
-boost::shared_ptr<ExprAST> PrintAST::getExpr() {
-	return _expr;
 }

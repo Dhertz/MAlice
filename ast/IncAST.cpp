@@ -9,10 +9,10 @@ IncAST::IncAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> exp
 }
 
 void IncAST::check() {
-	if (!_expr || !_expr->getTypeName()) {
+	if (!_expr || !_expr->getType()) {
 		cerr << "Line " << _lineNo << " - " << "Cannot increment bad expression." << endl;
-	} else if (_expr->getTypeName()->getTypeName() != "Number") {
+	} else if (_expr->getType()->getTypeName() != "Number") {
 		cerr << "Line " << _lineNo << " - " << "Cannot increment expression of type " 
-			<< _expr->getTypeName()->getTypeName() << "." << endl;
+			<< _expr->getType()->getTypeName() << "." << endl;
 	}
 }
