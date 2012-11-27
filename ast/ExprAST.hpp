@@ -16,7 +16,7 @@ class ExprAST : public ASTNode {
     boost::shared_ptr<Type> _type;
     pANTLR3_BASE_TREE _tree;
     int _lineNo;
-    bool _isDeclarable;
+    bool _isAssignable;
 	bool _hasExprTok;
     void check();
     boost::shared_ptr<Type> recurseTree(pANTLR3_BASE_TREE tree,
@@ -25,7 +25,7 @@ public:
     ExprAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree,
               boost::shared_ptr<ASTNode> parent, int lineNo, bool hasExprTok);
     boost::shared_ptr<Type> getType();
-    bool isDeclarable();
+    bool isAssignable();
 };
 
 #endif

@@ -45,7 +45,7 @@ ExprAST::ExprAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree,
     _type = boost::shared_ptr<Type>();
     _tree = tree;
     _lineNo = lineNo;
-    _isDeclarable = false;
+    _isAssignable = false;
 	_hasExprTok = hasExprTok;
     check();
 }
@@ -122,7 +122,7 @@ void ExprAST::check() {
             } else if (baseName == "Variable") {
                 boost::shared_ptr<Variable> var =
                   boost::shared_polymorphic_downcast<Variable>(varIdent);
-                _isDeclarable = true;
+                _isAssignable = true;
                 _type = var->getTypeName();
             } else {
               	Utils::printSemErr(_lineNo, varName + " is not a variable!");
@@ -161,7 +161,7 @@ void ExprAST::check() {
 						                     "must evaluate to a Number" +
 						                     ", not a " + indexType + ".");
                     } else {
-                        _isDeclarable = true;
+                        _isAssignable = true;
                         _type = arr->getElemType();
                     }
                 }
@@ -481,6 +481,6 @@ boost::shared_ptr<Type> ExprAST::getType() {
     return _type;
 }
 
-bool ExprAST::isDeclarable() {
-    return _isDeclarable;
+bool ExprAST::isAssignable() {
+    return _isAssignable;
 }

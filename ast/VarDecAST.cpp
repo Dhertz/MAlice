@@ -1,7 +1,7 @@
-#include "VariableDecAST.hpp"
+#include "VarDecAST.hpp"
 #include "../Utils.hpp"
 
-VariableDecAST::VariableDecAST(boost::shared_ptr<SymbolTable> st,
+VarDecAST::VarDecAST(boost::shared_ptr<SymbolTable> st,
                                  string typeName, string varName,
                                  boost::shared_ptr<ASTNode> parent, int lineNo)
                                  : ASTNode(st, parent, lineNo) {
@@ -12,7 +12,7 @@ VariableDecAST::VariableDecAST(boost::shared_ptr<SymbolTable> st,
     check();
 }
 
-void VariableDecAST::check() {
+void VarDecAST::check() {
     boost::shared_ptr<Identifier> type =
       _st->lookupCurrLevelAndEnclosingLevels(_typeName);
 

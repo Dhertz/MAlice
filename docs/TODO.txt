@@ -1,12 +1,7 @@
 TODO list:
 Part 2:
-	- Better method names (getTypeName on Expr should be getType, for eg)
-	- General style standardisation
 	- Watch out for circular references, and general memory leak tests
-	- Rename isDeclarable?
-	- Rename Stdin? And standardise the VariableAssign/VarDec ones
 	- Global error count?
-	- Make all error messages better, and put it in a Utils method
 	- How does CallParams work when errored cases arent added to the vector?
 	- Make type strings lower case to match top level ST
 	- Check no tabs
@@ -16,4 +11,9 @@ Part 2:
 	- Check that return in a proc breaks
 	- Check parse error case on ReturnAST
 	- Check no lines of just spaces/tabs (Ctrl+F for space NL)
-	- Check the not assignable check in VarAssign with respect to array elements (might be better to use isDeclarable? Which needs renaming to isAssignable)
+	- Check the not assignable check in VarAssign with respect to array elements (might be better to use isAssignable? Which needs renaming to isAssignable)
+
+
+valgrind --tool=memcheck --leak-check=full ./compile ../malice_examples/invalid/test35.alice
+
+

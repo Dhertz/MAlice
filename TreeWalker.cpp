@@ -1,6 +1,6 @@
 #include "TreeWalker.hpp"
 #include "Utils.hpp"
-#include "ast/VariableDecAST.hpp"
+#include "ast/VarDecAST.hpp"
 #include "ast/ExprAST.hpp"
 #include "ast/ArrayDecAST.hpp"
 #include "ast/ArrayAssignAST.hpp"
@@ -142,10 +142,10 @@ void TreeWalker::processVARDEC(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolT
 
     if (Utils::createStringFromTree(varOptionsTree) == "NEWVAR") {
         if (exprTree == NULL) {
-            boost::shared_ptr<VariableDecAST> dec(new VariableDecAST(st, typeName, varName, parent, getLine(tree)));
+            boost::shared_ptr<VarDecAST> dec(new VarDecAST(st, typeName, varName, parent, getLine(tree)));
             parent->addChild(dec, childNum);
         } else {
-            boost::shared_ptr<VariableDecAST> dec(new VariableDecAST(st, typeName, varName, parent, getLine(tree)));
+            boost::shared_ptr<VarDecAST> dec(new VarDecAST(st, typeName, varName, parent, getLine(tree)));
             
             boost::shared_ptr<ExprAST> expr(new ExprAST(st, exprTree, parent, getLine(tree), true));
             boost::shared_ptr<VarAssignAST> assign(new VarAssignAST(st, varName, expr, parent, getLine(tree)));

@@ -12,7 +12,7 @@ void StdinAST::check() {
     if (!_expr || !_expr->getType()) {
         Utils::printSemErr(_lineNo, (string) "Cannot read in to bad " +
                              "expression due to earlier error.");
-    } else if (!_expr->isDeclarable()) {
+    } else if (!_expr->isAssignable()) {
         Utils::printSemErr(_lineNo, (string) "Can only read in to variables " +
                              " or array elements.");
     }
