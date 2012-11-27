@@ -12,7 +12,8 @@
 #include "../Utils.hpp"
 
 ExprAST::ExprAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree,
-                   boost::shared_ptr<ASTNode> parent, int lineNo, bool hasExprTok) : ASTNode(st, parent, lineNo) {
+                   boost::shared_ptr<ASTNode> parent, int lineNo,
+                   bool hasExprTok) : ASTNode(st, parent, lineNo) {
     _boolArgBoolRet.insert("!");
 
     _intArgIntRet.insert("~");
@@ -114,7 +115,8 @@ void ExprAST::check() {
                 if (varType->getTypeName() != "Array") {
 					Utils::printSemErr(_lineNo, varName + " is not in scope!");
                 } else {
-                    boost::shared_ptr<Array> arr = boost::shared_polymorphic_downcast<Array>(varType);
+                    boost::shared_ptr<Array> arr =
+                      boost::shared_polymorphic_downcast<Array>(varType);
                     _type = arr;
                 }
             } else if (baseName == "Variable") {
@@ -183,7 +185,7 @@ void ExprAST::check() {
         boost::shared_ptr<Type> sentence(new Sentence);
         _type = sentence;
     } else {
-        // Recursive case, will resolve to a boolean or number
+        // Recursive case, will resolve to a Boolean or Number
 
         boost::shared_ptr<Type> retType = recurseTree(root, "*");
         _type = retType;
@@ -231,8 +233,8 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree,
             }
 
             if (expectedType != "*" && expectedType != "Letter") {
-                // Obviously the op bit here needs improving in the error message
-                cerr << "Line " << _lineNo << " - " << "Expected argument expression to " << op << " to evaluate to a " << expectedType << ", but got a Letter" << endl;
+                Utils::printSemErr(_lineNo, "'" + let + "' is a Letter, not " +
+                                     "a " + expectedType + ".");
                 return boost::shared_ptr<Type>();
             }
 
@@ -241,18 +243,29 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree,
         } else if (op == "\"") {
             // String base case, error case
 
-            cerr << "Line " << _lineNo << " - can't have strings as operator arguments!" << endl;
+            Utils::printSemErr(_lineNo, (string) "Invalid usage of Sentence " + 
+                                 "as operator argument.");
             return boost::shared_ptr<Type>();
         } else {
-			// VAR, ARRMEMBER, FUNC and number base cases
-			// (not sure if above comment is actually right...)
-
-			// Note false flag because EXPR root token has been stripped
+			// Note the false flag because EXPR root token has been stripped
             ExprAST checkExp(_st, tree, _parent, _lineNo, false);
             evaluatedType = checkExp.getType();
 
             if (!evaluatedType) {
-                // Error has already been outputted, we just need to break out of the parent call too
+                // Error has already been outputted, we just need to break out
+                //   of the parent call too
+                return boost::shared_ptr<Type>();
+            }
+
+            if (evaluatedType->getTypeName() == "Array") {
+                boost::shared_ptr<Array> evaluatedTypeArray =
+                  boost::shared_polymorphic_downcast<Array>(evaluatedType);
+                evaluatedType = evaluatedTypeArray->getElemType();
+            }
+
+            if (!evaluatedType) {
+                // Error has already been outputted, we just need to break out of
+                //   the parent call too
                 return boost::shared_ptr<Type>();
             }
 
@@ -265,17 +278,34 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree,
         }
 
         evaluatedType = recurseTree(arg, expEvalType);
+
         if (!evaluatedType) {
-            // Error has already been outputted, we just need to break out of the parent call too
+            // Error has already been outputted, we just need to break out of
+            //   the parent call too
             return boost::shared_ptr<Type>();
         }
 
-        if (expectedType != "*" && expectedType != evaluatedType->getTypeName()) {
-            cerr << "Line " << _lineNo << " - " << "Argument to " << op << " should be a " << expectedType << ", but got " << evaluatedType->getTypeName() << endl;
-            return boost::shared_ptr<Type>();
-        } else {
-            return evaluatedType;
+        if (evaluatedType->getTypeName() == "Array") {
+            boost::shared_ptr<Array> evaluatedTypeArray =
+              boost::shared_polymorphic_downcast<Array>(evaluatedType);
+            evaluatedType = evaluatedTypeArray->getElemType();
         }
+
+        if (!evaluatedType) {
+            // Error has already been outputted, we just need to break out of
+            //   the parent call too
+            return boost::shared_ptr<Type>();
+        }
+
+        if (expectedType != "*" && expectedType !=
+              evaluatedType->getTypeName()) {
+            Utils::printSemErr(_lineNo, "Expected argument to " + op + "to " +
+                                 "be a " + expectedType + ", not a " +
+                                  evaluatedType->getTypeName() + ".");
+           return boost::shared_ptr<Type>();
+        }
+        
+        return evaluatedType;
     } else if (children == 2) {
         // Binary operator
         string op = Utils::createStringFromTree(tree);
@@ -288,79 +318,154 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree,
         boost::shared_ptr<Type> lhsType, rhsType;
 
         if (_mixedArgsMixedRet.find(op) != _mixedArgsMixedRet.end()) {
-            // args must be of same type
-            // return type is type of either arg
+            // Args must be of same type
+            // Return type is type of either arg
 
             lhsType = recurseTree(lhs, "*");
             rhsType = recurseTree(rhs, "*");
 
             if (!lhsType || !rhsType) {
-                // Error has already been outputted, we just need to break out of the parent call too
+                // Error has already been outputted, we just need to break out
+                // of the parent call too
                 return boost::shared_ptr<Type>();
             }
 
-            if (lhsType->getTypeName() != rhsType->getTypeName()) {
-                cerr << "Line " << _lineNo << " - " << "Operand type mismatch in " << lhsTok << " " << op << " " << rhsTok
-                    << " (" << lhsType->getTypeName() << " isn't the same as " << rhsType->getTypeName() << ")" << endl;
+            if (lhsType->getTypeName() == "Array") {
+                boost::shared_ptr<Array> lhsTypeArray =
+                  boost::shared_polymorphic_downcast<Array>(lhsType);
+                lhsType = lhsTypeArray->getElemType();
+            }
+
+            if (rhsType->getTypeName() == "Array") {
+                boost::shared_ptr<Array> rhsTypeArray =
+                  boost::shared_polymorphic_downcast<Array>(rhsType);
+                rhsType = rhsTypeArray->getElemType();
+            }
+
+            if (!lhsType || !rhsType) {
+                // Error has already been outputted, we just need to break out
+                //   of the parent call too
                 return boost::shared_ptr<Type>();
-            } else if (expectedType != "*" && lhsType->getTypeName() != expectedType) {
-                cerr << "Line " << _lineNo << " - " << "In this scenario, " << op << " will return a " << lhsType->getTypeName() << ", not a " << expectedType << endl;
+            }
+
+            string lhsTypeStr = lhsType->getTypeName();
+            string rhsTypeStr = rhsType->getTypeName();
+            if (lhsTypeStr != rhsTypeStr) {
+                Utils::printSemErr(_lineNo, "Operand type mismatch for " + op +
+                                     " (" + lhsTypeStr + " does not match " +
+                                     rhsTypeStr + ").");
+                return boost::shared_ptr<Type>();
+            } else if (expectedType != "*" &&
+                         lhsType->getTypeName() != expectedType) {
+                Utils::printSemErr(_lineNo, "Operator " + op + " will return " +
+                                     "a " + lhsType->getTypeName() + "not a " +
+                                     expectedType + ".");
                 return boost::shared_ptr<Type>();
             }
             return lhsType;
         } else if (_mixedArgsBoolRet.find(op) != _mixedArgsBoolRet.end()) {
-            // args must be of same type
+            // Args must be of same type
+            // Boolean return type
 
             if (expectedType != "*" && expectedType != "Boolean") {
-                // No point even evaluating lhs or rhs because my return type is wrong
-                cerr << "Line " << _lineNo << " - " << op << " returns a Boolean, not a " << expectedType << endl;
+                // No point even evaluating lhs or rhs because my return type is
+                //   wrong
+                Utils::printSemErr(_lineNo, "Operator " + op + " returns a " +
+                                     "Boolean, not a " + expectedType + ".");
                 return boost::shared_ptr<Type>();
             } else {
 				lhsType = recurseTree(lhs, "*");
 	            rhsType = recurseTree(rhs, "*");
 
                 if (!lhsType || !rhsType) {
-					cout << "doh" << endl;
-                    // Error has already been outputted, we just need to break out of the parent call too
+                    // Error has already been outputted, we just need to break
+                    //   out of the parent call too
                     return boost::shared_ptr<Type>();
                 }
 
-                if (lhsType->getTypeName() != rhsType->getTypeName()) {
-                    cerr << "Line " << _lineNo << " - " << "Operand type mismatch in " << lhsTok << " " << op << " " << rhsTok
-                        << " (" << lhsType->getTypeName() << " isn't the same as " << rhsType->getTypeName() << ")" << endl;
+                if (lhsType->getTypeName() == "Array") {
+                    boost::shared_ptr<Array> lhsTypeArray =
+                      boost::shared_polymorphic_downcast<Array>(lhsType);
+                    lhsType = lhsTypeArray->getElemType();
+                }
+
+                if (rhsType->getTypeName() == "Array") {
+                    boost::shared_ptr<Array> rhsTypeArray =
+                      boost::shared_polymorphic_downcast<Array>(rhsType);
+                    rhsType = rhsTypeArray->getElemType();
+                }
+
+                if (!lhsType || !rhsType) {
+                    // Error has already been outputted, we just need to break
+                    //   out of the parent call too
                     return boost::shared_ptr<Type>();
                 }
 
-                // return new boolean
+                string lhsTypeStr = lhsType->getTypeName();
+                string rhsTypeStr = rhsType->getTypeName();
+                if (lhsTypeStr != rhsTypeStr) {
+                    Utils::printSemErr(_lineNo, "Operand type mismatch for "
+                                         + op + " (" + lhsTypeStr +
+                                         " does not match " + rhsTypeStr +
+                                         ").");
+                    return boost::shared_ptr<Type>();
+                }
+
                 boost::shared_ptr<Type> evaluatedType(new Boolean);
                 return evaluatedType;
             }
         } else if (_boolArgsBoolRet.find(op) != _boolArgsBoolRet.end()) {
-            // args must be boolean
+            // Args must be boolean
+            // Boolean return type
 
             if (expectedType != "*" && expectedType != "Boolean") {
-                // No point even evaluating lhs or rhs because my return type is wrong
-                cerr << "Line " << _lineNo << " - " << op << " returns a Boolean, not a " << expectedType << endl;
+                // No point even evaluating lhs or rhs because my return type is
+                //   wrong
+                Utils::printSemErr(_lineNo, "Operator " + op + " returns a " +
+                                     "Boolean, not a " + expectedType + ".");
                 return boost::shared_ptr<Type>();
             } else {
                 lhsType = recurseTree(lhs, "Boolean");
                 rhsType = recurseTree(rhs, "Boolean");
 
-                // return new boolean
+                if (!lhsType || !rhsType) {
+                    // Error has already been outputted, we just need to break
+                    //   out of the parent call too
+                    return boost::shared_ptr<Type>();
+                }
+
                 boost::shared_ptr<Type> evaluatedType(new Boolean);
                 return evaluatedType;
             }
         } else {
+            // Note the false flag because EXPR root token has been stripped
             ExprAST checkExp(_st, tree, _parent, _lineNo, false);
             boost::shared_ptr<Type> evaluatedType = checkExp.getType();
 
             if (!evaluatedType) {
-                // Error has already been outputted, we just need to break out of the parent call too
+                // Error has already been outputted, we just need to break out
+                //   of the parent call too
                 return boost::shared_ptr<Type>();
             }
 
-            if (expectedType != "*" && expectedType != evaluatedType->getTypeName()) {
-                cerr << "Line " << _lineNo << " - " << "Expected argument expression to " << op << " to evaluate to a " << expectedType << ", but got a " << evaluatedType->getTypeName() << endl;
+            if (evaluatedType->getTypeName() == "Array") {
+                boost::shared_ptr<Array> evaluatedTypeArray =
+                  boost::shared_polymorphic_downcast<Array>(evaluatedType);
+                evaluatedType = evaluatedTypeArray->getElemType();
+            }
+
+            if (!evaluatedType) {
+                // Error has already been outputted, we just need to break out
+                //   of the parent call too
+                return boost::shared_ptr<Type>();
+            }
+
+            if (expectedType != "*" && expectedType !=
+                  evaluatedType->getTypeName()) {
+                Utils::printSemErr(_lineNo, (string) "Expected argument " +
+                                     "expression evaluate to a " +
+                                     expectedType + ", but" + "got a " +
+                                     evaluatedType->getTypeName());
                 return boost::shared_ptr<Type>();
             }
             
