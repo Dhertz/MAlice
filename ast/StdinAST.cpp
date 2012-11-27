@@ -10,10 +10,10 @@ StdinAST::StdinAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST>
 
 void StdinAST::check() {
     if (!_expr || !_expr->getType()) {
-        cerr << "Line " << _lineNo << " - " << "Stdin has bad expression." << endl;
+        Utils::printSemErr(_lineNo, (string) "Cannot read in to bad " +
+                             "expression due to earlier error.");
     } else if (!_expr->isDeclarable()) {
-        cerr << "Line " << _lineNo << " - " 
-            << "Stdin can only write to variables or arrays, not " 
-                << _expr->getType()->getTypeName() << "." << endl;
+        Utils::printSemErr(_lineNo, (string) "Can only read in to variables " +
+                             " or array elements.");
     }
 }

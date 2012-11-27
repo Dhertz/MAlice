@@ -1,7 +1,10 @@
 #include "ProcDecAST.hpp"
 #include "../idents/Variable.hpp"
 
-ProcDecAST::ProcDecAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_ptr<HeaderParamsAST> params, boost::shared_ptr<ASTNode> parent, int lineNo) : ASTNode(st, parent, lineNo) {
+ProcDecAST::ProcDecAST(boost::shared_ptr<SymbolTable> st, string name,
+                         boost::shared_ptr<HeaderParamsAST> params,
+                         boost::shared_ptr<ASTNode> parent, int lineNo)
+                         : ASTNode(st, parent, lineNo) {
     _st = st;
     _name = name;
     _params = params;
@@ -10,21 +13,25 @@ ProcDecAST::ProcDecAST(boost::shared_ptr<SymbolTable> st, string name, boost::sh
 }
 
 void ProcDecAST::check() {
-    // Needs checking (may have to be more levels)
-    boost::shared_ptr<Identifier> name = _st->getEncSymTable()->lookupCurrLevelOnly(_name);
+    boost::shared_ptr<Identifier> name =
+      _st->getEncSymTable()->lookupCurrLevelOnly(_name);
 
     if (name) {
-        cerr << "Line " << _lineNo << " - " << "Procedure name " << _name << " already exists." << endl;
+        Utils::printSemErr(_lineNo, _name + " has already been defined in " +
+                             "this scope.");
     } else {
         vector< boost::shared_ptr<Param> > v = _params->getParams();
         vector< boost::shared_ptr<Param> >::iterator param;
 
-        for (param=v.begin(); param != v.end(); param++) {
-            // No need to do null checks here since that is covered in HeaderParamsAST
+        for (param=v.begin(); param != v.end(); ++param) {
+            // No need to do null checks here since that is covered in
+            //   HeaderParamsAST
             if((*param)->getType()->getTypeName() == "Array") {
                 _st->add((*param)->getName(), (*param)->getType());
             } else {
-                boost::shared_ptr<Identifier> var(new Variable((*param)->getType()));
+                boost::shared_ptr<Identifier> var(
+                  new Variable((*param)->getType())
+                );
                 _st->add((*param)->getName(), var);
             }
         }

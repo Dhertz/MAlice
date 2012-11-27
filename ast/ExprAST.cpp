@@ -159,7 +159,7 @@ void ExprAST::check() {
                     if (indexType != "Number") {
 						Utils::printSemErr(_lineNo, (string) "Array index " +
 						                     "must evaluate to a Number" +
-						                     ", not a " + indexType);
+						                     ", not a " + indexType + ".");
                     } else {
                         _isDeclarable = true;
                         _type = arr->getElemType();

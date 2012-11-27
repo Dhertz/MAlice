@@ -13,7 +13,9 @@ class ProcDecAST : public ASTNode {
     int _lineNo;
     void check();
 public:
-    ProcDecAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_ptr<HeaderParamsAST> params, boost::shared_ptr<ASTNode> parent, int lineNo);
+    ProcDecAST(boost::shared_ptr<SymbolTable> st, string name,
+    	         boost::shared_ptr<HeaderParamsAST> params,
+    	         boost::shared_ptr<ASTNode> parent, int lineNo);
 };
 
 #endif
