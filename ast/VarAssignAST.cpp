@@ -40,5 +40,5 @@ void VarAssignAST::check() {
                 "not type compatible.");
             }
         }
-    }    
+    }
 }

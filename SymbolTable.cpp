@@ -6,7 +6,7 @@ SymbolTable::SymbolTable(boost::shared_ptr<SymbolTable> st) {
 }
 
 void SymbolTable::add(string name, boost::shared_ptr<Identifier> obj) {
-    _dict[name] = obj;    
+    _dict[name] = obj;
 }
 
 boost::shared_ptr<Identifier> SymbolTable::lookupCurrLevelOnly(string name) {
@@ -23,7 +23,7 @@ boost::shared_ptr<Identifier> SymbolTable::lookupCurrLevelAndEnclosingLevels(str
         if (id) {
             return id;
         }
-    }    
+    }
     return boost::shared_ptr<Identifier>();
 }
 

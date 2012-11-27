@@ -15,7 +15,7 @@ FuncProcCallAST::FuncProcCallAST(boost::shared_ptr<SymbolTable> st, string name,
 void FuncProcCallAST::check() {
     boost::shared_ptr<Identifier> function =
       _st->lookupCurrLevelAndEnclosingLevels(_name);
-    
+
     if (!function) {
         Utils::printSemErr(_lineNo, _name + " is not in scope!");
     } else if (function->getBaseName() != "Callable") {
@@ -30,10 +30,10 @@ void FuncProcCallAST::check() {
 void FuncProcCallAST::parametersTypeCheck(boost::shared_ptr<Callable> function) {
     vector< boost::shared_ptr<Param> > params = function->getParams();
     vector< boost::shared_ptr<Param> >::iterator i = params.begin();
-    
+
     vector< boost::shared_ptr<Type> > paramTypes = _params->getTypes();
     vector< boost::shared_ptr<Type> >::iterator j = paramTypes.begin();
-    
+
     if (params.size() != paramTypes.size()) {
         string paramsStr = boost::lexical_cast<string>(params.size());
         string typesStr = boost::lexical_cast<string>(paramTypes.size());
@@ -41,7 +41,7 @@ void FuncProcCallAST::parametersTypeCheck(boost::shared_ptr<Callable> function) 
                              _name + " (expected " + paramsStr + ", got " +
                              typesStr + ").");
     }
-    
+
     int minimum = min(params.size(), paramTypes.size());
     for (int k = 0; k < minimum; ++i, ++j, ++k) {
         if (!(*i) || !(*i)->getType() || !(*j)) {

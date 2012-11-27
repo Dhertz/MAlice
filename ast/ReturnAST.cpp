@@ -18,7 +18,7 @@ void ReturnAST::check() {
                              "due to an earlier error.");
     } else {
         checkFunctionType(_parent);
-    }    
+    }
 }
 
 void ReturnAST::checkFunctionType(boost::shared_ptr<ASTNode> parent) {

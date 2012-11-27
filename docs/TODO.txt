@@ -1,16 +1,9 @@
 TODO list:
 Part 2:
 	- Watch out for circular references, and general memory leak tests
-	- Global error count?
-	- Make type strings lower case to match top level ST
-	- Check no tabs
 	- Remove duplication in ExprAST recursive method
-	- Check that return in a proc breaks
+	- Fix bug where return in a proc doesn't break
 	- Check parse error case on ReturnAST
-	- Check no lines of just spaces/tabs (Ctrl+F for space NL)
-	- Check the not assignable check in VarAssign with respect to array elements (might be better to use isAssignable?)
-
+	- TreeWalker: remove any dodgy comments, 80 char margin, spaces not tabs
 
 valgrind --tool=memcheck --leak-check=full ./compile ../malice_examples/invalid/test35.alice
-
-

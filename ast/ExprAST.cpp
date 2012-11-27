@@ -167,7 +167,6 @@ void ExprAST::check() {
                 }
             }
         }
-        
     } else if (tok == "'") {
         // Char of form 'x', evaluates to a Letter
 
@@ -217,7 +216,7 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree,
 
         string expEvalType;
         boost::shared_ptr<Type> evaluatedType;
-        
+
         if (_intArgIntRet.find(op) != _intArgIntRet.end()) {
             expEvalType = "Number";
         } else if (_boolArgBoolRet.find(op) != _boolArgBoolRet.end()) {
@@ -294,7 +293,7 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree,
                                   evaluatedType->getTypeName() + ".");
            return boost::shared_ptr<Type>();
         }
-        
+
         return evaluatedType;
     } else if (children == 2) {
         // Binary operator
@@ -454,7 +453,7 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree,
                                      evaluatedType->getTypeName() + ".");
                 return boost::shared_ptr<Type>();
             }
-            
+
             return evaluatedType;
         }
     }

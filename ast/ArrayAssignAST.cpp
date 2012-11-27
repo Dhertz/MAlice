@@ -17,7 +17,7 @@ ArrayAssignAST::ArrayAssignAST(boost::shared_ptr<SymbolTable> st, string name,
 void ArrayAssignAST::check() {
     boost::shared_ptr<Identifier> array =
       _st->lookupCurrLevelAndEnclosingLevels(_name);
-    
+
     if (!array) {
         Utils::printSemErr(_lineNo, "Array " + _name + " it is not in scope.");
     } else if (!_element || !_element->getType()) {

@@ -1,5 +1,5 @@
 #ifndef    TREE_WALKER_H
-#define TREE_WALKER_H 
+#define TREE_WALKER_H
 
 #include <antlr3.h>
 #include <map>
