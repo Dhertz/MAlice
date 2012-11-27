@@ -11,3 +11,5 @@ Part 2:
 	- Make type strings lower case to match top level ST
 	- Check no tabs
 	- Make sure arrays can't be in the base of an expression due to VAR tok
+	- Remove duplication in ExprAST recursive method
+
