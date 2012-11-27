@@ -264,13 +264,16 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree,
             }
 
             if (!evaluatedType) {
-                // Error has already been outputted, we just need to break out of
-                //   the parent call too
+                // Error has already been outputted, we just need to break out
+                //   of the parent call too
                 return boost::shared_ptr<Type>();
             }
 
-            if (expectedType != "*" && expectedType != evaluatedType->getTypeName()) {
-                cerr << "Line " << _lineNo << " - " << "Expected argument expression to " << op << " to evaluate to a " << expectedType << ", but got a " << evaluatedType->getTypeName() << endl;
+            if (expectedType != "*" &&
+                  expectedType != evaluatedType->getTypeName()) {
+                Utils::printSemErr(_lineNo, (string) "Expected expression to " +
+                                     "evaluate to a " + expectedType + ", but" +
+                                     " got a " + evaluatedType->getTypeName());
                 return boost::shared_ptr<Type>();
 			}
 

@@ -5,7 +5,7 @@ Param::Param(boost::shared_ptr<Type> type, string name) {
     _name = name;
 }
 
-boost::shared_ptr<Type> Param::getTypeName() {
+boost::shared_ptr<Type> Param::getType() {
     return _type;
 }
 

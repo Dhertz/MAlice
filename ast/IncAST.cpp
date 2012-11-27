@@ -1,7 +1,10 @@
 #include "IncAST.hpp"
 #include "../Utils.hpp"
 
-IncAST::IncAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr, boost::shared_ptr<ASTNode> parent, int lineNo) : ASTNode(st, parent, lineNo) {
+IncAST::IncAST(boost::shared_ptr<SymbolTable> st,
+                 boost::shared_ptr<ExprAST> expr,
+                 boost::shared_ptr<ASTNode> parent, int lineNo)
+                 : ASTNode(st, parent, lineNo) {
     _st = st;
     _expr = expr;
     _lineNo = lineNo;
@@ -10,9 +13,10 @@ IncAST::IncAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> exp
 
 void IncAST::check() {
     if (!_expr || !_expr->getType()) {
-        cerr << "Line " << _lineNo << " - " << "Cannot increment bad expression." << endl;
+        Utils::printSemErr(_lineNo, (string) "Cannot increment bad " +
+                             "expression due to earlier error.");
     } else if (_expr->getType()->getTypeName() != "Number") {
-        cerr << "Line " << _lineNo << " - " << "Cannot increment expression of type " 
-            << _expr->getType()->getTypeName() << "." << endl;
+        Utils::printSemErr(_lineNo, "Can only increment a Number, not a " +
+                             _expr->getType()->getTypeName());
     }
 }

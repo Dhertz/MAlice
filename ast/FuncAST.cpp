@@ -1,6 +1,10 @@
 #include "FuncAST.hpp"
+#include <boost/lexical_cast.hpp>
 
-FuncAST::FuncAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_ptr<CallParamsAST> params, boost::shared_ptr<ASTNode> parent, int lineNo) : ASTNode(st, parent, lineNo) {
+FuncAST::FuncAST(boost::shared_ptr<SymbolTable> st, string name,
+                   boost::shared_ptr<CallParamsAST> params,
+                   boost::shared_ptr<ASTNode> parent, int lineNo)
+                   : ASTNode(st, parent, lineNo) {
     _st = st;
     _name = name;
     _params = params;
@@ -9,14 +13,16 @@ FuncAST::FuncAST(boost::shared_ptr<SymbolTable> st, string name, boost::shared_p
 }
 
 void FuncAST::check() {
-    boost::shared_ptr<Identifier> function = _st->lookupCurrLevelAndEnclosingLevels(_name);
+    boost::shared_ptr<Identifier> function =
+      _st->lookupCurrLevelAndEnclosingLevels(_name);
     
     if (!function) {
-        cerr << "Line " << _lineNo << " - " << "Function " << _name << " not in scope." << endl;
+        Utils::printSemErr(_lineNo, _name + " is not in scope!");
     } else if (function->getBaseName() != "Callable") {
-        cerr << "Line " << _lineNo << " - " << _name << " is not a function, it's a " << function->getBaseName() << ". You can't call it." << endl;
+        Utils::printSemErr(_lineNo, _name + " is not callable.");
     } else {
-        boost::shared_ptr<Callable> funcCasted = boost::shared_polymorphic_downcast<Callable>(function);
+        boost::shared_ptr<Callable> funcCasted =
+          boost::shared_polymorphic_downcast<Callable>(function);
         parametersTypeCheck(funcCasted);
     }
 }
@@ -29,20 +35,28 @@ void FuncAST::parametersTypeCheck(boost::shared_ptr<Callable> function) {
     vector< boost::shared_ptr<Type> >::iterator j = paramTypes.begin();
     
     if (params.size() != paramTypes.size()) {
-        cerr << "Line " << _lineNo << " - " << "Invalid number of arguments for " << _name << " (expected " 
-            << params.size() << ", got " << paramTypes.size() << ")." << endl;
+        string paramsStr = boost::lexical_cast<string>(params.size());
+        string typesStr = boost::lexical_cast<string>(paramTypes.size());
+        Utils::printSemErr(_lineNo, "Invalid number of arguments given to " +
+                             _name + " (expected " + paramsStr + ", got " +
+                             typesStr + ").");
     }
     
     int minimum = min(params.size(), paramTypes.size());
     for (int k = 0; k < minimum; ++i, ++j, ++k) {
-        if (!(*i)) {
-            cerr << "Line " << _lineNo << " - " << "Bad parameter type." << endl;
-        } else if (!(*j)) {
-            cerr << "Line " << _lineNo << " - " << "Bad parameter type." << endl;
-        } else if (!(*i)->getTypeName()) {
-            cerr << "Line " << _lineNo << " - " << "Parameter has no type." << endl;
-        } else if ((*i)->getTypeName()->getTypeName() != (*j)->getTypeName()) {
-            cerr << "Line " << _lineNo << " - " << "Type mismatch for " << _name << ": argument " << k + 1 << " expects a " << (*i)->getTypeName()->getTypeName() << " but the call was made with a " << (*j)->getTypeName() << endl;
+        if (!(*i) || !(*i)->getType() || !(*j)) {
+            Utils::printSemErr(_lineNo, (string) "Bad parameter type due to " +
+                                 "an earlier error.");
+        } else {
+            string expType = (*i)->getType()->getTypeName();
+            string actType = (*j)->getTypeName();
+
+            if (expType != actType) {
+                string argNum = boost::lexical_cast<string>(k + 1);
+                Utils::printSemErr(_lineNo, "Argument " + argNum + " to " +
+                                     _name + " should be a " + expType +
+                                     ", not a " + actType + ".");
+            }
         }
     }
 }

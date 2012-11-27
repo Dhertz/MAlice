@@ -9,7 +9,8 @@ class IfAST : public ASTNode {
     int _lineNo;
     void check();
 public:
-    IfAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr, boost::shared_ptr<ASTNode> parent, int lineNo);
+    IfAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr,
+    	    boost::shared_ptr<ASTNode> parent, int lineNo);
 };
 
 #endif

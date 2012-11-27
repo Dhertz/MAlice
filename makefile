@@ -1,5 +1,5 @@
-CPP = g++ -I libantlr3c -g
-C   = gcc -I libantlr3c -g
+CPP = g++ -I libantlr3c
+C   = gcc -I libantlr3c
 
 all: antlr grammar compile
 

@@ -21,10 +21,10 @@ void ProcDecAST::check() {
 
         for (param=v.begin(); param != v.end(); param++) {
             // No need to do null checks here since that is covered in HeaderParamsAST
-            if((*param)->getTypeName()->getTypeName() == "Array") {
-                _st->add((*param)->getName(), (*param)->getTypeName());
+            if((*param)->getType()->getTypeName() == "Array") {
+                _st->add((*param)->getName(), (*param)->getType());
             } else {
-                boost::shared_ptr<Identifier> var(new Variable((*param)->getTypeName()));
+                boost::shared_ptr<Identifier> var(new Variable((*param)->getType()));
                 _st->add((*param)->getName(), var);
             }
         }
