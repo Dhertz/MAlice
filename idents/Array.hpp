@@ -5,7 +5,6 @@
 
 class Array : public Type {
     boost::shared_ptr<Type> _elemType;
-
 public:
     Array(boost::shared_ptr<Type> elemType);
     boost::shared_ptr<Type> getElemType();
