@@ -1,6 +1,6 @@
 #include "ExprAST.hpp"
 #include "CallParamsAST.hpp"
-#include "FuncAST.hpp"
+#include "FuncProcCallAST.hpp"
 #include "../idents/Array.hpp"
 #include "../idents/Boolean.hpp"
 #include "../idents/Callable.hpp"
@@ -71,13 +71,13 @@ void ExprAST::check() {
         boost::shared_ptr<CallParamsAST> callParamsNode(
           new CallParamsAST(_st, cplTree, _parent, _lineNo)
         );
-        FuncAST funcCheck(_st, funcName, callParamsNode, _parent, _lineNo);
+        FuncProcCallAST funcCheck(_st, funcName, callParamsNode, _parent, _lineNo);
 
         boost::shared_ptr<Identifier> funcIdent =
           _st->lookupCurrLevelAndEnclosingLevels(funcName);
 
 		// Don't need to output an error if the below if fails, as
-		//   CallParamsAST or FuncAST will have done it for me
+		//   CallParamsAST or FuncProcCallAST will have done it for me
 		if (funcIdent && funcIdent->getBaseName() == "Callable") {
             boost::shared_ptr<Callable> funcCallable =
               boost::shared_polymorphic_downcast<Callable>(funcIdent);
@@ -257,17 +257,16 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree,
                 return boost::shared_ptr<Type>();
             }
 
-            if (evaluatedType->getTypeName() == "Array") {
-                boost::shared_ptr<Array> evaluatedTypeArray =
-                  boost::shared_polymorphic_downcast<Array>(evaluatedType);
-                evaluatedType = evaluatedTypeArray->getElemType();
-            }
+			if (evaluatedType->getTypeName() == "Array") {
+				if (op != "ARRMEMBER") {
+					Utils::printSemErr(_lineNo, (string) "Can't apply " +
+					                     "operators to arrays!");
+					return boost::shared_ptr<Type>();
+				}
 
-            if (!evaluatedType) {
-                // Error has already been outputted, we just need to break out
-                //   of the parent call too
-                return boost::shared_ptr<Type>();
-            }
+				boost::shared_ptr<Array> evalArr = boost::shared_polymorphic_downcast<Array>(evaluatedType);
+				evaluatedType = evalArr->getElemType();
+			}
 
             if (expectedType != "*" &&
                   expectedType != evaluatedType->getTypeName()) {
@@ -281,18 +280,6 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree,
         }
 
         evaluatedType = recurseTree(arg, expEvalType);
-
-        if (!evaluatedType) {
-            // Error has already been outputted, we just need to break out of
-            //   the parent call too
-            return boost::shared_ptr<Type>();
-        }
-
-        if (evaluatedType->getTypeName() == "Array") {
-            boost::shared_ptr<Array> evaluatedTypeArray =
-              boost::shared_polymorphic_downcast<Array>(evaluatedType);
-            evaluatedType = evaluatedTypeArray->getElemType();
-        }
 
         if (!evaluatedType) {
             // Error has already been outputted, we just need to break out of
@@ -333,23 +320,27 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree,
                 return boost::shared_ptr<Type>();
             }
 
-            if (lhsType->getTypeName() == "Array") {
-                boost::shared_ptr<Array> lhsTypeArray =
-                  boost::shared_polymorphic_downcast<Array>(lhsType);
-                lhsType = lhsTypeArray->getElemType();
-            }
+			if (lhsType->getTypeName() == "Array") {
+				if (lhsTok != "ARRMEMBER") {
+					Utils::printSemErr(_lineNo, (string) "Can't apply " +
+					                     "operators to arrays!");
+					return boost::shared_ptr<Type>();
+				}
 
-            if (rhsType->getTypeName() == "Array") {
-                boost::shared_ptr<Array> rhsTypeArray =
-                  boost::shared_polymorphic_downcast<Array>(rhsType);
-                rhsType = rhsTypeArray->getElemType();
-            }
+				boost::shared_ptr<Array> lhsArr = boost::shared_polymorphic_downcast<Array>(lhsType);
+				lhsType = lhsArr->getElemType();
+			}
 
-            if (!lhsType || !rhsType) {
-                // Error has already been outputted, we just need to break out
-                //   of the parent call too
-                return boost::shared_ptr<Type>();
-            }
+			if (rhsType->getTypeName() == "Array") {
+				if (rhsTok != "ARRMEMBER") {
+					Utils::printSemErr(_lineNo, (string) "Can't apply " +
+					                     "operators to arrays!");
+					return boost::shared_ptr<Type>();
+				}
+
+				boost::shared_ptr<Array> rhsArr = boost::shared_polymorphic_downcast<Array>(rhsType);
+				rhsType = rhsArr->getElemType();
+			}
 
             string lhsTypeStr = lhsType->getTypeName();
             string rhsTypeStr = rhsType->getTypeName();
@@ -386,23 +377,27 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree,
                     return boost::shared_ptr<Type>();
                 }
 
-                if (lhsType->getTypeName() == "Array") {
-                    boost::shared_ptr<Array> lhsTypeArray =
-                      boost::shared_polymorphic_downcast<Array>(lhsType);
-                    lhsType = lhsTypeArray->getElemType();
-                }
+				if (lhsType->getTypeName() == "Array") {
+					if (lhsTok != "ARRMEMBER") {
+						Utils::printSemErr(_lineNo, (string) "Can't apply " +
+						                     "operators to arrays!");
+						return boost::shared_ptr<Type>();
+					}
 
-                if (rhsType->getTypeName() == "Array") {
-                    boost::shared_ptr<Array> rhsTypeArray =
-                      boost::shared_polymorphic_downcast<Array>(rhsType);
-                    rhsType = rhsTypeArray->getElemType();
-                }
+					boost::shared_ptr<Array> lhsArr = boost::shared_polymorphic_downcast<Array>(lhsType);
+					lhsType = lhsArr->getElemType();
+				}
 
-                if (!lhsType || !rhsType) {
-                    // Error has already been outputted, we just need to break
-                    //   out of the parent call too
-                    return boost::shared_ptr<Type>();
-                }
+				if (rhsType->getTypeName() == "Array") {
+					if (rhsTok != "ARRMEMBER") {
+						Utils::printSemErr(_lineNo, (string) "Can't apply " +
+						                     "operators to arrays!");
+						return boost::shared_ptr<Type>();
+					}
+
+					boost::shared_ptr<Array> rhsArr = boost::shared_polymorphic_downcast<Array>(rhsType);
+					rhsType = rhsArr->getElemType();
+				}
 
                 string lhsTypeStr = lhsType->getTypeName();
                 string rhsTypeStr = rhsType->getTypeName();
@@ -451,24 +446,12 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree,
                 return boost::shared_ptr<Type>();
             }
 
-            if (evaluatedType->getTypeName() == "Array") {
-                boost::shared_ptr<Array> evaluatedTypeArray =
-                  boost::shared_polymorphic_downcast<Array>(evaluatedType);
-                evaluatedType = evaluatedTypeArray->getElemType();
-            }
-
-            if (!evaluatedType) {
-                // Error has already been outputted, we just need to break out
-                //   of the parent call too
-                return boost::shared_ptr<Type>();
-            }
-
             if (expectedType != "*" && expectedType !=
                   evaluatedType->getTypeName()) {
                 Utils::printSemErr(_lineNo, (string) "Expected argument " +
-                                     "expression evaluate to a " +
-                                     expectedType + ", but" + "got a " +
-                                     evaluatedType->getTypeName());
+                                     "expression to evaluate to a " +
+                                     expectedType + ", but got a " +
+                                     evaluatedType->getTypeName() + ".");
                 return boost::shared_ptr<Type>();
             }
             

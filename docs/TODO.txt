@@ -2,16 +2,13 @@ TODO list:
 Part 2:
 	- Watch out for circular references, and general memory leak tests
 	- Global error count?
-	- How does CallParams work when errored cases arent added to the vector?
 	- Make type strings lower case to match top level ST
 	- Check no tabs
-	- Make sure arrays can't be in the base of an expression due to VAR tok
 	- Remove duplication in ExprAST recursive method
-	- Rename FuncAST to FuncProcCallAST (at least I think that's what it is...)
 	- Check that return in a proc breaks
 	- Check parse error case on ReturnAST
 	- Check no lines of just spaces/tabs (Ctrl+F for space NL)
-	- Check the not assignable check in VarAssign with respect to array elements (might be better to use isAssignable? Which needs renaming to isAssignable)
+	- Check the not assignable check in VarAssign with respect to array elements (might be better to use isAssignable?)
 
 
 valgrind --tool=memcheck --leak-check=full ./compile ../malice_examples/invalid/test35.alice

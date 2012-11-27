@@ -1,10 +1,10 @@
-#ifndef FUNC_AST
-#define FUNC_AST
+#ifndef FUNC_PROC_CALL_AST
+#define FUNC_PROC_CALLAST
 
 #include "CallParamsAST.hpp"
 #include "../idents/Callable.hpp"
 
-class FuncAST : public ASTNode {
+class FuncProcCallAST : public ASTNode {
     boost::shared_ptr<SymbolTable> _st;
     string _name;
     boost::shared_ptr<CallParamsAST> _params;
@@ -12,7 +12,7 @@ class FuncAST : public ASTNode {
     void parametersTypeCheck(boost::shared_ptr<Callable> function);
     void check();
 public:
-    FuncAST(boost::shared_ptr<SymbolTable> st, string name,
+    FuncProcCallAST(boost::shared_ptr<SymbolTable> st, string name,
     	      boost::shared_ptr<CallParamsAST> params,
     	      boost::shared_ptr<ASTNode> parent, int lineNo);
 };

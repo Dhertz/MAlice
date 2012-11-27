@@ -5,7 +5,7 @@
 #include "ast/ArrayDecAST.hpp"
 #include "ast/ArrayAssignAST.hpp"
 #include "ast/VarAssignAST.hpp"
-#include "ast/FuncAST.hpp"
+#include "ast/FuncProcCallAST.hpp"
 #include "ast/CallParamsAST.hpp"
 #include "ast/HeaderParamsAST.hpp"
 #include "ast/ProcDecAST.hpp"
@@ -174,7 +174,7 @@ void TreeWalker::processVARSTAT(pANTLR3_BASE_TREE tree, boost::shared_ptr<Symbol
         parent->addChild(assign, childNum);
     } else if (option == "FUNC") {
         boost::shared_ptr<CallParamsAST> params(new CallParamsAST(st, Utils::childByNum(optionsTree, 0), parent, getLine(tree)));
-        boost::shared_ptr<FuncAST> func(new FuncAST(st, varId, params, parent, getLine(tree)));
+        boost::shared_ptr<FuncProcCallAST> func(new FuncProcCallAST(st, varId, params, parent, getLine(tree)));
         parent->addChild(func, childNum);
     } else if (option == "ASSIGN") {
         boost::shared_ptr<ExprAST> expr(new ExprAST(st, Utils::childByNum(optionsTree, 0), parent, getLine(tree), true));

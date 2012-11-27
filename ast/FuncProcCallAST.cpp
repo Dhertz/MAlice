@@ -1,7 +1,7 @@
-#include "FuncAST.hpp"
+#include "FuncProcCallAST.hpp"
 #include <boost/lexical_cast.hpp>
 
-FuncAST::FuncAST(boost::shared_ptr<SymbolTable> st, string name,
+FuncProcCallAST::FuncProcCallAST(boost::shared_ptr<SymbolTable> st, string name,
                    boost::shared_ptr<CallParamsAST> params,
                    boost::shared_ptr<ASTNode> parent, int lineNo)
                    : ASTNode(st, parent, lineNo) {
@@ -12,7 +12,7 @@ FuncAST::FuncAST(boost::shared_ptr<SymbolTable> st, string name,
     check();
 }
 
-void FuncAST::check() {
+void FuncProcCallAST::check() {
     boost::shared_ptr<Identifier> function =
       _st->lookupCurrLevelAndEnclosingLevels(_name);
     
@@ -27,7 +27,7 @@ void FuncAST::check() {
     }
 }
 
-void FuncAST::parametersTypeCheck(boost::shared_ptr<Callable> function) {
+void FuncProcCallAST::parametersTypeCheck(boost::shared_ptr<Callable> function) {
     vector< boost::shared_ptr<Param> > params = function->getParams();
     vector< boost::shared_ptr<Param> >::iterator i = params.begin();
     
