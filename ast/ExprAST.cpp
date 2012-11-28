@@ -71,7 +71,8 @@ void ExprAST::check() {
         boost::shared_ptr<CallParamsAST> callParamsNode(
           new CallParamsAST(_st, cplTree, _parent, _lineNo)
         );
-        FuncProcCallAST funcCheck(_st, funcName, callParamsNode, _parent, _lineNo);
+        FuncProcCallAST funcCheck(_st, funcName, callParamsNode, _parent,
+                                    _lineNo);
 
         boost::shared_ptr<Identifier> funcIdent =
           _st->lookupCurrLevelAndEnclosingLevels(funcName);
@@ -263,7 +264,8 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree,
 					return boost::shared_ptr<Type>();
 				}
 
-				boost::shared_ptr<Array> evalArr = boost::shared_polymorphic_downcast<Array>(evaluatedType);
+				boost::shared_ptr<Array> evalArr =
+				  boost::shared_polymorphic_downcast<Array>(evaluatedType);
 				evaluatedType = evalArr->getElemType();
 			}
 
@@ -326,7 +328,8 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree,
 					return boost::shared_ptr<Type>();
 				}
 
-				boost::shared_ptr<Array> lhsArr = boost::shared_polymorphic_downcast<Array>(lhsType);
+				boost::shared_ptr<Array> lhsArr =
+				  boost::shared_polymorphic_downcast<Array>(lhsType);
 				lhsType = lhsArr->getElemType();
 			}
 
@@ -337,7 +340,8 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree,
 					return boost::shared_ptr<Type>();
 				}
 
-				boost::shared_ptr<Array> rhsArr = boost::shared_polymorphic_downcast<Array>(rhsType);
+				boost::shared_ptr<Array> rhsArr =
+				  boost::shared_polymorphic_downcast<Array>(rhsType);
 				rhsType = rhsArr->getElemType();
 			}
 
@@ -350,9 +354,9 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree,
                 return boost::shared_ptr<Type>();
             } else if (expectedType != "*" &&
                          lhsType->getTypeName() != expectedType) {
-                Utils::printSemErr(_lineNo, "Operator " + op + " will return " +
-                                     "a " + lhsType->getTypeName() + "not a " +
-                                     expectedType + ".");
+                Utils::printSemErr(_lineNo, "Operator " + op + " will " +
+                                     "rerurn a " + lhsType->getTypeName() +
+                                     "not a " + expectedType + ".");
                 return boost::shared_ptr<Type>();
             }
             return lhsType;
@@ -361,8 +365,8 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree,
             // Boolean return type
 
             if (expectedType != "*" && expectedType != "Boolean") {
-                // No point even evaluating lhs or rhs because my return type is
-                //   wrong
+                // No point even evaluating lhs or rhs because my return type
+                //   is wrong
                 Utils::printSemErr(_lineNo, "Operator " + op + " returns a " +
                                      "Boolean, not a " + expectedType + ".");
                 return boost::shared_ptr<Type>();
@@ -383,7 +387,8 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree,
 						return boost::shared_ptr<Type>();
 					}
 
-					boost::shared_ptr<Array> lhsArr = boost::shared_polymorphic_downcast<Array>(lhsType);
+					boost::shared_ptr<Array> lhsArr =
+					  boost::shared_polymorphic_downcast<Array>(lhsType);
 					lhsType = lhsArr->getElemType();
 				}
 
@@ -394,7 +399,8 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree,
 						return boost::shared_ptr<Type>();
 					}
 
-					boost::shared_ptr<Array> rhsArr = boost::shared_polymorphic_downcast<Array>(rhsType);
+					boost::shared_ptr<Array> rhsArr =
+					  boost::shared_polymorphic_downcast<Array>(rhsType);
 					rhsType = rhsArr->getElemType();
 				}
 
@@ -416,8 +422,8 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree,
             // Boolean return type
 
             if (expectedType != "*" && expectedType != "Boolean") {
-                // No point even evaluating lhs or rhs because my return type is
-                //   wrong
+                // No point even evaluating lhs or rhs because my return type
+                //   is wrong
                 Utils::printSemErr(_lineNo, "Operator " + op + " returns a " +
                                      "Boolean, not a " + expectedType + ".");
                 return boost::shared_ptr<Type>();
