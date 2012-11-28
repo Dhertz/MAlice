@@ -1,4 +1,4 @@
-#ifndef    TREE_WALKER_H
+#ifndef TREE_WALKER_H
 #define TREE_WALKER_H
 
 #include <antlr3.h>
@@ -28,7 +28,6 @@ class TreeWalker {
     void processWHILE(pANTLR3_BASE_TREE, boost::shared_ptr<SymbolTable>, boost::weak_ptr<ASTNode> parent, int childNum);
     void processCHOICE(pANTLR3_BASE_TREE, boost::shared_ptr<SymbolTable>, boost::weak_ptr<ASTNode> parent, int childNum);
     void processIF(pANTLR3_BASE_TREE, boost::shared_ptr<SymbolTable>, boost::weak_ptr<ASTNode> parent, int childNum);
-    void processCOND(pANTLR3_BASE_TREE, boost::shared_ptr<SymbolTable>, boost::weak_ptr<ASTNode> parent, int childNum);
     void processNS(pANTLR3_BASE_TREE, boost::shared_ptr<SymbolTable>, boost::weak_ptr<ASTNode> parent, int childNum);
     bool findReturn(pANTLR3_BASE_TREE tree);
     int getLine(pANTLR3_BASE_TREE tree);
