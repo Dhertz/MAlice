@@ -17,6 +17,7 @@ public:
                   boost::shared_ptr<ExprAST> expr, string name,
                   string typeName, boost::weak_ptr<ASTNode> parent,
                   int lineNo);
+    void print();
 };
 
 #endif

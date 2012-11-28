@@ -49,3 +49,7 @@ string ProcDecAST::getProcName() {
 string ProcDecAST::getNodeName() {
     return "ProcDec";
 }
+
+void ProcDecAST::print() {
+    cout << "Procedure declaration" << endl;
+}

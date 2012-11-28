@@ -104,3 +104,7 @@ bool HeaderParamsAST::duplicate(int upto, string name) {
 vector< boost::shared_ptr<Param> > HeaderParamsAST::getParams() {
     return _params;
 }
+
+void HeaderParamsAST::print() {
+    cout << "Parameters" << endl;
+}

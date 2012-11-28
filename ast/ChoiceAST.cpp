@@ -21,3 +21,7 @@ void ChoiceAST::check() {
                              _expr->getType()->getTypeName() + ".");
     }
 }
+
+void ChoiceAST::print() {
+    cout << "Choice conditional" << endl;
+}

@@ -56,3 +56,7 @@ void ArrayAssignAST::check() {
         }
     }
 }
+
+void ArrayAssignAST::print() {
+    cout << "Array member assignment" << endl;
+}

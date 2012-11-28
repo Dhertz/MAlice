@@ -18,6 +18,7 @@ public:
                  boost::weak_ptr<ASTNode> parent, int lineNo);
     string getNodeName();
     string getFuncName();
+    void print();
 };
 
 #endif

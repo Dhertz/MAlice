@@ -35,3 +35,7 @@ void VarDecAST::check() {
         _st->add(_varName, v);
     }
 }
+
+void VarDecAST::print() {
+    cout << "Variable declaration node" << endl;
+}

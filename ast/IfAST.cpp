@@ -20,3 +20,7 @@ void IfAST::check() {
                              _expr->getType()->getTypeName());
     }
 }
+
+void IfAST::print() {
+    cout << "Conditional statement" << endl;
+}

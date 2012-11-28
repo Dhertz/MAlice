@@ -14,6 +14,7 @@ public:
     VarDecAST(boost::shared_ptr<SymbolTable> st, string typeName,
     	             string varName, boost::weak_ptr<ASTNode> parent,
     	             int lineNo);
+    void print();
 };
 
 #endif

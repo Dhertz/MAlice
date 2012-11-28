@@ -38,3 +38,7 @@ void ArrayDecAST::check() {
         _st->add(_name, a);
     }
 }
+
+void ArrayDecAST::print() {
+    cout << "Array declaration" << endl;
+}

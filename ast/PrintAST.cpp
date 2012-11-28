@@ -15,3 +15,7 @@ void PrintAST::check() {
         Utils::printSemErr(_lineNo, (string) "Cannot print an array.");
     }
 }
+
+void PrintAST::print() {
+    cout << "Print node" << endl;
+}

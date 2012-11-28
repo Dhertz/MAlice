@@ -20,3 +20,7 @@ void IncAST::check() {
                              _expr->getType()->getTypeName());
     }
 }
+    
+void IncAST::print() {
+    cout << "Increment statement" << endl;
+}

@@ -28,3 +28,7 @@ boost::weak_ptr<ASTNode> ASTNode::getParent() {
 string ASTNode::getNodeName() {
     return "Node";
 }
+
+void ASTNode::print() {
+    cout << "Root node" << endl;
+}

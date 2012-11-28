@@ -60,3 +60,7 @@ void FuncProcCallAST::parametersTypeCheck(boost::shared_ptr<Callable> function) 
         }
     }
 }
+
+void FuncProcCallAST::print() {
+    cout << "Function call" << endl;
+}

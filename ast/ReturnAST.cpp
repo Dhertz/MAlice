@@ -83,3 +83,7 @@ void ReturnAST::checkFunctionType(boost::weak_ptr<ASTNode> parent) {
         }
     }
 }
+
+void ReturnAST::print() {
+    cout << "Function return" << endl;
+}

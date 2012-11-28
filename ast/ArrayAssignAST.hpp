@@ -16,6 +16,7 @@ public:
     ArrayAssignAST(boost::shared_ptr<SymbolTable> st, string name,
         boost::shared_ptr<ExprAST> element, boost::shared_ptr<ExprAST> value,
         boost::weak_ptr<ASTNode> parent, int lineNo);
+    void print();
 };
 
 #endif

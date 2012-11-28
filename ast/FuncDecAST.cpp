@@ -64,3 +64,7 @@ string FuncDecAST::getNodeName() {
 string FuncDecAST::getFuncName() {
     return _name;
 }
+
+void FuncDecAST::print() {
+  cout << "Function declaration" << endl;
+}

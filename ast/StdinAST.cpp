@@ -17,3 +17,7 @@ void StdinAST::check() {
                              " or array elements.");
     }
 }
+
+void StdinAST::print() {
+    cout << "Read in node" << endl;
+}

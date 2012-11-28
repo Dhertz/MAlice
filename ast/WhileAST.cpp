@@ -21,3 +21,7 @@ void WhileAST::check() {
     		                 _expr->getType()->getBaseName() + ".");
     }
 }
+
+void WhileAST::print() {
+    cout << "While Node" << endl;
+}

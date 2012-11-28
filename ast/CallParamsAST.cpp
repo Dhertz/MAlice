@@ -28,3 +28,7 @@ void CallParamsAST::check() {
         }
     }
 }
+
+void CallParamsAST::print() {
+    cout << "Function call paramaters" << endl;
+}

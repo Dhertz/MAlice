@@ -18,6 +18,7 @@ public:
     void addChild(boost::shared_ptr<ASTNode> child, int position);
     boost::weak_ptr<ASTNode> getParent();
     virtual string getNodeName();
+    virtual void print();
 };
 
 #endif

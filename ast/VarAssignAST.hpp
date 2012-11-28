@@ -14,6 +14,7 @@ public:
     VarAssignAST(boost::shared_ptr<SymbolTable> st, string varName,
     	           boost::shared_ptr<ExprAST> expr,
     	           boost::weak_ptr<ASTNode> parent, int lineNo);
+    void print();
 };
 
 #endif

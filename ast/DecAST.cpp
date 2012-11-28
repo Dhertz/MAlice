@@ -21,3 +21,7 @@ void DecAST::check() {
                            _expr->getType()->getTypeName() + ".");
     }
 }
+
+void DecAST::print() {
+    cout << "Decrement statement" << endl;
+}

@@ -42,3 +42,7 @@ void VarAssignAST::check() {
         }
     }
 }
+
+void VarAssignAST::print() {
+    cout << "Var assign node" << endl;
+}

@@ -472,3 +472,7 @@ boost::shared_ptr<Type> ExprAST::getType() {
 bool ExprAST::isAssignable() {
     return _isAssignable;
 }
+
+void ExprAST::print() {
+    cout << "Expression" << endl;
+}
