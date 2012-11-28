@@ -10,7 +10,7 @@ class IfAST : public ASTNode {
     void check();
 public:
     IfAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr,
-    	    boost::shared_ptr<ASTNode> parent, int lineNo);
+    	    boost::weak_ptr<ASTNode> parent, int lineNo);
 };
 
 #endif

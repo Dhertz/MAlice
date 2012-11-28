@@ -3,7 +3,7 @@
 
 ArrayDecAST::ArrayDecAST(boost::shared_ptr<SymbolTable> st,
                           boost::shared_ptr<ExprAST> length, string name,
-                          string typeName, boost::shared_ptr<ASTNode> parent,
+                          string typeName, boost::weak_ptr<ASTNode> parent,
                           int lineNo) : ASTNode(st, parent, lineNo) {
     _st = st;
     _name = name;

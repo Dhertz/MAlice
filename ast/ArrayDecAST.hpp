@@ -15,7 +15,7 @@ class ArrayDecAST : public ASTNode {
 public:
     ArrayDecAST(boost::shared_ptr<SymbolTable> st,
                   boost::shared_ptr<ExprAST> expr, string name,
-                  string typeName, boost::shared_ptr<ASTNode> parent,
+                  string typeName, boost::weak_ptr<ASTNode> parent,
                   int lineNo);
 };
 

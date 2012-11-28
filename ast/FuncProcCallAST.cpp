@@ -3,7 +3,7 @@
 
 FuncProcCallAST::FuncProcCallAST(boost::shared_ptr<SymbolTable> st, string name,
                    boost::shared_ptr<CallParamsAST> params,
-                   boost::shared_ptr<ASTNode> parent, int lineNo)
+                   boost::weak_ptr<ASTNode> parent, int lineNo)
                    : ASTNode(st, parent, lineNo) {
     _st = st;
     _name = name;

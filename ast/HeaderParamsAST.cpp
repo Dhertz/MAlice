@@ -3,7 +3,7 @@
 
 HeaderParamsAST::HeaderParamsAST(boost::shared_ptr<SymbolTable> st,
                                    pANTLR3_BASE_TREE tree,
-                                   boost::shared_ptr<ASTNode> parent,
+                                   boost::weak_ptr<ASTNode> parent,
                                    int lineNo) : ASTNode(st, parent, lineNo) {
     _st = st;
     _tree = tree;

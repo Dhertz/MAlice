@@ -12,7 +12,7 @@ class VarDecAST : public ASTNode {
     void check();
 public:
     VarDecAST(boost::shared_ptr<SymbolTable> st, string typeName,
-    	             string varName, boost::shared_ptr<ASTNode> parent,
+    	             string varName, boost::weak_ptr<ASTNode> parent,
     	             int lineNo);
 };
 

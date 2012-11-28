@@ -14,7 +14,7 @@ class FuncProcCallAST : public ASTNode {
 public:
     FuncProcCallAST(boost::shared_ptr<SymbolTable> st, string name,
     	      boost::shared_ptr<CallParamsAST> params,
-    	      boost::shared_ptr<ASTNode> parent, int lineNo);
+    	      boost::weak_ptr<ASTNode> parent, int lineNo);
 };
 
 #endif

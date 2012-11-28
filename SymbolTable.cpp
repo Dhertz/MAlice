@@ -51,10 +51,10 @@ boost::shared_ptr<SymbolTable> SymbolTable::getEncSymTable() {
     return _encSymTable;
 }
 
-void SymbolTable::addChild(boost::shared_ptr<SymbolTable> table) {
+void SymbolTable::addChild(boost::weak_ptr<SymbolTable> table) {
     _children.push_back(table);
 }
 
-vector< boost::shared_ptr<SymbolTable> > SymbolTable::getChildren() {
+vector< boost::weak_ptr<SymbolTable> > SymbolTable::getChildren() {
     return _children;
 }

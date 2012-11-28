@@ -11,7 +11,7 @@ class PrintAST : public ASTNode {
     void check();
 public:
     PrintAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr,
-        boost::shared_ptr<ASTNode> parent, int lineNo);
+        boost::weak_ptr<ASTNode> parent, int lineNo);
     boost::shared_ptr<Identifier> getTypeName();
     boost::shared_ptr<ExprAST> getExpr();
 };

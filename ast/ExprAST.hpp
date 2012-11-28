@@ -23,7 +23,7 @@ class ExprAST : public ASTNode {
                                           string expectedType);
 public:
     ExprAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree,
-              boost::shared_ptr<ASTNode> parent, int lineNo, bool hasExprTok);
+              boost::weak_ptr<ASTNode> parent, int lineNo, bool hasExprTok);
     boost::shared_ptr<Type> getType();
     bool isAssignable();
 };

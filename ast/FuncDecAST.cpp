@@ -4,7 +4,7 @@
 
 FuncDecAST::FuncDecAST(boost::shared_ptr<SymbolTable> st, string name,
                          boost::shared_ptr<HeaderParamsAST> params,
-                         string returnType, boost::shared_ptr<ASTNode> parent,
+                         string returnType, boost::weak_ptr<ASTNode> parent,
                          int lineNo) : ASTNode(st, parent, lineNo) {
     _st = st;
     _name = name;

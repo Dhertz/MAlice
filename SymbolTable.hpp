@@ -9,7 +9,7 @@
 
 class SymbolTable : public boost::enable_shared_from_this<SymbolTable> {
     boost::shared_ptr<SymbolTable> _encSymTable;
-    vector< boost::shared_ptr<SymbolTable> > _children;
+    vector< boost::weak_ptr<SymbolTable> > _children;
     boost::unordered_map<string, boost::shared_ptr<Identifier> > _dict;
 public:
     SymbolTable(boost::shared_ptr<SymbolTable> st);
@@ -19,9 +19,9 @@ public:
     void printCurrLevelOnly();
     void printCurrLevelAndEnclosingLevels();
     boost::shared_ptr<SymbolTable> getEncSymTable();
-    vector< boost::shared_ptr<SymbolTable> > getChildren();
+    vector< boost::weak_ptr<SymbolTable> > getChildren();
     boost::unordered_map<string, boost::shared_ptr<Identifier> >getDict();
-    void addChild(boost::shared_ptr<SymbolTable>);
+    void addChild(boost::weak_ptr<SymbolTable>);
 };
 
 #endif

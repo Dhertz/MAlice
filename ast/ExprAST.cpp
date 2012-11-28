@@ -12,7 +12,7 @@
 #include "../Utils.hpp"
 
 ExprAST::ExprAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree,
-                   boost::shared_ptr<ASTNode> parent, int lineNo,
+                   boost::weak_ptr<ASTNode> parent, int lineNo,
                    bool hasExprTok) : ASTNode(st, parent, lineNo) {
     _boolArgBoolRet.insert("!");
 

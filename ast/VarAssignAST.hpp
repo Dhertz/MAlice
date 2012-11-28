@@ -13,7 +13,7 @@ class VarAssignAST : public ASTNode {
 public:
     VarAssignAST(boost::shared_ptr<SymbolTable> st, string varName,
     	           boost::shared_ptr<ExprAST> expr,
-    	           boost::shared_ptr<ASTNode> parent, int lineNo);
+    	           boost::weak_ptr<ASTNode> parent, int lineNo);
 };
 
 #endif
