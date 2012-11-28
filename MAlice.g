@@ -61,20 +61,10 @@ tokens {
 
         exception = recognizer->state->exception;
 
-        // Print the file name if possible
-        if (exception->streamName == NULL) {
-            if (((pANTLR3_COMMON_TOKEN)(exception->token))->type == ANTLR3_TOKEN_EOF) {
-                ANTLR3_FPRINTF(stderr, "End of input reached: (");
-            } else {
-                ANTLR3_FPRINTF(stderr, "Unknown file source: (");
-            }
-        } else {
-            fileName = exception->streamName->to8(exception->streamName);
-        }
+        ANTLR3_FPRINTF(stderr, "Syntax error, ");
 
         // Print the line number next
-        ANTLR3_FPRINTF(stderr, "Line \%i", exception->line);
-        ANTLR3_FPRINTF(stderr, " - \%s", (pANTLR3_UINT8) exception->message);
+        ANTLR3_FPRINTF(stderr, "line \%i", exception->line);
 
         parser       = (pANTLR3_PARSER) recognizer->super;
         stream       = parser->tstream->istream;
@@ -82,12 +72,12 @@ tokens {
         tokenString  = currentToken->toString(currentToken);
 
         // Print the token if we can
-        ANTLR3_FPRINTF(stderr, ", character \%i.", exception->charPositionInLine);
+        ANTLR3_FPRINTF(stderr, ", character \%i. ", exception->charPositionInLine);
         if (currentToken != NULL) {
             if (currentToken->type == ANTLR3_TOKEN_EOF) {
                 ANTLR3_FPRINTF(stderr, "The error was at <EOF>.");
             } else {
-                ANTLR3_FPRINTF(stderr, "\n    Error was near \%s\n    ", 
+                ANTLR3_FPRINTF(stderr, "Near \%s: ", 
                     tokenString == NULL ? (pANTLR3_UINT8)"a token without a textual representation." : tokenString->chars);
             }
         }

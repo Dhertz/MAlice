@@ -41,3 +41,11 @@ void ProcDecAST::check() {
         _st->getEncSymTable()->add(_name, _procObj);
     }
 }
+
+string ProcDecAST::getProcName() {
+    return _name;
+}
+
+string ProcDecAST::getNodeName() {
+    return "ProcDec";
+}

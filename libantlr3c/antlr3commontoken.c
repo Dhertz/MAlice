@@ -547,17 +547,9 @@ static  pANTLR3_STRING    toString		(pANTLR3_COMMON_TOKEN token)
      * the reporting string
      * return "[@"+getTokenIndex()+","+start+":"+stop+"='"+txt+"',<"+type+">"+channelStr+","+line+":"+getCharPositionInLine()+"]";
      */
-    outtext->append8(outtext, "[Index: ");
-    outtext->addi   (outtext, (ANTLR3_INT32)token->getTokenIndex(token));
-    outtext->append8(outtext, " (Start: ");
-    outtext->addi   (outtext, (ANTLR3_INT32)token->getStartIndex(token));
-    outtext->append8(outtext, "-Stop: ");
-    outtext->addi   (outtext, (ANTLR3_INT32)token->getStopIndex(token));
-    outtext->append8(outtext, ") ='");
+    outtext->append8(outtext, "'");
     outtext->appendS(outtext, text);
-    outtext->append8(outtext, "', type<");
-    outtext->addi   (outtext, token->type);
-    outtext->append8(outtext, "> ");
+    outtext->append8(outtext, "'");
 
     if	(token->getChannel(token) > ANTLR3_TOKEN_DEFAULT_CHANNEL)
     {
@@ -565,12 +557,6 @@ static  pANTLR3_STRING    toString		(pANTLR3_COMMON_TOKEN token)
 	outtext->addi	(outtext, (ANTLR3_INT32)token->getChannel(token));
 	outtext->append8(outtext, ") ");
     }
-
-    outtext->append8(outtext, "Line: ");
-    outtext->addi   (outtext, (ANTLR3_INT32)token->getLine(token));
-    outtext->append8(outtext, " LinePos:");
-    outtext->addi   (outtext, token->getCharPositionInLine(token));
-    outtext->addc   (outtext, ']');
 
     return  outtext;
 }
