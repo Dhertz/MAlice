@@ -1,9 +1,4 @@
 TODO list:
 Part 2:
-	- Watch out for circular references, and general memory leak tests
 	- Remove duplication in ExprAST recursive method
-	- Fix bug where return in a proc doesn't break
-	- Check parse error case on ReturnAST
-	- TreeWalker: remove any dodgy comments, 80 char margin, spaces not tabs
 
-valgrind --tool=memcheck --leak-check=full ./compile ../malice_examples/invalid/test35.alice
