@@ -12,19 +12,19 @@ void ASTVisitor::visitVARDEC(string typeName, string varName) {}
 
 void ASTVisitor::visitVARSTAT() {}
 
-void ASTVisitor::visitINC() {}
+void ASTVisitor::visitINC(boost::shared_ptr<ExprAST> expr) {}
 
-void ASTVisitor::visitDEC() {}
+void ASTVisitor::visitDEC(boost::shared_ptr<ExprAST> expr) {}
 
-void ASTVisitor::visitPRINT() {}
+void ASTVisitor::visitPRINT(boost::shared_ptr<ExprAST> expr) {}
 
 void ASTVisitor::visitRETURN() {}
 
-void ASTVisitor::visitSTDIN() {}
+void ASTVisitor::visitSTDIN(boost::shared_ptr<ExprAST> expr) {}
 
-void ASTVisitor::visitWHILE() {}
+void ASTVisitor::visitWHILE(boost::shared_ptr<ExprAST> expr) {}
 
-void ASTVisitor::visitCHOICE() {}
+void ASTVisitor::visitCHOICE(boost::shared_ptr<ExprAST> cond) {}
 
 void ASTVisitor::visitIF(boost::shared_ptr<ExprAST> cond) {}
 
