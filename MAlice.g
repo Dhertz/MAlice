@@ -288,7 +288,7 @@ statement: body |
 
 
 conditionalStatement: 'perhaps' '(' e1=expression ')' 'so' sl1=statementList elseif* ('or' sl3=statementList)? 'because' 'Alice' 'was' 'unsure' 'which'
-                      -> ^(IF $e1 ^(IFSTS $sl1) elseif* ^(ELSESTS $sl3?));
+                      -> ^(IF $e1 ^(IFSTS $sl1) elseif* ^(ELSESTS $sl3)?);
 
 elseif: 'or' 'maybe' '(' e=expression ')' 'so' sl=statementList
         -> ^(IF $e ^(IFSTS $sl));
