@@ -39,3 +39,7 @@ void VarDecAST::check() {
 void VarDecAST::print() {
     cout << "Variable declaration node" << endl;
 }
+
+void VarDecAST::accept(boost::shared_ptr<ASTVisitor> v) {
+  v->visitVARDEC(_typeName, _varName);
+}

@@ -1,6 +1,7 @@
 #ifndef AST_H
 #define AST_H
 
+#include "../ASTVisitor.hpp"
 #include "ASTNode.hpp"
 
 class AST {

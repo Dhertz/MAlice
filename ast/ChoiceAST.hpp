@@ -3,6 +3,7 @@
 
 #include "ASTNode.hpp"
 #include "ExprAST.hpp"
+#include "../ASTVisitor.hpp" 
 
 class ChoiceAST : public ASTNode {
     boost::shared_ptr<SymbolTable> _st;

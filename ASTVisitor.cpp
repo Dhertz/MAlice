@@ -2,13 +2,13 @@
 
 void ASTVisitor::visitPROG() {}
 
-void ASTVisitor::visitPROCDEC() {}
+void ASTVisitor::visitPROCDEC(string name, boost::shared_ptr<HeaderParamsAST> params) {}
 
 void ASTVisitor::visitBODY() {}
 
-void ASTVisitor::visitFUNCDEC() {}
+void ASTVisitor::visitFUNCDEC(string name, string returnType, boost::shared_ptr<HeaderParamsAST> params) {}
 
-void ASTVisitor::visitVARDEC() {}
+void ASTVisitor::visitVARDEC(string typeName, string varName) {}
 
 void ASTVisitor::visitVARSTAT() {}
 

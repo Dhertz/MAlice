@@ -1,9 +1,9 @@
 #ifndef AST_NODE_H
 #define AST_NODE_H
 
+#include <boost/shared_ptr.hpp>
 #include <vector>
 #include "../SymbolTable.hpp"
-#include "../ASTVisitor.hpp"
 
 class ASTNode {
     vector< boost::shared_ptr<ASTNode> > _children;
@@ -20,7 +20,6 @@ public:
     boost::weak_ptr<ASTNode> getParent();
     virtual string getNodeName();
     virtual void print();
-	virtual void accept(boost::shared_ptr<ASTVisitor> v);
 };
 
 #endif

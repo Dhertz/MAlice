@@ -24,3 +24,7 @@ void IncAST::check() {
 void IncAST::print() {
     cout << "Increment statement" << endl;
 }
+
+void IncAST::accept(boost::shared_ptr<ASTVisitor> v) {
+    
+}
