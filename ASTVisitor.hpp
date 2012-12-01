@@ -26,6 +26,8 @@ public:
 				   vector <boost::shared_ptr<ASTNode> > children);
 	void visitArrayAssign(string name, boost::shared_ptr<ExprAST> index,
                    boost::shared_ptr<ExprAST> value);
+    void visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
+                         boost::shared_ptr<Type> type);
 };
 
 #endif

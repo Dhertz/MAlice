@@ -29,3 +29,6 @@ void ASTVisitor::visitIf(boost::shared_ptr<ExprAST> cond,
 void ASTVisitor::visitArrayAssign(string name,
                   boost::shared_ptr<ExprAST> index,
                   boost::shared_ptr<ExprAST> value) {}
+
+void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
+                                 boost::shared_ptr<Type> type) {}

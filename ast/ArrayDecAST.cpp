@@ -32,13 +32,17 @@ void ArrayDecAST::check() {
         Utils::printSemErr(_lineNo, "Array size must be a Number, not a " +
                              _length->getType()->getTypeName());
     } else {
-        boost::shared_ptr<Type> typeCasted =
+        boost::shared_ptr<Type> _typeObj =
           boost::shared_polymorphic_downcast<Type>(type);
-        boost::shared_ptr<Array> a(new Array(typeCasted));
+        boost::shared_ptr<Array> a(new Array(_typeObj));
         _st->add(_name, a);
     }
 }
 
 void ArrayDecAST::print() {
     cout << "Array declaration" << endl;
+}
+
+void ArrayDecAST::accept(boost::shared_ptr<ASTVisitor> v) {
+    v->visitArrayDec(_name, _length, _typeObj);
 }

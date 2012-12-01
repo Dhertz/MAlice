@@ -4,6 +4,7 @@
 #include "ASTNode.hpp"
 #include "ExprAST.hpp"
 #include "../idents/Array.hpp"
+#include "../ASTVisitor.hpp"
 
 class ArrayDecAST : public ASTNode {
     boost::shared_ptr<SymbolTable> _st;
@@ -11,6 +12,7 @@ class ArrayDecAST : public ASTNode {
     string _name;
     string _elemType;
     int _lineNo;
+	boost::shared_ptr<Type> _typeObj;
     void check();
 public:
     ArrayDecAST(boost::shared_ptr<SymbolTable> st,
@@ -18,6 +20,7 @@ public:
                   string typeName, boost::weak_ptr<ASTNode> parent,
                   int lineNo);
     void print();
+	void accept(boost::shared_ptr<ASTVisitor> v);
 };
 
 #endif
