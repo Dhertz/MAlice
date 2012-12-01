@@ -19,6 +19,7 @@ public:
                 boost::shared_ptr<IfBodyAST> elses,
                 boost::weak_ptr<ASTNode> parent, int lineNo);
     void print();
+	void accept(boost::shared_ptr<ASTVisitor> v);
 };
 
 #endif

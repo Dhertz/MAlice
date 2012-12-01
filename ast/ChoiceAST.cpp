@@ -29,3 +29,7 @@ void ChoiceAST::check() {
 void ChoiceAST::print() {
     cout << "Choice conditional" << endl;
 }
+
+void ChoiceAST::accept(boost::shared_ptr<ASTVisitor> v) {
+	v->visitIF(expr); // need body as 2nd argument (what about else?)
+}
