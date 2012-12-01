@@ -15,7 +15,7 @@ compile: idents/Type.o idents/Callable.o idents/Number.o idents/Sentence.o \
 	     idents/Letter.o idents/Boolean.o idents/Variable.o idents/Array.o \
 	     idents/Param.o idents/Function.o idents/Proc.o \
 	     SymbolTable.o ast/AST.o ast/ASTNode.o ast/ExprAST.o ast/DecAST.o \
-	     ast/IncAST.o ast/IfAST.o ast/ChoiceAST.o ast/WhileAST.o \
+	     ast/IncAST.o ast/IfBodyAST.o ast/IfAST.o ast/ChoiceAST.o ast/WhileAST.o \
 	     ast/PrintAST.o ast/StdinAST.o ast/VarDecAST.o ast/VarAssignAST.o \
 	     ast/ArrayAssignAST.o ast/ArrayDecAST.o ast/HeaderParamsAST.o \
 	     ast/FuncDecAST.o ast/ProcDecAST.o ast/ReturnAST.o ast/CallParamsAST.o \

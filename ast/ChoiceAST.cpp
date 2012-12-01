@@ -3,10 +3,14 @@
 
 ChoiceAST::ChoiceAST(boost::shared_ptr<SymbolTable> st,
                        boost::shared_ptr<ExprAST> expr,
+                       boost::shared_ptr<IfBodyAST> ifs,
+                       boost::shared_ptr<IfBodyAST> elses,
                        boost::weak_ptr<ASTNode> parent, int lineNo)
                        : ASTNode(st, parent, lineNo) {
     _st = st;
     _expr = expr;
+    _ifs = ifs;
+    _elses = elses;
     _lineNo = lineNo;
     check();
 }
