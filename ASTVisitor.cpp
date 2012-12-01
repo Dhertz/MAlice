@@ -26,6 +26,6 @@ void ASTVisitor::visitWHILE() {}
 
 void ASTVisitor::visitCHOICE() {}
 
-void ASTVisitor::visitIF() {}
+void ASTVisitor::visitIF(boost::shared_ptr<ExprAST> cond) {}
 
 void ASTVisitor::visitNS() {}

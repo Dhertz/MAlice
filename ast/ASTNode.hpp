@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "../SymbolTable.hpp"
+#include "../ASTVisitor.hpp"
 
 class ASTNode {
     vector< boost::shared_ptr<ASTNode> > _children;
@@ -19,6 +20,7 @@ public:
     boost::weak_ptr<ASTNode> getParent();
     virtual string getNodeName();
     virtual void print();
+	virtual void accept(boost::shared_ptr<ASTVisitor> v);
 };
 
 #endif
