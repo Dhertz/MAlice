@@ -53,3 +53,7 @@ string ProcDecAST::getNodeName() {
 void ProcDecAST::print() {
     cout << "Procedure declaration" << endl;
 }
+
+void ProcDecAST::accept(boost::shared_ptr<ASTVisitor> v) {
+    v->visitPROCDEC(_name, _params);
+}

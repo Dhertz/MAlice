@@ -3,6 +3,7 @@
 
 #include "HeaderParamsAST.hpp"
 #include "../idents/Proc.hpp"
+#include "../ASTVisitor.hpp"
 
 class ProcDecAST : public ASTNode {
     boost::shared_ptr<SymbolTable> _st;
@@ -19,6 +20,7 @@ public:
     string getProcName();
     string getNodeName();
     void print();
+    void accept(boost::shared_ptr<ASTVisitor> v);
 };
 
 #endif

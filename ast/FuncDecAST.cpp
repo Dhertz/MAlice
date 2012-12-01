@@ -68,3 +68,7 @@ string FuncDecAST::getFuncName() {
 void FuncDecAST::print() {
   cout << "Function declaration" << endl;
 }
+
+void FuncDecAST::accept(boost::shared_ptr<ASTVisitor> v) {
+  v->visitFUNCDEC(_name, _returnType, _params);
+}

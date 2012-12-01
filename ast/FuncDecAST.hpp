@@ -3,6 +3,7 @@
 
 #include "HeaderParamsAST.hpp"
 #include "../idents/Function.hpp"
+#include "../ASTVisitor.hpp"
 
 class FuncDecAST : public ASTNode {
     boost::shared_ptr<SymbolTable> _st;
@@ -19,6 +20,7 @@ public:
     string getNodeName();
     string getFuncName();
     void print();
+    void accept(boost::shared_ptr<ASTVisitor> v);
 };
 
 #endif

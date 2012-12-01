@@ -19,3 +19,7 @@ void PrintAST::check() {
 void PrintAST::print() {
     cout << "Print node" << endl;
 }
+
+void PrintAST::accept(boost::shared_ptr<ASTVisitor> v) {
+    v->visitPRINT(_expr);
+}

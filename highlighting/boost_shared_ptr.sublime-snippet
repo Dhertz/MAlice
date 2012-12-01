@@ -1,0 +1,6 @@
+<snippet>
+	<description>boost::shared_ptr</description>
+<content><![CDATA[boost::shared_ptr<${1}>]]></content>
+    <tabTrigger>boo</tabTrigger>
+    <scope>source.c++</scope>
+</snippet>

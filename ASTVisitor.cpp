@@ -2,27 +2,27 @@
 
 void ASTVisitor::visitPROG() {}
 
-void ASTVisitor::visitPROCDEC() {}
+void ASTVisitor::visitPROCDEC(string name, boost::shared_ptr<HeaderParamsAST> params) {}
 
 void ASTVisitor::visitBODY() {}
 
-void ASTVisitor::visitFUNCDEC() {}
+void ASTVisitor::visitFUNCDEC(string name, string returnType, boost::shared_ptr<HeaderParamsAST> params) {}
 
-void ASTVisitor::visitVARDEC() {}
+void ASTVisitor::visitVARDEC(string typeName, string varName) {}
 
 void ASTVisitor::visitVARSTAT() {}
 
-void ASTVisitor::visitINC() {}
+void ASTVisitor::visitINC(boost::shared_ptr<ExprAST> expr) {}
 
-void ASTVisitor::visitDEC() {}
+void ASTVisitor::visitDEC(boost::shared_ptr<ExprAST> expr) {}
 
-void ASTVisitor::visitPRINT() {}
+void ASTVisitor::visitPRINT(boost::shared_ptr<ExprAST> expr) {}
 
 void ASTVisitor::visitRETURN() {}
 
-void ASTVisitor::visitSTDIN() {}
+void ASTVisitor::visitSTDIN(boost::shared_ptr<ExprAST> expr) {}
 
-void ASTVisitor::visitWHILE() {}
+void ASTVisitor::visitWHILE(boost::shared_ptr<ExprAST> expr) {}
 
 void ASTVisitor::visitCHOICE(boost::shared_ptr<ExprAST> cond, 
 				   			   boost::shared_ptr<IfBodyAST> trueBody, 

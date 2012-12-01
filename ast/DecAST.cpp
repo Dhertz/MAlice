@@ -25,3 +25,7 @@ void DecAST::check() {
 void DecAST::print() {
     cout << "Decrement statement" << endl;
 }
+
+void DecAST::accept(boost::shared_ptr<ASTVisitor> v) {
+    v->ASTVisitor::visitDEC(_expr);
+}

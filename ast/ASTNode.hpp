@@ -1,6 +1,7 @@
 #ifndef AST_NODE_H
 #define AST_NODE_H
 
+#include <boost/shared_ptr.hpp>
 #include <vector>
 #include "../SymbolTable.hpp"
 

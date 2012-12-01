@@ -3,6 +3,7 @@
 
 #include "CallParamsAST.hpp"
 #include "ExprAST.hpp"
+#include "../ASTVisitor.hpp"
 
 class PrintAST : public ASTNode {
     boost::shared_ptr<SymbolTable> _st;
@@ -11,10 +12,10 @@ class PrintAST : public ASTNode {
     void check();
 public:
     PrintAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr,
-        boost::weak_ptr<ASTNode> parent, int lineNo);
+    boost::weak_ptr<ASTNode> parent, int lineNo);
     boost::shared_ptr<Identifier> getTypeName();
     boost::shared_ptr<ExprAST> getExpr();
     void print();
+    void accept(boost::shared_ptr<ASTVisitor> v);
 };
-
 #endif
