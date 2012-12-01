@@ -19,16 +19,6 @@ void ASTNode::addChild(boost::shared_ptr<ASTNode> child, int childNum) {
     }
 }
 
-void ASTNode::check() {}
-
 boost::weak_ptr<ASTNode> ASTNode::getParent() {
     return _parent;
-}
-
-string ASTNode::getNodeName() {
-    return "Node";
-}
-
-void ASTNode::print() {
-    cout << "Root node" << endl;
 }

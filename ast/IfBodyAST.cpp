@@ -7,3 +7,9 @@ IfBodyAST::IfBodyAST(boost::shared_ptr<SymbolTable> st,
 void IfBodyAST::print() {
 	cout << "If statement body" << endl;
 }
+
+string IfBodyAST::getNodeName() {
+	return "IfBody";
+}
+
+void IfBodyAST::check() {}

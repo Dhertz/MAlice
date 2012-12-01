@@ -22,6 +22,10 @@ void StdinAST::print() {
     cout << "Read in node" << endl;
 }
 
+string StdinAST::getNodeName() {
+    return "Stdin";
+}
+
 void StdinAST::accept(boost::shared_ptr<ASTVisitor> v) {
     v->visitStdin(_expr);
 }

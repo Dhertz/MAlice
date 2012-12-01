@@ -26,6 +26,10 @@ void DecAST::print() {
     cout << "Decrement statement" << endl;
 }
 
+string DecAST::getNodeName() {
+    return "Dec";
+}
+
 void DecAST::accept(boost::shared_ptr<ASTVisitor> v) {
     v->visitDec(_expr);
 }

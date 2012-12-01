@@ -40,6 +40,10 @@ void VarDecAST::print() {
     cout << "Variable declaration node" << endl;
 }
 
+string VarDecAST::getNodeName() {
+    return "VarDec";
+}
+
 void VarDecAST::accept(boost::shared_ptr<ASTVisitor> v) {
   v->visitVarDec(_typeName, _varName);
 }

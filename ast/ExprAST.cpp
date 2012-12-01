@@ -473,6 +473,10 @@ bool ExprAST::isAssignable() {
     return _isAssignable;
 }
 
+string ExprAST::getNodeName() {
+    return "Expr";
+}
+
 void ExprAST::print() {
     cout << "Expression" << endl;
 }

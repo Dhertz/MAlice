@@ -18,6 +18,7 @@ public:
     CallParamsAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree,
                     boost::weak_ptr<ASTNode> parent, int lineNo);
     vector< boost::shared_ptr<Type> > getTypes();
+    string getNodeName();
     void print();
 };
 

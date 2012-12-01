@@ -25,6 +25,10 @@ void IncAST::print() {
     cout << "Increment statement" << endl;
 }
 
+string IncAST::getNodeName() {
+    return "Inc";
+}
+
 void IncAST::accept(boost::shared_ptr<ASTVisitor> v) {
     v->visitInc(_expr);
 }

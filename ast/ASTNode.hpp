@@ -6,7 +6,7 @@
 #include "../SymbolTable.hpp"
 
 class ASTNode {
-    virtual void check();
+    virtual void check() = 0;
 protected:
     vector< boost::shared_ptr<ASTNode> > _children;
     boost::shared_ptr<SymbolTable> _st;
@@ -18,8 +18,8 @@ public:
     vector< boost::shared_ptr<ASTNode> > getChildren();
     void addChild(boost::shared_ptr<ASTNode> child, int position);
     boost::weak_ptr<ASTNode> getParent();
-    virtual string getNodeName();
-    virtual void print();
+    virtual string getNodeName() = 0;
+    virtual void print() = 0;
 };
 
 #endif

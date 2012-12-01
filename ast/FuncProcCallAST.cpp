@@ -61,6 +61,10 @@ void FuncProcCallAST::parametersTypeCheck(boost::shared_ptr<Callable> function) 
     }
 }
 
+string FuncProcCallAST::getNodeName() {
+    return "FuncProcCall";
+}
+
 void FuncProcCallAST::print() {
     cout << "Function call" << endl;
 }

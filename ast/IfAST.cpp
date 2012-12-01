@@ -27,6 +27,10 @@ void IfAST::print() {
     cout << "Conditional statement" << endl;
 }
 
+string IfAST::getNodeName() {
+    return "If";
+}
+
 void IfAST::accept(boost::shared_ptr<ASTVisitor> v) {
     v->visitIf(_expr, _body, _children);
 }

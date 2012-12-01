@@ -16,6 +16,7 @@ public:
     boost::shared_ptr<Identifier> getTypeName();
     boost::shared_ptr<ExprAST> getExpr();
     void print();
+    string getNodeName();
     void accept(boost::shared_ptr<ASTVisitor> v);
 };
 #endif

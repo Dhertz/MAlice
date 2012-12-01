@@ -26,6 +26,10 @@ void WhileAST::print() {
     cout << "While Node" << endl;
 }
 
+string WhileAST::getNodeName() {
+    return "While";
+}
+
 void WhileAST::accept(boost::shared_ptr<ASTVisitor> v) {
     v->visitWhile(_expr);
 }

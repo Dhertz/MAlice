@@ -10,6 +10,7 @@
 
 class ASTVisitor {
 public:
+	void visitProg();
 	void visitProcDec(string name, boost::shared_ptr<HeaderParamsAST> params);
 	void visitFuncDec(string name, string returnType, boost::shared_ptr<HeaderParamsAST> params);
 	void visitVarDec(string typeName, string varName);

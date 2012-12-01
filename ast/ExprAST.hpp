@@ -26,6 +26,7 @@ public:
               boost::weak_ptr<ASTNode> parent, int lineNo, bool hasExprTok);
     boost::shared_ptr<Type> getType();
     bool isAssignable();
+    string getNodeName();
     void print();
 };
 

@@ -1,5 +1,7 @@
 #include "ASTVisitor.hpp"
 
+void ASTVisitor::visitProg() {}
+
 void ASTVisitor::visitProcDec(string name, boost::shared_ptr<HeaderParamsAST> params) {}
 
 void ASTVisitor::visitFuncDec(string name, string returnType, boost::shared_ptr<HeaderParamsAST> params) {}

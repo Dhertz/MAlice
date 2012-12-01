@@ -105,6 +105,10 @@ vector< boost::shared_ptr<Param> > HeaderParamsAST::getParams() {
     return _params;
 }
 
+string HeaderParamsAST::getNodeName() {
+    return "HeaderParams";
+}
+
 void HeaderParamsAST::print() {
     cout << "Parameters" << endl;
 }

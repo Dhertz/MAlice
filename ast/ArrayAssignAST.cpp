@@ -57,6 +57,10 @@ void ArrayAssignAST::check() {
     }
 }
 
+string ArrayAssignAST::getNodeName() {
+    return "ArrayAssign";
+}
+
 void ArrayAssignAST::print() {
     cout << "Array member assignment" << endl;
 }

@@ -28,6 +28,7 @@ void ReturnAST::checkFunctionType(boost::weak_ptr<ASTNode> parent) {
             // Shouldn't happen, as this case would be caught by a parse error
             return;
         }
+
         if (p->getNodeName() == "FuncDec") {
             boost::shared_ptr<FuncDecAST> funcDec =
               boost::shared_polymorphic_downcast<FuncDecAST>(p);
@@ -86,6 +87,10 @@ void ReturnAST::checkFunctionType(boost::weak_ptr<ASTNode> parent) {
 
 void ReturnAST::print() {
     cout << "Function return" << endl;
+}
+
+string ReturnAST::getNodeName() {
+    return "Return";
 }
 
 void ReturnAST::accept(boost::shared_ptr<ASTVisitor> v) {

@@ -19,6 +19,7 @@
 #include "ast/ChoiceAST.hpp"
 #include "ast/IfAST.hpp"
 #include "ast/IfBodyAST.hpp"
+#include "ast/ProgAST.hpp"
 #include <antlr3commontree.h>
 
 //Construct object, assign fields and start walking the input tree from the top
@@ -59,10 +60,10 @@ void TreeWalker::processPROG(pANTLR3_BASE_TREE tree,
     boost::weak_ptr<SymbolTable> p (progSt);
     st->addChild(p);
 
-    boost::shared_ptr<ASTNode> root(new ASTNode(progSt, 
+    boost::shared_ptr<ProgAST> root(new ProgAST(progSt, 
                                                 boost::shared_ptr<ASTNode>(), 
                                                 getLine(tree)));
-    boost::weak_ptr<ASTNode> r(root);
+    boost::weak_ptr<ProgAST> r(root);
     _outputTree->setRoot(root);
 
     for (int i = 0; i < tree->getChildCount(tree); ++i) {
@@ -157,7 +158,10 @@ bool TreeWalker::findReturn(pANTLR3_BASE_TREE tree) {
     for (int i = 0; i < tree->getChildCount(tree); ++i) {
         string tok = Utils::createStringFromTree(Utils::childByNum(tree, i));
 
-        if (tok == "IF" | tok == "WHILE" | tok == "CHOICE") {
+        cout << tok << endl;
+
+        if (tok == "IF" | tok == "WHILE" | tok == "CHOICE" | tok == "IFSTS" | 
+              tok == "ELSESTS") {
             thislevelflag = findReturn(Utils::childByNum(tree, i));
         }
 

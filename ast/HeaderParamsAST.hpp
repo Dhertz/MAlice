@@ -17,6 +17,7 @@ public:
     	              boost::weak_ptr<ASTNode> parent, int lineNo);
     vector< boost::shared_ptr<Param> > getParams();
     void print();
+    string getNodeName();
 };
 
 #endif

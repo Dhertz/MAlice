@@ -20,6 +20,10 @@ void PrintAST::print() {
     cout << "Print node" << endl;
 }
 
+string PrintAST::getNodeName() {
+    return "Print";
+}
+
 void PrintAST::accept(boost::shared_ptr<ASTVisitor> v) {
     v->visitPrint(_expr);
 }

@@ -29,6 +29,10 @@ void CallParamsAST::check() {
     }
 }
 
+string CallParamsAST::getNodeName() {
+    return "CallParams";
+}
+
 void CallParamsAST::print() {
     cout << "Function call paramaters" << endl;
 }

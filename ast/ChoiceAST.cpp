@@ -30,6 +30,10 @@ void ChoiceAST::print() {
     cout << "Choice conditional" << endl;
 }
 
+string ChoiceAST::getNodeName() {
+    return "Choice";
+}
+
 void ChoiceAST::accept(boost::shared_ptr<ASTVisitor> v) {
 	v->visitChoice(_expr, _ifs, _elses);
 }

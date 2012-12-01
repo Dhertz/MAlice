@@ -43,6 +43,10 @@ void ArrayDecAST::print() {
     cout << "Array declaration" << endl;
 }
 
+string ArrayDecAST::getNodeName() {
+    return "ArrayDec";
+}
+
 void ArrayDecAST::accept(boost::shared_ptr<ASTVisitor> v) {
     v->visitArrayDec(_name, _length, _typeObj);
 }
