@@ -18,12 +18,14 @@ public:
 	void visitReturn(boost::shared_ptr<ExprAST> expr);
 	void visitStdin(boost::shared_ptr<ExprAST> expr);
 	void visitWhile(boost::shared_ptr<ExprAST> cond);
-	void visitCHOICE(boost::shared_ptr<ExprAST> cond, 
+	void visitChoice(boost::shared_ptr<ExprAST> cond, 
 					   boost::shared_ptr<IfBodyAST> trueBody, 
 					   boost::shared_ptr<IfBodyAST> falseBody);
-	void visitIF(boost::shared_ptr<ExprAST> cond,
+	void visitIf(boost::shared_ptr<ExprAST> cond,
 				   boost::shared_ptr<IfBodyAST> trueBody, 
 				   vector <boost::shared_ptr<ASTNode> > children);
+	void visitArrayAssign(string name, boost::shared_ptr<ExprAST> index,
+                   boost::shared_ptr<ExprAST> value);
 };
 
 #endif

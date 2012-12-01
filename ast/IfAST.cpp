@@ -27,6 +27,6 @@ void IfAST::print() {
     cout << "Conditional statement" << endl;
 }
 
-void IfAST::accept(ASTVisitor v) {
-    v.visitIF(_expr, _body, _children);
+void IfAST::accept(boost::shared_ptr<ASTVisitor> v) {
+    v->visitIf(_expr, _body, _children);
 }
