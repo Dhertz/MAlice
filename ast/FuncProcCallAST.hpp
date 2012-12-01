@@ -3,6 +3,7 @@
 
 #include "CallParamsAST.hpp"
 #include "../idents/Callable.hpp"
+#include "../ASTVisitor.hpp"
 
 class FuncProcCallAST : public ASTNode {
     boost::shared_ptr<SymbolTable> _st;
@@ -16,6 +17,7 @@ public:
     	      boost::shared_ptr<CallParamsAST> params,
     	      boost::weak_ptr<ASTNode> parent, int lineNo);
     void print();
+    void accept(boost::shared_ptr<ASTVisitor> v);
 };
 
 #endif

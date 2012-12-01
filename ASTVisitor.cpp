@@ -25,3 +25,8 @@ void ASTVisitor::visitCHOICE(boost::shared_ptr<ExprAST> cond,
 void ASTVisitor::visitIF(boost::shared_ptr<ExprAST> cond,
 			   			   boost::shared_ptr<IfBodyAST> trueBody, 
 			   			   vector <boost::shared_ptr<ASTNode> > children) {}
+
+void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr) {}
+
+void ASTVisitor::visitFuncCall(string name,
+						    	boost::shared_ptr<CallParamsAST> params) {}

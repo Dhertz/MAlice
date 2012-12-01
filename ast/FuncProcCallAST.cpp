@@ -64,3 +64,7 @@ void FuncProcCallAST::parametersTypeCheck(boost::shared_ptr<Callable> function) 
 void FuncProcCallAST::print() {
     cout << "Function call" << endl;
 }
+
+void FuncProcCallAST::accept(boost::shared_ptr<ASTVisitor> v) {
+  v->visitFuncCall(_name, _params);
+}

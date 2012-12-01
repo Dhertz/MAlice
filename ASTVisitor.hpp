@@ -5,6 +5,7 @@
 #include "ast/IfBodyAST.hpp"
 #include "ast/HeaderParamsAST.hpp"
 #include "ast/ExprAST.hpp"
+#include "ast/CallParamsAST.hpp"
 #include <string>
 
 class ASTVisitor {
@@ -24,6 +25,8 @@ public:
 	void visitIF(boost::shared_ptr<ExprAST> cond,
 				   boost::shared_ptr<IfBodyAST> trueBody, 
 				   vector <boost::shared_ptr<ASTNode> > children);
+	void visitVarAss(string varName, boost::shared_ptr<ExprAST> expr);
+	void visitFuncCall(string name, boost::shared_ptr<CallParamsAST> params);
 };
 
 #endif

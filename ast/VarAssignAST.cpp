@@ -46,3 +46,7 @@ void VarAssignAST::check() {
 void VarAssignAST::print() {
     cout << "Var assign node" << endl;
 }
+
+void VarAssignAST::accept(boost::shared_ptr<ASTVisitor> v) {
+    v->visitVarAss(_varName, _expr);
+}

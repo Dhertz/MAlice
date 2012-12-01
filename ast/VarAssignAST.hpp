@@ -3,6 +3,7 @@
 
 #include "ExprAST.hpp"
 #include "../idents/Variable.hpp"
+#include "../ASTVisitor.hpp"
 
 class VarAssignAST : public ASTNode {
     boost::shared_ptr<SymbolTable> _st;
@@ -15,6 +16,7 @@ public:
     	           boost::shared_ptr<ExprAST> expr,
     	           boost::weak_ptr<ASTNode> parent, int lineNo);
     void print();
+    void accept(boost::shared_ptr<ASTVisitor> v);
 };
 
 #endif
