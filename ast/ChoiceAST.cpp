@@ -31,5 +31,5 @@ void ChoiceAST::print() {
 }
 
 void ChoiceAST::accept(boost::shared_ptr<ASTVisitor> v) {
-	v->visitCHOICE(_expr, _ifs, _elses);
+	v->visitChoice(_expr, _ifs, _elses);
 }
