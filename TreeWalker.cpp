@@ -158,8 +158,6 @@ bool TreeWalker::findReturn(pANTLR3_BASE_TREE tree) {
     for (int i = 0; i < tree->getChildCount(tree); ++i) {
         string tok = Utils::createStringFromTree(Utils::childByNum(tree, i));
 
-        cout << tok << endl;
-
         if (tok == "IF" | tok == "WHILE" | tok == "CHOICE" | tok == "IFSTS" | 
               tok == "ELSESTS") {
             thislevelflag = findReturn(Utils::childByNum(tree, i));
