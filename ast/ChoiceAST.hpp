@@ -1,6 +1,7 @@
 #ifndef CHOICE_AST
 #define CHOICE_AST
 
+#include "../ASTVisitor.hpp"
 #include "ASTNode.hpp"
 #include "ExprAST.hpp"
 #include "IfBodyAST.hpp"

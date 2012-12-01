@@ -3,12 +3,11 @@
 
 #include <vector>
 #include "../SymbolTable.hpp"
-#include "../ASTVisitor.hpp"
 
 class ASTNode {
-    vector< boost::shared_ptr<ASTNode> > _children;
     virtual void check();
 protected:
+    vector< boost::shared_ptr<ASTNode> > _children;
     boost::shared_ptr<SymbolTable> _st;
     boost::weak_ptr<ASTNode> _parent;
     int _lineNo;
@@ -20,7 +19,6 @@ public:
     boost::weak_ptr<ASTNode> getParent();
     virtual string getNodeName();
     virtual void print();
-	virtual void accept(boost::shared_ptr<ASTVisitor> v);
 };
 
 #endif

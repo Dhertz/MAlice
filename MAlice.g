@@ -291,7 +291,7 @@ conditionalStatement: 'perhaps' '(' e1=expression ')' 'so' sl1=statementList els
                       -> ^(IF $e1 ^(IFSTS $sl1) elseif* ^(ELSESTS $sl3?));
 
 elseif: 'or' 'maybe' '(' e=expression ')' 'so' sl=statementList
-        -> ^(IFSTS $e $sl);
+        -> ^(IF $e ^(IFSTS $sl));
 
 
 type: 'number' | 'letter' | 'sentence';
