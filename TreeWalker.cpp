@@ -18,6 +18,7 @@
 #include "ast/WhileAST.hpp"
 #include "ast/ChoiceAST.hpp"
 #include "ast/IfAST.hpp"
+#include "ast/IfBodyAST.hpp"
 #include <antlr3commontree.h>
 
 //Construct object, assign fields and start walking the input tree from the top
@@ -366,8 +367,15 @@ void TreeWalker::processCHOICE(pANTLR3_BASE_TREE tree,
     boost::shared_ptr<ExprAST> expr(
       new ExprAST(st, Utils::childByNum(tree, 0), parent, getLine(tree), true));
 
+    boost::shared_ptr<IfBodyAST> ifs(new IfBodyAST(st, parent, getLine(tree)));
+
+    boost::shared_ptr<IfBodyAST> elses(new IfBodyAST(st, parent, getLine(tree)));
+
     boost::shared_ptr<ChoiceAST> choice(
-      new ChoiceAST(st, expr, parent, getLine(tree)));
+      new ChoiceAST(st, expr, ifs, elses, parent, getLine(tree)));
+
+    choice->addChild(ifs, 0);
+    choice->addChild(elses, 1);
     
     if(boost::shared_ptr<ASTNode> p = parent.lock()) {
         p->addChild(choice, childNum);
@@ -375,8 +383,15 @@ void TreeWalker::processCHOICE(pANTLR3_BASE_TREE tree,
         cout << "Bad parent." << endl;
     }
 
-    for (int i = 1; i < tree->getChildCount(tree); ++i) {
-        walk(Utils::childByNum(tree, i), st, choice, i - 1);
+    pANTLR3_BASE_TREE ifTree = Utils::childByNum(tree, 1);
+    pANTLR3_BASE_TREE elseTree = Utils::childByNum(tree, 2);
+
+    for (int i = 0; i < ifTree->getChildCount(ifTree); ++i) {
+        walk(Utils::childByNum(ifTree, i), st, ifs, i);
+    }
+
+    for (int i = 0; i < elseTree->getChildCount(elseTree); ++i) {
+        walk(Utils::childByNum(elseTree, i), st, elses, i);
     }
 }
 
@@ -386,16 +401,40 @@ void TreeWalker::processIF(pANTLR3_BASE_TREE tree,
     boost::shared_ptr<ExprAST> expr(
       new ExprAST(st, Utils::childByNum(tree, 0), parent, getLine(tree), true));
 
-    boost::shared_ptr<IfAST> ifnode(new IfAST(st, expr, parent, getLine(tree)));
+    boost::shared_ptr<IfBodyAST> body(new IfBodyAST(st, parent, getLine(tree)));
+
+    boost::shared_ptr<IfAST> ifnode(
+      new IfAST(st, expr, body, parent, getLine(tree)));
+
+    ifnode->addChild(body, 0);
+
+    pANTLR3_BASE_TREE ifTree = Utils::childByNum(tree, 1);
+
+    for (int i = 0; i < ifTree->getChildCount(ifTree); ++i) {
+        walk(Utils::childByNum(ifTree, i), st, body, i);
+    }
+
+    for (int i = 2; i < tree->getChildCount(tree); ++i) {
+        pANTLR3_BASE_TREE childTree = Utils::childByNum(tree, i);
+        string childName = Utils::createStringFromTree(childTree);
+        if (childName == "IF") {
+            processIF(childTree, st, ifnode, i);
+        } else {
+            boost::shared_ptr<IfBodyAST> elses(
+              new IfBodyAST(st, parent, getLine(tree)));
+
+            ifnode->addChild(elses, i);
+            pANTLR3_BASE_TREE elseTree = Utils::childByNum(tree, i);
+            for (int i = 0; i < elseTree->getChildCount(elseTree); ++i) {
+                walk(Utils::childByNum(elseTree, i), st, elses, i);
+            }
+        }
+    }
     
     if(boost::shared_ptr<ASTNode> p = parent.lock()) {
         p->addChild(ifnode, childNum);
     } else {
         cout << "Bad parent." << endl;
-    }
-
-    for (int i = 1; i < tree->getChildCount(tree); ++i) {
-        walk(Utils::childByNum(tree, i), st, ifnode, i - 1);
     }
 }
 

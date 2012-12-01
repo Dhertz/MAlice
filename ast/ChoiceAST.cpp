@@ -3,10 +3,14 @@
 
 ChoiceAST::ChoiceAST(boost::shared_ptr<SymbolTable> st,
                        boost::shared_ptr<ExprAST> expr,
+                       boost::shared_ptr<IfBodyAST> ifs,
+                       boost::shared_ptr<IfBodyAST> elses,
                        boost::weak_ptr<ASTNode> parent, int lineNo)
                        : ASTNode(st, parent, lineNo) {
     _st = st;
     _expr = expr;
+    _ifs = ifs;
+    _elses = elses;
     _lineNo = lineNo;
     check();
 }
@@ -27,5 +31,5 @@ void ChoiceAST::print() {
 }
 
 void ChoiceAST::accept(boost::shared_ptr<ASTVisitor> v) {
-	v->visitIF(_expr); // need body as 2nd argument (what about else?)
+	v->visitCHOICE(_expr, _ifs, _elses);
 }

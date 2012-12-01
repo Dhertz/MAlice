@@ -18,6 +18,10 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr) {}
 
 void ASTVisitor::visitWhile(boost::shared_ptr<ExprAST> expr) {}
 
-void ASTVisitor::visitCHOICE(boost::shared_ptr<ExprAST> cond) {}
+void ASTVisitor::visitCHOICE(boost::shared_ptr<ExprAST> cond, 
+				   			   boost::shared_ptr<IfBodyAST> trueBody, 
+				   			   boost::shared_ptr<IfBodyAST> falseBody) {}
 
-void ASTVisitor::visitIF(boost::shared_ptr<ExprAST> cond) {}
+void ASTVisitor::visitIF(boost::shared_ptr<ExprAST> cond,
+			   			   boost::shared_ptr<IfBodyAST> trueBody, 
+			   			   vector <boost::shared_ptr<ASTNode> > children) {}

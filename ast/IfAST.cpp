@@ -2,10 +2,12 @@
 #include "../Utils.hpp"
 
 IfAST::IfAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr,
+               boost::shared_ptr<IfBodyAST> body,
                boost::weak_ptr<ASTNode> parent, int lineNo)
                : ASTNode(st, parent, lineNo) {
     _st = st;
     _expr = expr;
+    _body = body;
     _lineNo = lineNo;
     check();
 }
@@ -23,4 +25,8 @@ void IfAST::check() {
 
 void IfAST::print() {
     cout << "Conditional statement" << endl;
+}
+
+void IfAST::accept(ASTVisitor v) {
+    v.visitIF(_expr, _body, _children);
 }

@@ -6,9 +6,9 @@
 #include "../SymbolTable.hpp"
 
 class ASTNode {
-    vector< boost::shared_ptr<ASTNode> > _children;
     virtual void check();
 protected:
+    vector< boost::shared_ptr<ASTNode> > _children;
     boost::shared_ptr<SymbolTable> _st;
     boost::weak_ptr<ASTNode> _parent;
     int _lineNo;

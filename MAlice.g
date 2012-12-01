@@ -30,6 +30,8 @@ tokens {
     STDIN;
     WHILE;
     CHOICE;
+      IFSTS;
+      ELSESTS;
     IF;
       COND;
       ELSEIF;
@@ -274,10 +276,10 @@ statement: body |
 
            ('either' '(' expression ')' 'so' trueS=statementList 'or' falseS=statementList 'because' 'Alice' 'was' 'unsure' 'which' delimiter) =>
            'either' '(' expression ')' 'so' trueS=statementList 'or' falseS=statementList 'because' 'Alice' 'was' 'unsure' 'which' delimiter 
-           -> ^(CHOICE expression $trueS $falseS) |
+           -> ^(CHOICE expression ^(IFSTS $trueS) ^(ELSESTS $falseS)) |
 
            'either' '(' expression ')' 'so' trueS=statementList 'or' falseS=statementList 'because' 'Alice' 'was' 'unsure' 'which' 
-           -> ^(CHOICE expression $trueS $falseS) |
+           -> ^(CHOICE expression ^(IFSTS $trueS) ^(ELSESTS $falseS)) |
 
            (conditionalStatement delimiter) => conditionalStatement delimiter
            -> conditionalStatement |
@@ -286,10 +288,10 @@ statement: body |
 
 
 conditionalStatement: 'perhaps' '(' e1=expression ')' 'so' sl1=statementList elseif* ('or' sl3=statementList)? 'because' 'Alice' 'was' 'unsure' 'which'
-                      -> ^(IF $e1 $sl1 elseif* $sl3?);
+                      -> ^(IF $e1 ^(IFSTS $sl1) elseif* ^(ELSESTS $sl3?));
 
 elseif: 'or' 'maybe' '(' e=expression ')' 'so' sl=statementList
-        -> ^(IF $e $sl);
+        -> ^(IF $e ^(IFSTS $sl));
 
 
 type: 'number' | 'letter' | 'sentence';
