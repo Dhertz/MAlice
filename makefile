@@ -19,8 +19,8 @@ compile: idents/Type.o idents/Callable.o idents/Number.o idents/Sentence.o \
 	     ast/PrintAST.o ast/StdinAST.o ast/VarDecAST.o ast/VarAssignAST.o \
 	     ast/ArrayAssignAST.o ast/ArrayDecAST.o ast/HeaderParamsAST.o \
 	     ast/FuncDecAST.o ast/ProcDecAST.o ast/ReturnAST.o ast/CallParamsAST.o \
-	     ast/FuncProcCallAST.o TreeWalker.o Utils.o ASTVisitor.o MAlice.o MAliceLexer.o \
-	     MAliceParser.o libantlr3c/antlr3baserecognizer.o \
+	     ast/FuncProcCallAST.o TreeWalker.o Utils.o ASTVisitor.o AssemCom.o MAlice.o \
+	     MAliceLexer.o MAliceParser.o libantlr3c/antlr3baserecognizer.o \
 	     libantlr3c/antlr3convertutf.o libantlr3c/antlr3parser.o \
 	     libantlr3c/antlr3basetree.o libantlr3c/antlr3cyclicdfa.o \
 	     libantlr3c/antlr3rewritestreams.o libantlr3c/antlr3basetreeadaptor.o \
