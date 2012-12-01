@@ -55,5 +55,5 @@ void ProcDecAST::print() {
 }
 
 void ProcDecAST::accept(boost::shared_ptr<ASTVisitor> v) {
-    v->visitPROCDEC(_name, _params);
+    v->visitProcDec(_name, _params);
 }

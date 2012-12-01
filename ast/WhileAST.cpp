@@ -27,5 +27,5 @@ void WhileAST::print() {
 }
 
 void WhileAST::accept(boost::shared_ptr<ASTVisitor> v) {
-    v->visitWHILE(_expr);
+    v->visitWhile(_expr);
 }

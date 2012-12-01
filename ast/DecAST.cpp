@@ -27,5 +27,5 @@ void DecAST::print() {
 }
 
 void DecAST::accept(boost::shared_ptr<ASTVisitor> v) {
-    v->ASTVisitor::visitDEC(_expr);
+    v->visitDec(_expr);
 }

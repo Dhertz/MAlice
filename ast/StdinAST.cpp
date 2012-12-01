@@ -23,5 +23,5 @@ void StdinAST::print() {
 }
 
 void StdinAST::accept(boost::shared_ptr<ASTVisitor> v) {
-    v->visitSTDIN(_expr);
+    v->visitStdin(_expr);
 }

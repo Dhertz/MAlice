@@ -41,5 +41,5 @@ void VarDecAST::print() {
 }
 
 void VarDecAST::accept(boost::shared_ptr<ASTVisitor> v) {
-  v->visitVARDEC(_typeName, _varName);
+  v->visitVarDec(_typeName, _varName);
 }

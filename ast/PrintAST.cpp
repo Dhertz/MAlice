@@ -21,5 +21,5 @@ void PrintAST::print() {
 }
 
 void PrintAST::accept(boost::shared_ptr<ASTVisitor> v) {
-    v->visitPRINT(_expr);
+    v->visitPrint(_expr);
 }

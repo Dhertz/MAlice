@@ -26,5 +26,5 @@ void IncAST::print() {
 }
 
 void IncAST::accept(boost::shared_ptr<ASTVisitor> v) {
-    v->visitINC(_expr);
+    v->visitInc(_expr);
 }

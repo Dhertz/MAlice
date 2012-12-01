@@ -2,6 +2,7 @@
 #define RETURN_AST
 
 #include "ExprAST.hpp"
+#include "../ASTVisitor.hpp"
 
 class ReturnAST : public ASTNode {
     boost::shared_ptr<SymbolTable> _st;
@@ -14,6 +15,7 @@ public:
     	        boost::shared_ptr<ExprAST> expr,
     	        boost::weak_ptr<ASTNode> parent, int lineNo);
     void print();
+	void accept(boost::shared_ptr<ASTVisitor> v);
 };
 
 #endif

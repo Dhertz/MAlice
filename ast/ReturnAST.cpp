@@ -87,3 +87,7 @@ void ReturnAST::checkFunctionType(boost::weak_ptr<ASTNode> parent) {
 void ReturnAST::print() {
     cout << "Function return" << endl;
 }
+
+void ReturnAST::accept(boost::shared_ptr<ASTVisitor> v) {
+	v->visitReturn(_expr);
+}
