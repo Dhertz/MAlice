@@ -1,4 +1,9 @@
 #include "ASTVisitor.hpp"
+#include "idents/Variable.hpp"
+
+ASTVisitor::ASTVisitor(boost::shared_ptr<SymbolTable> st) {
+	_st = st;
+}
 
 void ASTVisitor::visitProg() {}
 
@@ -6,9 +11,18 @@ void ASTVisitor::visitProcDec(string name, boost::shared_ptr<HeaderParamsAST> pa
 
 void ASTVisitor::visitFuncDec(string name, string returnType, boost::shared_ptr<HeaderParamsAST> params) {}
 
-void ASTVisitor::visitVarDec(string typeName, string varName) {}
+void ASTVisitor::visitVarDec(string typeName, string varName) {
+	boost::shared_ptr<Identifier> varIdent = _st->lookupCurrLevelOnly(varName);
+	if (varIdent) {
+		boost::shared_ptr<Variable> var = boost::shared_polymorphic_downcast<Variable>(varIdent);
+		boost::shared_ptr<Type> varType = var->getTypeName();
+		// instruction to allocate memory for global of type
+	}
+}
 
-void ASTVisitor::visitInc(boost::shared_ptr<ExprAST> expr) {}
+void ASTVisitor::visitInc(boost::shared_ptr<ExprAST> expr) {
+	
+}
 
 void ASTVisitor::visitDec(boost::shared_ptr<ExprAST> expr) {}
 

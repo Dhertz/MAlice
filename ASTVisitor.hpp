@@ -6,10 +6,14 @@
 #include "ast/HeaderParamsAST.hpp"
 #include "ast/ExprAST.hpp"
 #include "ast/CallParamsAST.hpp"
+#include "AssemCom.hpp"
 #include <string>
 
 class ASTVisitor {
+	list<AssemCom> _instrs;
+	boost::shared_ptr<SymbolTable> _st;
 public:
+	ASTVisitor(boost::shared_ptr<SymbolTable> st);
 	void visitProg();
 	void visitProcDec(string name, boost::shared_ptr<HeaderParamsAST> params);
 	void visitFuncDec(string name, string returnType, boost::shared_ptr<HeaderParamsAST> params);
