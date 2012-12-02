@@ -45,6 +45,7 @@ public:
                   		 	boost::shared_ptr<ExprAST> value);
     void visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
                          boost::shared_ptr<Type> type);
+    list<AssemCom> getInstrs();
 };
 
 #endif

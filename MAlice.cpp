@@ -5,6 +5,7 @@
 #include "Utils.hpp"
 #include "MAliceLexer.h"
 #include "MAliceParser.h"
+#include "InstructionPrinter.hpp"
 
 using namespace std;
 
@@ -73,6 +74,8 @@ void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
 
     boost::shared_ptr<ASTVisitor> treeVisitor(new ASTVisitor(top));
     semanticTree->getRoot()->accept(treeVisitor);
+
+	InstructionPrinter::printList(treeVisitor->getInstrs());
 
     parser->free(parser);
     tokens->free(tokens);
