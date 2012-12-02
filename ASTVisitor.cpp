@@ -95,7 +95,7 @@ void ASTVisitor::visitVarDec(string typeName, string varName,
 			_instrs.push_back(AssemCom(l.getLabel() + ":", 0,
 											std::vector<string>()));
 			std::vector<string> word;
-			word.push_back("varName");
+			word.push_back(varName);
 			_instrs.push_back(AssemCom(".word", 1, word));
 			var->setAssLoc(l.getLabel());
 		}
@@ -285,13 +285,15 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 void ASTVisitor::visitFuncCall(string name,
 						    	 boost::shared_ptr<CallParamsAST> params, 
 							     boost::shared_ptr<SymbolTable> st) {
+
+
 	vector<boost::shared_ptr< ExprAST> > exprs = params->getParamExprs();
 
 	vector<boost::shared_ptr< ExprAST> >::iterator it;
 	int i = 0;
 
 	for (it = exprs.begin(); it != exprs.end(); ++it) {
-
+		cout << "yo" << endl;
 		pANTLR3_BASE_TREE cp = (*it)->getRoot();
 
 		boost::tuple< string, list<AssemCom>, vector<string> > genParam
@@ -356,6 +358,10 @@ void ASTVisitor::visitFuncCall(string name,
 	  	}
 	  	i++;
 	}
+
+	vector<string> blArgs;
+	blArgs.push_back(name);
+	_instrs.push_back(AssemCom("bl", 1, blArgs));
 }
 
 void ASTVisitor::visitArrayAssign(string name,

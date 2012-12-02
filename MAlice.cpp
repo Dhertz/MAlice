@@ -72,8 +72,6 @@ void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
         return;
     }
 
-    semanticTree->print();
-
     if (boost::shared_ptr<SymbolTable> globalSt = top->getChildren()[0].lock()) {
     	boost::shared_ptr<ASTVisitor> treeVisitor(new ASTVisitor(globalSt));
 	    semanticTree->getRoot()->accept(treeVisitor);
