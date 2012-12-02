@@ -74,6 +74,8 @@ public:
     void visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
                          boost::shared_ptr<Type> type, 
                          boost::shared_ptr<SymbolTable> st);
+    
+    list<AssemCom> getInstrs();
 };
 
 #endif

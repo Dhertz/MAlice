@@ -215,3 +215,7 @@ void ASTVisitor::visitArrayAssign(string name,
 void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
                                  boost::shared_ptr<Type> type, 
 							     boost::shared_ptr<SymbolTable> st) {}
+
+list<AssemCom> ASTVisitor::getInstrs() {
+	return _instrs;
+}

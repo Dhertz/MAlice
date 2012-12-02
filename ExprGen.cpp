@@ -1,5 +1,7 @@
 #include "ExprGen.hpp"
 #include "Utils.hpp"
+#include "idents/Array.hpp"
+#include "idents/Variable.hpp"
 
 boost::tuple< string, list<AssemCom>, vector<string> > ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<SymbolTable> st, vector<string> freeRegs) {
 	// These should be shared with ExprAST
@@ -16,8 +18,6 @@ boost::tuple< string, list<AssemCom>, vector<string> > ExprGen::generateExpressi
     boolArgsBoolRet.insert("&&");
     mixedArgsMixedRet.insert("|");
     mixedArgsMixedRet.insert("^");
-    mixedArgsMixedRet.insert("&");
-    mixedArgsMixedRet.insert("&");
     mixedArgsMixedRet.insert("&");
     mixedArgsMixedRet.insert("+");
     mixedArgsMixedRet.insert("-");
@@ -119,12 +119,39 @@ boost::tuple< string, list<AssemCom>, vector<string> > ExprGen::generateExpressi
 				}
 			}
 		}
+
+		// bl funcName
+		// (presumably we'll have a method that takes a funcName and gives back a label name?)
+		vector<string> args;
+		args.push_back(funcName);
+		AssemCom bl("bl", args.size(), args);
+		instrs.push_back(bl);
 		return boost::tuple< string, list<AssemCom>, vector<string> >("r0", instrs, freeRegs);
     } else if (tok == "VAR") {
         // Variable reference, evaluates to variable's type
         // Also allowed to be an array, so that function calls with array
         //   arguments are allowed
 
+		// I think that I can just look up my ST until I find the Identifier,
+		//   which will now have a string field of its assembly location
+		// If this is set, I return it
+		// If not, I allocate a register if possible, or memory space otherwise
+
+		string varName = Utils::createStringFromTree(Utils::childByNum(root, 0));
+	    boost::shared_ptr<Identifier> varIdent = st->lookupCurrLevelAndEnclosingLevels(varName);
+
+		if (varIdent->getBaseName() == "Type") {
+            boost::shared_ptr<Type> varType = boost::shared_polymorphic_downcast<Type>(varIdent);
+            boost::shared_ptr<Array> arr = boost::shared_polymorphic_downcast<Array>(varType);
+
+			// Array will definitely have already been allocated by now
+			string loc = arr->getAssLoc();
+			return boost::tuple< string, list<AssemCom>, vector<string> >(loc, instrs, freeRegs);
+        } else {
+            boost::shared_ptr<Variable> var = boost::shared_polymorphic_downcast<Variable>(varIdent);
+			// TODO: look at var's ass location field
+			// Return if not null, otherwise allocate and return
+        }
     } else if (tok == "ARRMEMBER") {
         // Array member reference, evaluates to array's element type
 
