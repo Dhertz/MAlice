@@ -41,9 +41,22 @@ void ASTVisitor::visitProcDec(string name,
 	}
 }
 
-void ASTVisitor::visitFuncDec(string name, string returnType, 
-								boost::shared_ptr<HeaderParamsAST> params, 
-								boost::shared_ptr<SymbolTable> st) {}
+// same as above at the moment
+void ASTVisitor::visitFuncDec(string name, string returnType,
+								boost::shared_ptr<HeaderParamsAST> params,
+								vector <boost::shared_ptr<ASTNode> > children,
+								boost::shared_ptr<SymbolTable> st) {
+	vector<string> alignArg;
+	alignArg.push_back("2");
+	_instrs.push_back(AssemCom(".align", 1, alignArg));							// .align 2
+
+	_instrs.push_back(AssemCom(name + ":", 0, std::vector<string>()));			// name:
+
+	vector<boost::shared_ptr<ASTNode> >::iterator i;							// function body
+	for (i = children.begin(); i != children.end(); ++i) {
+		(*i)->accept(shared_from_this());
+	}
+}
 
 void ASTVisitor::visitVarDec(string typeName, string varName, 
 							   boost::shared_ptr<SymbolTable> st) {
@@ -62,6 +75,10 @@ void ASTVisitor::visitInc(boost::shared_ptr<ExprAST> expr,
 	  = ExprGen::generateExpression(expr->getRoot(), st, _freeRegs);
 	string resultReg = res.get<0>();
 
+	list<AssemCom> exprInstrs = res.get<1>();
+
+	_instrs.splice(_instrs.end(), exprInstrs);
+
 	vector<string> incArgs;
 	incArgs.push_back(resultReg);
 	incArgs.push_back(resultReg);
@@ -75,6 +92,10 @@ void ASTVisitor::visitDec(boost::shared_ptr<ExprAST> expr,
 	boost::tuple< string, list<AssemCom>, vector<string> > res
 	  = ExprGen::generateExpression(expr->getRoot(), st, _freeRegs);
 	string resultReg = res.get<0>();
+
+	list<AssemCom> exprInstrs = res.get<1>();
+
+	_instrs.splice(_instrs.end(), exprInstrs);
 
 	vector<string> decArgs;
 	decArgs.push_back(resultReg);
@@ -118,6 +139,11 @@ void ASTVisitor::visitWhile(boost::shared_ptr<ExprAST> cond,
 	boost::tuple< string, list<AssemCom>, vector<string> > res
 	  = ExprGen::generateExpression(cond->getRoot(), st, _freeRegs);
 	string resultReg = res.get<0>();
+
+	list<AssemCom> condInstrs = res.get<1>();
+
+	_instrs.splice(_instrs.end(), condInstrs);
+
 	vector<string> cmpArgs;
 	cmpArgs.push_back(resultReg);
 	cmpArgs.push_back("#0");
@@ -139,6 +165,11 @@ void ASTVisitor::visitChoice(boost::shared_ptr<ExprAST> cond,
 	boost::tuple< string, list<AssemCom>, vector<string> > res
 	  = ExprGen::generateExpression(cond->getRoot(), st, _freeRegs);
 	string resultReg = res.get<0>();
+
+	list<AssemCom> condInstrs = res.get<1>();
+
+	_instrs.splice(_instrs.end(), condInstrs);
+
 	std::vector<string> cmpArgs;
 	cmpArgs.push_back(resultReg);
 	cmpArgs.push_back("#0");
@@ -175,6 +206,11 @@ void ASTVisitor::visitIf(boost::shared_ptr<ExprAST> cond,
 	boost::tuple< string, list<AssemCom>, vector<string> > res
 	  = ExprGen::generateExpression(cond->getRoot(), st, _freeRegs);
 	string resultReg = res.get<0>();
+
+	list<AssemCom> condInstrs = res.get<1>();
+
+	_instrs.splice(_instrs.end(), condInstrs);
+
 	vector<string> cmpArgs;
 	cmpArgs.push_back(resultReg);
 	cmpArgs.push_back("#0");
@@ -215,7 +251,23 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 
 void ASTVisitor::visitFuncCall(string name,
 						    	 boost::shared_ptr<CallParamsAST> params, 
-							     boost::shared_ptr<SymbolTable> st) {}
+							     boost::shared_ptr<SymbolTable> st) {
+	vector<boost::shared_ptr< ExprAST> > exprs = params->getParamExprs();
+
+	vector<boost::shared_ptr< ExprAST> >::iterator it;
+
+	for (it = exprs.begin(); it != exprs.end(); ++it) {
+		pANTLR3_BASE_TREE cp = (*it)->getRoot();
+
+		boost::tuple< string, list<AssemCom>, vector<string> > genParam
+	  	  = ExprGen::generateExpression(cp, st, _freeRegs);
+
+	  	string paramLoc = genParam.get<0>();
+	  	list<AssemCom> pInstrs = genParam.get<1>();
+
+	  	_instrs.splice(_instrs.end(), pInstrs);
+	}
+}
 
 void ASTVisitor::visitArrayAssign(string name,
                   					boost::shared_ptr<ExprAST> index,
