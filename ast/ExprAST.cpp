@@ -27,8 +27,6 @@ ExprAST::ExprAST(boost::shared_ptr<SymbolTable> st, pANTLR3_BASE_TREE tree,
     _mixedArgsMixedRet.insert("|");
     _mixedArgsMixedRet.insert("^");
     _mixedArgsMixedRet.insert("&");
-    _mixedArgsMixedRet.insert("&");
-    _mixedArgsMixedRet.insert("&");
     _mixedArgsMixedRet.insert("+");
     _mixedArgsMixedRet.insert("-");
     _mixedArgsMixedRet.insert("*");
