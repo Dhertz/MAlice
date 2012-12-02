@@ -5,6 +5,7 @@
 #include <vector>
 #include "../SymbolTable.hpp"
 #include "../ASTVisitor.hpp"
+#include <iostream>
 
 class ASTNode {
     virtual void check() = 0;

@@ -1,4 +1,5 @@
 #include "AST.hpp"
+#include <iostream>
 
 void AST::setRoot(boost::shared_ptr<ProgAST> root) {
     _root = root;

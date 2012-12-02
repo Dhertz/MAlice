@@ -14,6 +14,13 @@ ASTVisitor::ASTVisitor(boost::shared_ptr<SymbolTable> st) {
 	_globalSt = st;
 }
 
+void ASTVisitor::initFreeRegs() {
+	string regs[] = {"r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9",
+					 "r10", "r11", "r12"};
+
+	_freeRegs = vector<string>(regs, regs + sizeof(regs) / sizeof(string));
+}
+
 void ASTVisitor::visitProg(vector <boost::shared_ptr<ASTNode> > children, 
 							 boost::shared_ptr<SymbolTable> st) {
 	// I imagine some bollocks will go here...
@@ -66,40 +73,42 @@ void ASTVisitor::visitVarDec(string typeName, string varName,
 
 	boost::shared_ptr<Identifier> localIdent = st->lookupCurrLevelOnly(varName);
 
-	boost::shared_ptr<Variable> var = 
-	  boost::shared_polymorphic_downcast<Variable>(varIdent);
+	if (varIdent) {
+		boost::shared_ptr<Variable> var = 
+		  boost::shared_polymorphic_downcast<Variable>(varIdent);
 
-	boost::shared_ptr<Variable> localVar = 
-	  boost::shared_polymorphic_downcast<Variable>(localIdent);
+		boost::shared_ptr<Variable> localVar = 
+		  boost::shared_polymorphic_downcast<Variable>(localIdent);
 
-	if (var->getAssLoc() == "" && localVar->getAssLoc() == "") {
-		boost::shared_ptr<Type> varType = var->getTypeName();
-		if (varType->getTypeName() == "Number") {
-			std::vector<string> comm;
-			comm.push_back(varName);
-			comm.push_back("4");
-			_instrs.push_back(AssemCom(".comm", 2, comm));
-			Label l;
-			_instrs.push_back(AssemCom(l.getLabel() + ":", 0, 
-											std::vector<string>()));
-			std::vector<string> word;
-			word.push_back(varName);
-			_instrs.push_back(AssemCom(".word", 1, word));
-			var->setAssLoc(l.getLabel());
-		} else if (varType->getTypeName() == "Letter") {
-			std::vector<string> comm;
-			comm.push_back(varName);
-			comm.push_back("1");
-			_instrs.push_back(AssemCom(".comm", 2, comm));
-			Label l;
-			_instrs.push_back(AssemCom(l.getLabel() + ":", 0,
-											std::vector<string>()));
-			std::vector<string> word;
-			word.push_back(varName);
-			_instrs.push_back(AssemCom(".word", 1, word));
-			var->setAssLoc(l.getLabel());
-		} else {
-			// TODO: string case
+		if (var->getAssLoc() == "" && localVar->getAssLoc() == "") {
+			boost::shared_ptr<Type> varType = var->getTypeName();
+			if (varType->getTypeName() == "Number") {
+				std::vector<string> comm;
+				comm.push_back(varName);
+				comm.push_back("4");
+				_instrs.push_back(AssemCom(".comm", 2, comm));
+				Label l;
+				_instrs.push_back(AssemCom(l.getLabel() + ":", 0, 
+												std::vector<string>()));
+				std::vector<string> word;
+				word.push_back(varName);
+				_instrs.push_back(AssemCom(".word", 1, word));
+				var->setAssLoc(l.getLabel());
+			} else if (varType->getTypeName() == "Letter") {
+				std::vector<string> comm;
+				comm.push_back(varName);
+				comm.push_back("1");
+				_instrs.push_back(AssemCom(".comm", 2, comm));
+				Label l;
+				_instrs.push_back(AssemCom(l.getLabel() + ":", 0,
+												std::vector<string>()));
+				std::vector<string> word;
+				word.push_back(varName);
+				_instrs.push_back(AssemCom(".word", 1, word));
+				var->setAssLoc(l.getLabel());
+			} else {
+				// TODO: string case
+			}
 		}
 	}
 }
