@@ -286,7 +286,7 @@ void ASTVisitor::visitFuncCall(string name,
 				args.push_back("{" + paramLoc + "}");
 				AssemCom push("push", args.size(), args);
 				_instrs.push_back(push);										// push {ri}
-			} else if (freeRegs.empty()) {
+			} else if (_freeRegs.empty()) {
 				// Need to temporarily borrow a register
 				vector<string> args;
 				args.push_back("{r0}");
@@ -307,7 +307,7 @@ void ASTVisitor::visitFuncCall(string name,
 				_instrs.push_back(pop);											// pop {ro}
 			} else {
 
-				string reg = freeRegs.front();
+				string reg = _freeRegs.front();
 
 				vector<string> args;
 				args.push_back(reg);
