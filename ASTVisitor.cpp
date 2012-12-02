@@ -62,10 +62,17 @@ void ASTVisitor::visitFuncDec(string name, string returnType,
 void ASTVisitor::visitVarDec(string typeName, string varName, 
 							   boost::shared_ptr<SymbolTable> st) {
 	boost::shared_ptr<Identifier> varIdent = 
-									_globalSt->lookupCurrLevelOnly(varName);
-	if (varIdent) {
-		boost::shared_ptr<Variable> var = 
-		  boost::shared_polymorphic_downcast<Variable>(varIdent);
+	  _globalSt->lookupCurrLevelOnly(varName);
+
+	boost::shared_ptr<Identifier> localIdent = st->lookupCurrLevelOnly(varName);
+
+	boost::shared_ptr<Variable> var = 
+	  boost::shared_polymorphic_downcast<Variable>(varIdent);
+
+	boost::shared_ptr<Variable> localVar = 
+	  boost::shared_polymorphic_downcast<Variable>(localIdent);
+
+	if (var->getAssLoc() == "" && localVar->getAssLoc() == "") {
 		boost::shared_ptr<Type> varType = var->getTypeName();
 		if (varType->getTypeName() == "Number") {
 			std::vector<string> comm;
@@ -88,7 +95,7 @@ void ASTVisitor::visitVarDec(string typeName, string varName,
 			_instrs.push_back(AssemCom(l.getLabel() + ":", 0,
 											std::vector<string>()));
 			std::vector<string> word;
-			word.push_back("varName");
+			word.push_back(varName);
 			_instrs.push_back(AssemCom(".word", 1, word));
 			var->setAssLoc(l.getLabel());
 		}
@@ -310,11 +317,15 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 void ASTVisitor::visitFuncCall(string name,
 						    	 boost::shared_ptr<CallParamsAST> params, 
 							     boost::shared_ptr<SymbolTable> st) {
+
+
 	vector<boost::shared_ptr< ExprAST> > exprs = params->getParamExprs();
 
 	vector<boost::shared_ptr< ExprAST> >::iterator it;
+	int i = 0;
 
 	for (it = exprs.begin(); it != exprs.end(); ++it) {
+		cout << "yo" << endl;
 		pANTLR3_BASE_TREE cp = (*it)->getRoot();
 
 		boost::tuple< string, list<AssemCom>, vector<string> > genParam
@@ -324,7 +335,65 @@ void ASTVisitor::visitFuncCall(string name,
 	  	list<AssemCom> pInstrs = genParam.get<1>();
 
 	  	_instrs.splice(_instrs.end(), pInstrs);
+
+	  	if (i < 4) {
+	  		if (paramLoc != ("r" + i)) {
+	  			//Parameter needs to be moved into correct register
+	  			vector<string> args;
+				args.push_back("r" + i);
+				args.push_back(paramLoc);
+				AssemCom mov("mov", args.size(), args);
+				_instrs.push_back(mov);
+	  		}
+	  	} else {
+	  		// Push any other params
+			if (paramLoc[0] == 'r') {
+
+				vector<string> args;
+				args.push_back("{" + paramLoc + "}");
+				AssemCom push("push", args.size(), args);
+				_instrs.push_back(push);										// push {ri}
+			} else if (_freeRegs.empty()) {
+				// Need to temporarily borrow a register
+				vector<string> args;
+				args.push_back("{r0}");
+				AssemCom push("push", args.size(), args);
+				_instrs.push_back(push);										// push {r0}
+
+				args.clear();
+				args.push_back("r0");
+				args.push_back(paramLoc);
+				AssemCom mov("mov", args.size(), args);
+				_instrs.push_back(mov);											// mov r0 ri
+
+				_instrs.push_back(push);										// push {r0}
+
+				args.clear();
+				args.push_back("{r0}");
+				AssemCom pop("pop", args.size(), args);
+				_instrs.push_back(pop);											// pop {ro}
+			} else {
+
+				string reg = _freeRegs.front();
+
+				vector<string> args;
+				args.push_back(reg);
+				args.push_back(paramLoc);
+				AssemCom mov("mov", args.size(), args);
+				_instrs.push_back(mov);											// mov reg paramLoc
+
+				args.clear();
+				args.push_back("{" + reg + "}");
+				AssemCom push("push", args.size(), args);
+				_instrs.push_back(push);										// push reg
+			}
+	  	}
+	  	i++;
 	}
+
+	vector<string> blArgs;
+	blArgs.push_back(name);
+	_instrs.push_back(AssemCom("bl", 1, blArgs));
 }
 
 void ASTVisitor::visitArrayAssign(string name,

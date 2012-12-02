@@ -1,4 +1,6 @@
 #include "Label.hpp"
+#include <iostream>
+#include <sstream>
 
 int Label::nextUnusedLabel = 0;
 
@@ -8,5 +10,8 @@ Label::Label() {
 }
 
 std::string Label::getLabel() {
-	return ".L" + id;
+	std::string lbl(".L");
+	std::ostringstream s;
+	s << lbl << id;
+	return s.str();
 }
