@@ -69,6 +69,7 @@ void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
 
     if (Utils::globalErrorCount > 0) {
         cerr << "Errors found. Stopping." << endl;
+        Utils::globalErrorCount = 0;
         return;
     }
 
