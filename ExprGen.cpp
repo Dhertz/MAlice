@@ -204,8 +204,30 @@ boost::tuple< string, list<AssemCom>, vector<string> > ExprGen::generateExpressi
 
 		return boost::tuple< string, list<AssemCom>, vector<string> >("*** array base loc " + loc + " offset for element " + indexLoc + " (elem type is " + elemType + ") ***", instrs, freeRegs);
     } else if (tok == "'") {
-        // Char of form 'x', evaluates to a Letter
-		return boost::tuple< string, list<AssemCom>, vector<string> >("TODO", instrs, freeRegs);
+        // Char of form 'x'
+		// Put it in a register if possible, otherwise somehow allocate memory
+
+		if (!freeRegs.empty()) {
+			// We have a free register, put the char in there
+			string reg = freeRegs.front();
+			freeRegs.erase(freeRegs.begin());
+
+			string let = Utils::createStringFromTree(Utils::childByNum(root, 0));
+			char letChar = let[0];
+			int charByte = letChar; // TODO: check this is right
+
+			// mov rx, charByte
+			vector<string> args;
+			args.push_back(reg);
+			args.push_back("#" + charByte);
+			AssemCom mov("mov", args.size(), args);
+			instrs.push_back(mov);
+
+			return boost::tuple< string, list<AssemCom>, vector<string> >(reg, instrs, freeRegs);
+		} else {
+			cout << "TODO: this case (~227 in ExprGen)" << endl;
+			return boost::tuple< string, list<AssemCom>, vector<string> >("TODO", instrs, freeRegs);
+		}
     } else if (tok == "\"") {
         // String of form "foo", evaluates to a Sentence
 		return boost::tuple< string, list<AssemCom>, vector<string> >("TODO", instrs, freeRegs);

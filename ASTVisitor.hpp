@@ -19,6 +19,7 @@ class ASTVisitor : public boost::enable_shared_from_this<ASTVisitor> {
 	list<AssemCom> _instrs;
 	vector<string> _freeRegs;
 	boost::shared_ptr<SymbolTable> _globalSt;
+	void initFreeRegs();
 public:
 	ASTVisitor(boost::shared_ptr<SymbolTable> st);
 

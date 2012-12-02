@@ -1,4 +1,5 @@
 #include "ASTNode.hpp"
+#include <iostream>
 
 ASTNode::ASTNode(boost::shared_ptr<SymbolTable> st,
                    boost::weak_ptr<ASTNode> parent, int lineNo) {
