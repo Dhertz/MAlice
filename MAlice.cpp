@@ -72,10 +72,12 @@ void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
         return;
     }
 
-    boost::shared_ptr<ASTVisitor> treeVisitor(new ASTVisitor());
-    semanticTree->getRoot()->accept(treeVisitor);
+    if (boost::shared_ptr<SymbolTable> globalSt = top->getChildren()[0].lock()) {
+    	boost::shared_ptr<ASTVisitor> treeVisitor(new ASTVisitor(globalSt));
+	    semanticTree->getRoot()->accept(treeVisitor);
 
-	InstructionPrinter::printList(treeVisitor->getInstrs());
+		InstructionPrinter::printList(treeVisitor->getInstrs());
+    }
 
     parser->free(parser);
     tokens->free(tokens);

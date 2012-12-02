@@ -18,11 +18,15 @@ class HeaderParamsAST;
 class ASTVisitor : public boost::enable_shared_from_this<ASTVisitor> {
 	list<AssemCom> _instrs;
 	vector<string> _freeRegs;
+	boost::shared_ptr<SymbolTable> _globalSt;
 public:
+	ASTVisitor(boost::shared_ptr<SymbolTable> st);
+
 	void visitProg(vector <boost::shared_ptr<ASTNode> > children, 
 					 boost::shared_ptr<SymbolTable> st);
 
 	void visitProcDec(string name, boost::shared_ptr<HeaderParamsAST> params, 
+						vector <boost::shared_ptr<ASTNode> > children,
 						boost::shared_ptr<SymbolTable> st);
 
 	void visitFuncDec(string name, string returnType, 

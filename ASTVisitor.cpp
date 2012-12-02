@@ -9,6 +9,10 @@
 #include "ExprGen.hpp"
 #include <boost/tuple/tuple.hpp>
 
+ASTVisitor::ASTVisitor(boost::shared_ptr<SymbolTable> st) {
+	_globalSt = st;
+}
+
 void ASTVisitor::visitProg(vector <boost::shared_ptr<ASTNode> > children, 
 							 boost::shared_ptr<SymbolTable> st) {
 	// I imagine some bollocks will go here...
@@ -22,13 +26,19 @@ void ASTVisitor::visitProg(vector <boost::shared_ptr<ASTNode> > children,
 }
 
 void ASTVisitor::visitProcDec(string name, 
-								boost::shared_ptr<HeaderParamsAST> params, 
+								boost::shared_ptr<HeaderParamsAST> params,
+								vector <boost::shared_ptr<ASTNode> > children, 
 								boost::shared_ptr<SymbolTable> st) {
 	vector<string> alignArg;
 	alignArg.push_back("2");
 	_instrs.push_back(AssemCom(".align", 1, alignArg));							// .align 2
 
 	_instrs.push_back(AssemCom(name + ":", 0, std::vector<string>()));			// name:
+
+	vector<boost::shared_ptr<ASTNode> >::iterator i;							// function body
+	for (i = children.begin(); i != children.end(); ++i) {
+		(*i)->accept(shared_from_this());
+	}
 }
 
 void ASTVisitor::visitFuncDec(string name, string returnType, 

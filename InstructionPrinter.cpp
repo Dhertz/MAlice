@@ -7,6 +7,9 @@ void InstructionPrinter::printList(list<AssemCom> l) {
 	for (it = l.begin(); it != l.end(); ++it) {
 		AssemCom comm = *it;
 
+		if (comm.getArity() > 0) {
+			cout << "\t";
+		}
 		cout << comm.getName() << "\t";
 
 		vector<string> args = comm.getArgs();
