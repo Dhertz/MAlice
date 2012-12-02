@@ -1,7 +1,7 @@
 #include "ExprGen.hpp"
 #include "Utils.hpp"
 
-boost::tuple< string, list<AssemCom>, vector<string> > generateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<SymbolTable> st, vector<string> freeRegs) {
+boost::tuple< string, list<AssemCom>, vector<string> > ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<SymbolTable> st, vector<string> freeRegs) {
 	// These should be shared with ExprAST
 	set<string> boolArgBoolRet;
     set<string> intArgIntRet;

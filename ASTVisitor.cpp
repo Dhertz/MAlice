@@ -7,6 +7,7 @@
 #include "idents/Variable.hpp"
 #include "Label.hpp"
 #include "ExprGen.hpp"
+#include <boost/tuple/tuple.hpp>
 
 ASTVisitor::ASTVisitor(boost::shared_ptr<SymbolTable> st) {
 	_st = st;
@@ -27,9 +28,9 @@ void ASTVisitor::visitProcDec(string name,
 								boost::shared_ptr<HeaderParamsAST> params) {
 	vector<string> alignArg;
 	alignArg.push_back("2");
-	_instrs.push_back(AssemCom(".align", 1, alignArg));									// .align 2
+	_instrs.push_back(AssemCom(".align", 1, alignArg));							// .align 2
 
-	_instrs.push_back(AssemCom(name + ":", 0, std::vector<string>()));					// name:
+	_instrs.push_back(AssemCom(name + ":", 0, std::vector<string>()));			// name:
 }
 
 void ASTVisitor::visitFuncDec(string name, string returnType, 
@@ -46,8 +47,9 @@ void ASTVisitor::visitVarDec(string typeName, string varName) {
 }
 
 void ASTVisitor::visitInc(boost::shared_ptr<ExprAST> expr) {
-	pair< string, list<AssemCom> > res = ExprGen::generateExpression(expr, _st);
-	string resultReg = res.first;
+	boost::tuple< string, list<AssemCom>, vector<string> > res
+	  = ExprGen::generateExpression(expr->getRoot(), _st, _freeRegs);
+	string resultReg = res.get<0>();
 
 	vector<string> incArgs;
 	incArgs.push_back(resultReg);
@@ -58,8 +60,9 @@ void ASTVisitor::visitInc(boost::shared_ptr<ExprAST> expr) {
 }
 
 void ASTVisitor::visitDec(boost::shared_ptr<ExprAST> expr) {
-	pair< string, list<AssemCom> > res = ExprGen::generateExpression(expr, _st);
-	string resultReg = res.first;
+	boost::tuple< string, list<AssemCom>, vector<string> > res
+	  = ExprGen::generateExpression(expr->getRoot(), _st, _freeRegs);
+	string resultReg = res.get<0>();
 
 	vector<string> decArgs;
 	decArgs.push_back(resultReg);
@@ -96,8 +99,9 @@ void ASTVisitor::visitWhile(boost::shared_ptr<ExprAST> cond,
 		(*i)->accept(shared_from_this());
 	}
 
-	pair< string, list<AssemCom> > res = ExprGen::generateExpression(cond, _st);
-	string resultReg = res.first;
+	boost::tuple< string, list<AssemCom>, vector<string> > res
+	  = ExprGen::generateExpression(cond->getRoot(), _st, _freeRegs);
+	string resultReg = res.get<0>();
 	vector<string> cmpArgs;
 	cmpArgs.push_back(resultReg);
 	cmpArgs.push_back("#0");
@@ -115,8 +119,9 @@ void ASTVisitor::visitChoice(boost::shared_ptr<ExprAST> cond,
 				   			   boost::shared_ptr<IfBodyAST> falseBody) {
 	Label elseLabel;
 
-	pair< string, list<AssemCom> > res = ExprGen::generateExpression(cond, _st);
-	string resultReg = res.first;
+	boost::tuple< string, list<AssemCom>, vector<string> > res
+	  = ExprGen::generateExpression(cond->getRoot(), _st, _freeRegs);
+	string resultReg = res.get<0>();
 	std::vector<string> cmpArgs;
 	cmpArgs.push_back(resultReg);
 	cmpArgs.push_back("#0");
@@ -149,8 +154,9 @@ void ASTVisitor::visitIf(boost::shared_ptr<ExprAST> cond,
 			   			   vector <boost::shared_ptr<ASTNode> > children) {
 	Label elseLabel;
 
-	pair< string, list<AssemCom> > res = ExprGen::generateExpression(cond, _st);
-	string resultReg = res.first;
+	boost::tuple< string, list<AssemCom>, vector<string> > res
+	  = ExprGen::generateExpression(cond->getRoot(), _st, _freeRegs);
+	string resultReg = res.get<0>();
 	vector<string> cmpArgs;
 	cmpArgs.push_back(resultReg);
 	cmpArgs.push_back("#0");
