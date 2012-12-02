@@ -172,6 +172,7 @@ boost::tuple< string, list<AssemCom>, vector<string> > ExprGen::generateExpressi
 				//   I'm doing if there isn't
 
 				cout << "TODO: this case (~163 in ExprGen)" << endl;
+				return boost::tuple< string, list<AssemCom>, vector<string> >("TODO", instrs, freeRegs);
 			} else {
 				return loc;
 			}
@@ -204,12 +205,12 @@ boost::tuple< string, list<AssemCom>, vector<string> > ExprGen::generateExpressi
 		return boost::tuple< string, list<AssemCom>, vector<string> >("*** array base loc " + loc + " offset for element " + indexLoc + " (elem type is " + elemType + ") ***", instrs, freeRegs);
     } else if (tok == "'") {
         // Char of form 'x', evaluates to a Letter
-
+		return boost::tuple< string, list<AssemCom>, vector<string> >("TODO", instrs, freeRegs);
     } else if (tok == "\"") {
         // String of form "foo", evaluates to a Sentence
-
+		return boost::tuple< string, list<AssemCom>, vector<string> >("TODO", instrs, freeRegs);
     } else {
         // Recursive case, will resolve to a Boolean or Number
-
+		return boost::tuple< string, list<AssemCom>, vector<string> >("TODO", instrs, freeRegs);
     }
 }

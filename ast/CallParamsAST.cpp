@@ -1,5 +1,4 @@
 #include "CallParamsAST.hpp"
-#include "ExprAST.hpp"
 #include "../Utils.hpp"
 
 CallParamsAST::CallParamsAST(boost::shared_ptr<SymbolTable> st,
@@ -17,14 +16,19 @@ vector< boost::shared_ptr<Type> > CallParamsAST::getTypes() {
     return _types;
 }
 
+vector< boost::shared_ptr<ExprAST> > CallParamsAST::getParamExprs() {
+    return _params;
+}
+
 void CallParamsAST::check() {
     for (int i = 0; i < _tree->getChildCount(_tree); ++i) {
-        ExprAST e(_st, Utils::childByNum(_tree, i), _parent, _lineNo, true);
-        if (!e.getType()) {
+        boost::shared_ptr<ExprAST> e(new ExprAST(_st, Utils::childByNum(_tree, i), _parent, _lineNo, true));
+        if (!e->getType()) {
             Utils::printSemErr(_lineNo, (string) "Invalid expression in " +
                                  "function call due to earlier error.");
         } else {
-            _types.push_back(e.getType());
+            _types.push_back(e->getType());
+            _params.push_back(e);
         }
     }
 }
