@@ -62,10 +62,17 @@ void ASTVisitor::visitFuncDec(string name, string returnType,
 void ASTVisitor::visitVarDec(string typeName, string varName, 
 							   boost::shared_ptr<SymbolTable> st) {
 	boost::shared_ptr<Identifier> varIdent = 
-									_globalSt->lookupCurrLevelOnly(varName);
-	if (varIdent) {
-		boost::shared_ptr<Variable> var = 
-		  boost::shared_polymorphic_downcast<Variable>(varIdent);
+	  _globalSt->lookupCurrLevelOnly(varName);
+
+	boost::shared_ptr<Identifier> localIdent = st->lookupCurrLevelOnly(varName);
+
+	boost::shared_ptr<Variable> var = 
+	  boost::shared_polymorphic_downcast<Variable>(varIdent);
+
+	boost::shared_ptr<Variable> localVar = 
+	  boost::shared_polymorphic_downcast<Variable>(localIdent);
+
+	if (var->getAssLoc() == "" && localVar->getAssLoc() == "") {
 		boost::shared_ptr<Type> varType = var->getTypeName();
 		if (varType->getTypeName() == "Number") {
 			std::vector<string> comm;
