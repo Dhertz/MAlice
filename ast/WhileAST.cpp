@@ -31,5 +31,5 @@ string WhileAST::getNodeName() {
 }
 
 void WhileAST::accept(boost::shared_ptr<ASTVisitor> v) {
-    v->visitWhile(_expr);
+    v->visitWhile(_expr, _children);
 }

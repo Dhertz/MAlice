@@ -8,7 +8,7 @@ class ProgAST : public ASTNode {
 	void check();
 public:
 	ProgAST(boost::shared_ptr<SymbolTable> st,
-                   boost::weak_ptr<ASTNode> parent, int lineNo);
+              boost::weak_ptr<ASTNode> parent, int lineNo);
 	void print();
 	string getNodeName();
 	void accept(ASTVisitor v);

@@ -66,7 +66,13 @@ void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
 
     TreeWalker walker(top, tree, semanticTree);
 
-    //semanticTree->print();
+    if (Utils::globalErrorCount > 0) {
+        cerr << "Errors found. Stopping." << endl;
+        return;
+    }
+
+    boost::shared_ptr<ASTVisitor> treeVisitor(new ASTVisitor(top));
+    semanticTree->getRoot()->accept(treeVisitor);
 
     parser->free(parser);
     tokens->free(tokens);

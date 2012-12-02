@@ -9,6 +9,7 @@ using namespace std;
 class Utils {
     static void print(pANTLR3_BASE_TREE tree, int level);
 public:
+    static int globalErrorCount;
     static void printTree(pANTLR3_BASE_TREE ast);
     static pANTLR3_BASE_TREE childByNum(pANTLR3_BASE_TREE tree, int num);
     static string createStringFromTree(pANTLR3_BASE_TREE tree);

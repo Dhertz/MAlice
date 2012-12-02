@@ -1,6 +1,8 @@
 #include "Utils.hpp"
 #include <iostream>
 
+int Utils::globalErrorCount = 0;
+
 void Utils::print(pANTLR3_BASE_TREE tree, int level) {
     for (int i = 0; i < level; ++i) {
         cout << "--";
@@ -30,8 +32,10 @@ string Utils::createStringFromTree(pANTLR3_BASE_TREE tree) {
 
 void Utils::printSemErr(int lineNo, string err) {
     cerr << "Semantic error, line " << lineNo << ": " << err << endl;
+    globalErrorCount++;
 }
 
 void Utils::printSynErr(int lineNo, string err) {
     cerr << "Syntax error, line " << lineNo << ": " << err << endl;
+    globalErrorCount++;
 }
