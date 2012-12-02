@@ -8,5 +8,5 @@ Label::Label() {
 }
 
 std::string Label::getLabel() {
-	return "L" + id;
+	return ".L" + id;
 }

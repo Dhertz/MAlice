@@ -2,6 +2,7 @@
 #define IF_BODY_AST
 
 #include "ASTNode.hpp"
+#include "../ASTVisitor.hpp"
 
 class IfBodyAST : public ASTNode {
 	void check();
@@ -10,6 +11,7 @@ public:
                    boost::weak_ptr<ASTNode> parent, int lineNo);
 	void print();
 	string getNodeName();
+	void accept(boost::shared_ptr<ASTVisitor>);
 };
 
 #endif

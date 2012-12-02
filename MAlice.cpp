@@ -66,7 +66,7 @@ void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
 
     TreeWalker walker(top, tree, semanticTree);
 
-    //semanticTree->print();
+    semanticTree->print();
 
     parser->free(parser);
     tokens->free(tokens);

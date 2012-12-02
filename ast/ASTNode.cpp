@@ -22,3 +22,5 @@ void ASTNode::addChild(boost::shared_ptr<ASTNode> child, int childNum) {
 boost::weak_ptr<ASTNode> ASTNode::getParent() {
     return _parent;
 }
+
+void ASTNode::accept(boost::shared_ptr<ASTVisitor> v) {}
