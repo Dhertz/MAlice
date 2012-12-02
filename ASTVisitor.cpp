@@ -95,7 +95,7 @@ void ASTVisitor::visitVarDec(string typeName, string varName,
 			_instrs.push_back(AssemCom(l.getLabel() + ":", 0,
 											std::vector<string>()));
 			std::vector<string> word;
-			word.push_back("varName");
+			word.push_back(varName);
 			_instrs.push_back(AssemCom(".word", 1, word));
 			var->setAssLoc(l.getLabel());
 		} else {
@@ -142,7 +142,39 @@ void ASTVisitor::visitDec(boost::shared_ptr<ExprAST> expr,
 }
 
 void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr, 
-							  boost::shared_ptr<SymbolTable> st) {}
+							  boost::shared_ptr<SymbolTable> st) {
+	boost::tuple< string, list<AssemCom>, vector<string> > res
+	  = ExprGen::generateExpression(expr->getRoot(), st, _freeRegs);
+	string resultReg = res.get<0>();
+	if (resultReg != "r0") {
+		
+		vector<string> push;
+		push.push_back("{r0}");
+		_instrs.push_back(AssemCom("push", 1, push));
+
+		list<AssemCom> exprInstrs = res.get<1>();
+
+		_instrs.splice(_instrs.end(), exprInstrs);
+
+		vector<string> printArg;
+		printArg.push_back("printf");
+
+		_instrs.push_back(AssemCom("bl", 1, printArg));
+		
+		_instrs.push_back(AssemCom("pop", 1, push));
+	
+	} else {
+		
+		list<AssemCom> exprInstrs = res.get<1>();
+
+		_instrs.splice(_instrs.end(), exprInstrs);
+
+		vector<string> printArg;
+		printArg.push_back("printf");
+
+		_instrs.push_back(AssemCom("bl", 1, printArg));
+	}
+}
 
 void ASTVisitor::visitReturn(boost::shared_ptr<ExprAST> expr, 
 							   boost::shared_ptr<SymbolTable> st) {
@@ -316,13 +348,15 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 void ASTVisitor::visitFuncCall(string name,
 						    	 boost::shared_ptr<CallParamsAST> params, 
 							     boost::shared_ptr<SymbolTable> st) {
+
+
 	vector<boost::shared_ptr< ExprAST> > exprs = params->getParamExprs();
 
 	vector<boost::shared_ptr< ExprAST> >::iterator it;
 	int i = 0;
 
 	for (it = exprs.begin(); it != exprs.end(); ++it) {
-
+		cout << "yo" << endl;
 		pANTLR3_BASE_TREE cp = (*it)->getRoot();
 
 		boost::tuple< string, list<AssemCom>, vector<string> > genParam
@@ -387,6 +421,10 @@ void ASTVisitor::visitFuncCall(string name,
 	  	}
 	  	i++;
 	}
+
+	vector<string> blArgs;
+	blArgs.push_back(name);
+	_instrs.push_back(AssemCom("bl", 1, blArgs));
 }
 
 void ASTVisitor::visitArrayAssign(string name,
