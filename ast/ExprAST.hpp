@@ -15,6 +15,7 @@ class ExprAST : public ASTNode {
     set<string> _mixedArgsBoolRet;
     boost::shared_ptr<Type> _type;
     pANTLR3_BASE_TREE _tree;
+    pANTLR3_BASE_TREE _root;
     int _lineNo;
     bool _isAssignable;
 	bool _hasExprTok;
@@ -28,6 +29,7 @@ public:
     bool isAssignable();
     string getNodeName();
     void print();
+	pANTLR3_BASE_TREE getRoot();
 };
 
 #endif

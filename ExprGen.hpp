@@ -12,7 +12,7 @@ using namespace std;
 
 class ExprGen {
 public:
-	static pair< string, list<AssemCom> > generateExpression(boost::shared_ptr<ExprAST> expr, boost::shared_ptr<SymbolTable> st);
+	static pair< string, list<AssemCom> > generateExpression(pANTLR3_BASE_TREE expr, boost::shared_ptr<SymbolTable> st);
 };
 
 #endif

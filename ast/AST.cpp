@@ -8,6 +8,10 @@ void AST::print() {
 	printNode(_root, 0);
 }
 
+boost::shared_ptr<ASTNode> AST::getRoot() {
+	return _root;
+}
+
 void AST::printNode(boost::shared_ptr<ASTNode> node, int level) {
 	for (int i = 0; i < level; ++i) {
         cout << "--";
