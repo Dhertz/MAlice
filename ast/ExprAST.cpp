@@ -56,6 +56,7 @@ void ExprAST::check() {
 
     pANTLR3_BASE_TREE root = (_hasExprTok) ?
       Utils::childByNum(_tree, 0) : _tree;
+    _root = root;
     string tok = Utils::createStringFromTree(root);
 
     if (tok == "FUNC") {
@@ -479,4 +480,8 @@ string ExprAST::getNodeName() {
 
 void ExprAST::print() {
     cout << "Expression" << endl;
+}
+
+pANTLR3_BASE_TREE ExprAST::getRoot() {
+	return _root;
 }
