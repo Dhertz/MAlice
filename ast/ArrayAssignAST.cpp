@@ -66,5 +66,5 @@ void ArrayAssignAST::print() {
 }
 
 void ArrayAssignAST::accept(boost::shared_ptr<ASTVisitor> v) {
-    v->visitArrayAssign(_name, _element, _value);
+    v->visitArrayAssign(_name, _element, _value, _st);
 }

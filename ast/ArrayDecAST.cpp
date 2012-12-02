@@ -48,5 +48,5 @@ string ArrayDecAST::getNodeName() {
 }
 
 void ArrayDecAST::accept(boost::shared_ptr<ASTVisitor> v) {
-    v->visitArrayDec(_name, _length, _typeObj);
+    v->visitArrayDec(_name, _length, _typeObj, _st);
 }

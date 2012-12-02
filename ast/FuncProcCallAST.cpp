@@ -70,5 +70,5 @@ void FuncProcCallAST::print() {
 }
 
 void FuncProcCallAST::accept(boost::shared_ptr<ASTVisitor> v) {
-  v->visitFuncCall(_name, _params);
+  v->visitFuncCall(_name, _params, _st);
 }

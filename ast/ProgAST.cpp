@@ -14,6 +14,6 @@ string ProgAST::getNodeName() {
 
 void ProgAST::check() {}
 
-void ProgAST::accept(ASTVisitor v) {
-	v.visitProg(_children);
+void ProgAST::accept(boost::shared_ptr<ASTVisitor> v) {
+	v->visitProg(_children, _st);
 }

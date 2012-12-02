@@ -23,4 +23,4 @@ boost::weak_ptr<ASTNode> ASTNode::getParent() {
     return _parent;
 }
 
-void ASTNode::accept(boost::shared_ptr<ASTVisitor> v) {}
+void ASTNode::accept(boost::shared_ptr<ASTVisitor> v) {cout<<"hello";}

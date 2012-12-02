@@ -57,7 +57,7 @@ void TreeWalker::processPROG(pANTLR3_BASE_TREE tree,
                                boost::shared_ptr<SymbolTable> st, 
                                boost::weak_ptr<ASTNode> parent, int childNum) {
     boost::shared_ptr<SymbolTable> progSt(new SymbolTable(st));
-    boost::weak_ptr<SymbolTable> p (progSt);
+    boost::weak_ptr<SymbolTable> p(progSt);
     st->addChild(p);
 
     boost::shared_ptr<ProgAST> root(new ProgAST(progSt, 

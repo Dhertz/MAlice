@@ -32,5 +32,5 @@ string IfAST::getNodeName() {
 }
 
 void IfAST::accept(boost::shared_ptr<ASTVisitor> v) {
-    v->visitIf(_expr, _body, _children);
+    v->visitIf(_expr, _body, _children, _st);
 }

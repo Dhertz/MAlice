@@ -45,5 +45,5 @@ string VarDecAST::getNodeName() {
 }
 
 void VarDecAST::accept(boost::shared_ptr<ASTVisitor> v) {
-  v->visitVarDec(_typeName, _varName);
+  v->visitVarDec(_typeName, _varName, _st);
 }
