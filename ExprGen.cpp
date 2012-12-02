@@ -50,9 +50,9 @@ boost::tuple< string, list<AssemCom>, vector<string> > ExprGen::generateExpressi
 			boost::tuple< string, list<AssemCom>, vector<string> > genParam = generateExpression(cp, st, freeRegs);
 			string paramLoc = genParam.get<0>();
 			list<AssemCom> paramInstrs = genParam.get<1>();
-			// Don't need to update freeRegs because none of the temporary
-			//   values that might be in the registers need to be kept, as long
-			//   as I don't lose my argument value
+			// Don't need to update freeRegs because I know paramLoc stays
+			//   intact for as long as I need it in the rest of this case,
+			//   and don't care about it after the function call
 
 			// Move the instructions to generate the param to the end of my
 			//   rolling list of instructions
@@ -71,7 +71,15 @@ boost::tuple< string, list<AssemCom>, vector<string> > ExprGen::generateExpressi
 				}
 			} else {
 				// Push any other params
-				if (freeRegs.empty()) {
+				if (paramLoc[0] == 'r') {
+					// paramLoc is already a register, so I can just push it
+					// push paramloc
+
+					vector<string> args;
+					args.push_back("{" + paramLoc + "}");
+					AssemCom push("push", args.size(), args);
+					instrs.push_back(push);
+				} else if (freeRegs.empty()) {
 					// Need to temporarily borrow a register (I've chosen r0)
 					// push {r0}
 					// mov r0, paramLoc
@@ -128,7 +136,7 @@ boost::tuple< string, list<AssemCom>, vector<string> > ExprGen::generateExpressi
 		instrs.push_back(bl);
 		return boost::tuple< string, list<AssemCom>, vector<string> >("r0", instrs, freeRegs);
     } else if (tok == "VAR") {
-        // Variable reference, evaluates to variable's type
+        // Variable reference
         // Also allowed to be an array, so that function calls with array
         //   arguments are allowed
 
@@ -169,8 +177,31 @@ boost::tuple< string, list<AssemCom>, vector<string> > ExprGen::generateExpressi
 			}
         }
     } else if (tok == "ARRMEMBER") {
-        // Array member reference, evaluates to array's element type
+        // Array member reference
 
+        string arrName = Utils::createStringFromTree(Utils::childByNum(root, 0));
+        boost::shared_ptr<Identifier> arrIdent = st->lookupCurrLevelAndEnclosingLevels(arrName);
+		boost::shared_ptr<Type> arrType = boost::shared_polymorphic_downcast<Type>(arrIdent);
+        boost::shared_ptr<Array> arr = boost::shared_polymorphic_downcast<Array>(arrType);
+
+		string loc = arr->getAssLoc();
+
+		pANTLR3_BASE_TREE index = Utils::childByNum(root, 1);
+
+		boost::tuple< string, list<AssemCom>, vector<string> > genIndex = generateExpression(index, st, freeRegs);
+		string indexLoc = genIndex.get<0>();
+		list<AssemCom> indexInstrs = genIndex.get<1>();
+		// Don't need to update freeRegs as long as indexLoc isn't used below
+
+		// Move the instructions to generate the index to the end of my
+		//   rolling list of instructions
+		instrs.splice(instrs.end(), indexInstrs);
+
+		// I imagine we'll have getAssSize() inside types, which will come in
+		//   handy here when calculating the offset
+		string elemType = arr->getElemType()->getTypeName();
+
+		return boost::tuple< string, list<AssemCom>, vector<string> >("*** array base loc " + loc + " offset for element " + indexLoc + " (elem type is " + elemType + ") ***", instrs, freeRegs);
     } else if (tok == "'") {
         // Char of form 'x', evaluates to a Letter
 
