@@ -12,7 +12,7 @@
 void ASTVisitor::visitProg(vector <boost::shared_ptr<ASTNode> > children, 
 							 boost::shared_ptr<SymbolTable> st) {
 	// I imagine some bollocks will go here...
-
+	
 	vector<boost::shared_ptr<ASTNode> >::iterator i;
 	for (i = children.begin(); i != children.end(); ++i) {
 		(*i)->accept(shared_from_this());

@@ -1,6 +1,6 @@
 #include "AST.hpp"
 
-void AST::setRoot(boost::shared_ptr<ASTNode> root) {
+void AST::setRoot(boost::shared_ptr<ProgAST> root) {
     _root = root;
 }
 
@@ -8,7 +8,7 @@ void AST::print() {
 	printNode(_root, 0);
 }
 
-boost::shared_ptr<ASTNode> AST::getRoot() {
+boost::shared_ptr<ProgAST> AST::getRoot() {
 	return _root;
 }
 

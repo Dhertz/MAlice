@@ -4,8 +4,6 @@
 void InstructionPrinter::printList(list<AssemCom> l) {
 	list<AssemCom>::const_iterator it;
 
-	cout << l.size() << endl;
-
 	for (it = l.begin(); it != l.end(); ++it) {
 		AssemCom comm = *it;
 
