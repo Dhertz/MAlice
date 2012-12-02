@@ -31,5 +31,5 @@ string DecAST::getNodeName() {
 }
 
 void DecAST::accept(boost::shared_ptr<ASTVisitor> v) {
-    v->visitDec(_expr);
+    v->visitDec(_expr, _st);
 }

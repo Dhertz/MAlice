@@ -15,5 +15,5 @@ string ProgAST::getNodeName() {
 void ProgAST::check() {}
 
 void ProgAST::accept(ASTVisitor v) {
-	v.visitProg(_children);
+	v.visitProg(_children, _st);
 }

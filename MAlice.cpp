@@ -71,7 +71,7 @@ void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
         return;
     }
 
-    boost::shared_ptr<ASTVisitor> treeVisitor(new ASTVisitor(top));
+    boost::shared_ptr<ASTVisitor> treeVisitor(new ASTVisitor());
     semanticTree->getRoot()->accept(treeVisitor);
 
     parser->free(parser);

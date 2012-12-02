@@ -25,5 +25,5 @@ string PrintAST::getNodeName() {
 }
 
 void PrintAST::accept(boost::shared_ptr<ASTVisitor> v) {
-    v->visitPrint(_expr);
+    v->visitPrint(_expr, _st);
 }

@@ -30,5 +30,5 @@ string IncAST::getNodeName() {
 }
 
 void IncAST::accept(boost::shared_ptr<ASTVisitor> v) {
-    v->visitInc(_expr);
+    v->visitInc(_expr, _st);
 }

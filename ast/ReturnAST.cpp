@@ -94,5 +94,5 @@ string ReturnAST::getNodeName() {
 }
 
 void ReturnAST::accept(boost::shared_ptr<ASTVisitor> v) {
-	v->visitReturn(_expr);
+	v->visitReturn(_expr, _st);
 }
