@@ -13,10 +13,10 @@ string Variable::getBaseName() {
     return "Variable";
 }
 
-string getAssLoc() {
+string Variable::getAssLoc() {
 	return _assLoc;
 }
 
-void setAssLoc(string assLoc) {
+void Variable::setAssLoc(string assLoc) {
 	_assLoc = assLoc;
 }
