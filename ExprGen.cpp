@@ -136,6 +136,7 @@ boost::tuple< string, list<AssemCom>, vector<string> > ExprGen::generateExpressi
 		//   which will now have a string field of its assembly location
 		// If this is set, I return it
 		// If not, I allocate a register if possible, or memory space otherwise
+		// Or perhaps it's an error if it's unallocated by this stage, see below
 
 		string varName = Utils::createStringFromTree(Utils::childByNum(root, 0));
 	    boost::shared_ptr<Identifier> varIdent = st->lookupCurrLevelAndEnclosingLevels(varName);
@@ -145,12 +146,27 @@ boost::tuple< string, list<AssemCom>, vector<string> > ExprGen::generateExpressi
             boost::shared_ptr<Array> arr = boost::shared_polymorphic_downcast<Array>(varType);
 
 			// Array will definitely have already been allocated by now
+			// Do I need an error if this is "" just like I might have below?
+			// Or is that case impossible?
 			string loc = arr->getAssLoc();
 			return boost::tuple< string, list<AssemCom>, vector<string> >(loc, instrs, freeRegs);
         } else {
             boost::shared_ptr<Variable> var = boost::shared_polymorphic_downcast<Variable>(varIdent);
-			// TODO: look at var's ass location field
-			// Return if not null, otherwise allocate and return
+			string loc = var->getAssLoc();
+
+			if (loc == "") {
+				// Is this an "access to uninitialised variable" error?
+				// Really can't get my head around it
+
+				// If it turns out that it isn't an error, we need to allocate
+				//   the variable
+				// Which is easy if there's a register, but I have no idea what
+				//   I'm doing if there isn't
+
+				cout << "TODO: this case (~163 in ExprGen)" << endl;
+			} else {
+				return loc;
+			}
         }
     } else if (tok == "ARRMEMBER") {
         // Array member reference, evaluates to array's element type

@@ -2,6 +2,7 @@
 
 Variable::Variable(boost::shared_ptr<Type> type) {
     _type = type;
+	_assLoc = "";
 }
 
 boost::shared_ptr<Type> Variable::getTypeName() {
@@ -10,4 +11,12 @@ boost::shared_ptr<Type> Variable::getTypeName() {
 
 string Variable::getBaseName() {
     return "Variable";
+}
+
+string getAssLoc() {
+	return _assLoc;
+}
+
+void setAssLoc(string assLoc) {
+	_assLoc = assLoc;
 }
