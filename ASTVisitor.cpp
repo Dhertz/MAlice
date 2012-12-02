@@ -255,8 +255,10 @@ void ASTVisitor::visitFuncCall(string name,
 	vector<boost::shared_ptr< ExprAST> > exprs = params->getParamExprs();
 
 	vector<boost::shared_ptr< ExprAST> >::iterator it;
+	int i = 0;
 
 	for (it = exprs.begin(); it != exprs.end(); ++it) {
+
 		pANTLR3_BASE_TREE cp = (*it)->getRoot();
 
 		boost::tuple< string, list<AssemCom>, vector<string> > genParam
@@ -266,6 +268,60 @@ void ASTVisitor::visitFuncCall(string name,
 	  	list<AssemCom> pInstrs = genParam.get<1>();
 
 	  	_instrs.splice(_instrs.end(), pInstrs);
+
+	  	if (i < 4) {
+	  		if (paramLoc != ("r" + i)) {
+	  			//Parameter needs to be moved into correct register
+	  			vector<string> args;
+				args.push_back("r" + i);
+				args.push_back(paramLoc);
+				AssemCom mov("mov", args.size(), args);
+				_instrs.push_back(mov);
+	  		}
+	  	} else {
+	  		// Push any other params
+			if (paramLoc[0] == 'r') {
+
+				vector<string> args;
+				args.push_back("{" + paramLoc + "}");
+				AssemCom push("push", args.size(), args);
+				_instrs.push_back(push);										// push {ri}
+			} else if (freeRegs.empty()) {
+				// Need to temporarily borrow a register
+				vector<string> args;
+				args.push_back("{r0}");
+				AssemCom push("push", args.size(), args);
+				_instrs.push_back(push);										// push {r0}
+
+				args.clear();
+				args.push_back("r0");
+				args.push_back(paramLoc);
+				AssemCom mov("mov", args.size(), args);
+				_instrs.push_back(mov);											// mov r0 ri
+
+				_instrs.push_back(push);										// push {r0}
+
+				args.clear();
+				args.push_back("{r0}");
+				AssemCom pop("pop", args.size(), args);
+				_instrs.push_back(pop);											// pop {ro}
+			} else {
+
+				string reg = freeRegs.front();
+
+				vector<string> args;
+				args.push_back(reg);
+				args.push_back(paramLoc);
+				AssemCom mov("mov", args.size(), args);
+				_instrs.push_back(mov);											// mov reg paramLoc
+
+				args.clear();
+				args.push_back("{" + reg + "}");
+				AssemCom push("push", args.size(), args);
+				_instrs.push_back(push);										// push reg
+			}
+	  	}
+	  	i++;
 	}
 }
 
