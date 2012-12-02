@@ -211,6 +211,11 @@ boost::tuple< string, list<AssemCom>, vector<string> > res
 
 		_instrs.splice(_instrs.end(), exprInstrs);
 
+		vector<string> movArg;
+		movArg.push_back("r0");
+		movArg.push_back("#1024");
+		_instrs.push_back(AssemCom("mov", 2, movArg));
+		
 		vector<string> mallocArg;
 		mallocArg.push_back("malloc");
 
@@ -218,6 +223,12 @@ boost::tuple< string, list<AssemCom>, vector<string> > res
 
 		vector<string> stdinArg;
 		stdinArg.push_back("gets");
+
+		vector<string> mov1Arg;
+		mov1Arg.push_back(resultReg);
+		mov1Arg.push_back("r0");
+		_instrs.push_back(AssemCom("mov", 2, mov1Arg));
+		mov1Arg.push_back("malloc");
 
 		_instrs.push_back(AssemCom("bl", 1, stdinArg));
 		
