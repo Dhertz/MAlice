@@ -186,7 +186,51 @@ void ASTVisitor::visitReturn(boost::shared_ptr<ExprAST> expr,
 }
 
 void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr, 
-							  boost::shared_ptr<SymbolTable> st) {}
+							  boost::shared_ptr<SymbolTable> st) {
+boost::tuple< string, list<AssemCom>, vector<string> > res
+	  = ExprGen::generateExpression(expr->getRoot(), st, _freeRegs);
+	string resultReg = res.get<0>();
+	if (resultReg != "r0") {
+		
+		vector<string> push;
+		push.push_back("{r0}");
+		_instrs.push_back(AssemCom("push", 1, push));
+
+		list<AssemCom> exprInstrs = res.get<1>();
+
+		_instrs.splice(_instrs.end(), exprInstrs);
+
+		vector<string> mallocArg;
+		mallocArg.push_back("malloc");
+
+		_instrs.push_back(AssemCom("bl", 1, mallocArg));
+
+		vector<string> stdinArg;
+		stdinArg.push_back("gets");
+
+		_instrs.push_back(AssemCom("bl", 1, stdinArg));
+		
+		_instrs.push_back(AssemCom("pop", 1, push));
+	
+	} else {
+		
+		list<AssemCom> exprInstrs = res.get<1>();
+
+		_instrs.splice(_instrs.end(), exprInstrs);
+
+		vector<string> mallocArg;
+		mallocArg.push_back("malloc");
+
+		_instrs.push_back(AssemCom("bl", 1, mallocArg));
+
+		vector<string> stdinArg;
+		stdinArg.push_back("gets");
+
+		_instrs.push_back(AssemCom("bl", 1, stdinArg));
+
+	}
+
+}
 
 void ASTVisitor::visitWhile(boost::shared_ptr<ExprAST> cond, 
 			   			   	  vector <boost::shared_ptr<ASTNode> > children, 
