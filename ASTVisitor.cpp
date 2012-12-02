@@ -7,6 +7,7 @@
 #include "idents/Variable.hpp"
 #include "Label.hpp"
 #include "ExprGen.hpp"
+#include "idents/Array.hpp"
 #include <boost/tuple/tuple.hpp>
 
 ASTVisitor::ASTVisitor(boost::shared_ptr<SymbolTable> st) {
@@ -42,7 +43,30 @@ void ASTVisitor::visitVarDec(string typeName, string varName) {
 		boost::shared_ptr<Variable> var = 
 		  boost::shared_polymorphic_downcast<Variable>(varIdent);
 		boost::shared_ptr<Type> varType = var->getTypeName();
-		// instruction to allocate memory for global of type
+		if (varType->getTypeName() == "Number") {
+			//need to add label and .word def for each of these too.§
+			std::vector<string> comm;
+			comm.push_back(varName);
+			comm.push_back("4");
+			_instrs.push_back(AssemCom(".comm", 2, comm));
+			Label l;
+			_instrs.push_back(AssemCom(l.getLabel() + ":", 0, std::vector<string>()));
+			std::vector<string> word;
+			word.push_back("varName");
+			_instrs.push_back(AssemCom(".word", 1, word));
+		} else if (varType->getTypeName() == "Letter") {
+			std::vector<string> comm;
+			comm.push_back(varName);
+			comm.push_back("1");
+			_instrs.push_back(AssemCom(".comm", 2, comm));
+			Label l;
+			_instrs.push_back(AssemCom(l.getLabel() + ":", 0, std::vector<string>()));
+			std::vector<string> word;
+			word.push_back("varName");
+			_instrs.push_back(AssemCom(".word", 1, word));
+		}
+	} else {
+		//err...Not sure, assign register to variable?
 	}
 }
 
@@ -202,4 +226,33 @@ void ASTVisitor::visitArrayAssign(string name,
                   					boost::shared_ptr<ExprAST> value) {}
 
 void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
-                                 boost::shared_ptr<Type> type) {}
+                                 boost::shared_ptr<Type> type) {
+	boost::shared_ptr<Identifier> arrIdent = _st->lookupCurrLevelOnly(name);
+	if (arrIdent) {
+		boost::shared_ptr<Array> arr =  
+			boost::shared_polymorphic_downcast<Array>(arrIdent);
+		boost::shared_ptr<Type> arrType = arr->getElemType();
+		if (arrType->getTypeName() == "Number") {
+			std::vector<string> comm;
+			comm.push_back(name);
+			comm.push_back("4*something"); //need to access array length here.
+			_instrs.push_back(AssemCom(".comm", 2, comm));
+			Label l;
+			_instrs.push_back(AssemCom(l.getLabel() + ":", 0, std::vector<string>()));
+			std::vector<string> word;
+			word.push_back("varName");
+			_instrs.push_back(AssemCom(".word", 1, word));
+			//need to add label and .word def for each of these too.
+		} else if (arrType->getTypeName() == "Letter") {
+			std::vector<string> comm;
+			comm.push_back(name);
+			comm.push_back("1*something"); //need to access array length here.
+			_instrs.push_back(AssemCom(".comm", 2, comm));
+			Label l;
+			_instrs.push_back(AssemCom(l.getLabel() + ":", 0, std::vector<string>()));
+			std::vector<string> word;
+			word.push_back("varName");
+			_instrs.push_back(AssemCom(".word", 1, word));	
+		}
+	}
+}
