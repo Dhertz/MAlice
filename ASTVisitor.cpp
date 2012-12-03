@@ -43,9 +43,52 @@ void ASTVisitor::visitProcDec(string name,
 
 	_instrs.push_back(AssemCom(name + ":", 0, std::vector<string>()));			// name:
 
-	vector<boost::shared_ptr<ASTNode> >::iterator i;							// function body
-	for (i = children.begin(); i != children.end(); ++i) {
-		(*i)->accept(shared_from_this());
+	vector<string> stmfdArgs;
+	stmfdArgs.push_back("sp!");
+	stmfdArgs.push_back("{fp, lr}");
+	_instrs.push_back(AssemCom("stmfd", 2, stmfdArgs));							// stmfd sp!, {fp, lr}
+
+	vector<string> fpArgs;
+	fpArgs.push_back("fp");
+	fpArgs.push_back("sp");
+	fpArgs.push_back("#4");
+	_instrs.push_back(AssemCom("add", 3, fpArgs));								// add fp, sp, #4
+
+	vector<string> subArgs;
+	subArgs.push_back("sp");
+	subArgs.push_back("sp");
+	subArgs.push_back("#260");
+	_instrs.push_back(AssemCom("add", 3, subArgs));								// sub sp, sp, #260
+
+	vector<int> callableChildren;
+
+	int i = 0;
+	vector<boost::shared_ptr<ASTNode> >::iterator it;							// function body
+	for (it = children.begin(); it != children.end(); ++it) {
+		if ((*it)->getNodeName() == "FuncDec" 
+				|| (*it)->getNodeName() == "ProcDec") {
+			callableChildren.push_back(i);
+		} else {
+			(*it)->accept(shared_from_this());
+		}
+		i++;
+	}
+
+	vector<string> spArgs;
+	spArgs.push_back("sp");
+	spArgs.push_back("fp");
+	spArgs.push_back("#4");
+	_instrs.push_back(AssemCom("sub", 3, spArgs));								// sub sp, fp, #4
+
+	vector<string> ldmfdArgs;
+	ldmfdArgs.push_back("sp!");
+	ldmfdArgs.push_back("{fp, pc}");
+	_instrs.push_back(AssemCom("ldmfd", 2, ldmfdArgs));							// ldmfd sp!, {fp, pc}
+
+	// moved nested functions outside of parent function
+	vector<int>::iterator cIt;
+	for (cIt = callableChildren.begin(); cIt != callableChildren.end(); ++cIt) {
+		(*(children.begin() + (*cIt)))->accept(shared_from_this());				
 	}
 }
 
@@ -60,9 +103,52 @@ void ASTVisitor::visitFuncDec(string name, string returnType,
 
 	_instrs.push_back(AssemCom(name + ":", 0, std::vector<string>()));			// name:
 
-	vector<boost::shared_ptr<ASTNode> >::iterator i;							// function body
-	for (i = children.begin(); i != children.end(); ++i) {
-		(*i)->accept(shared_from_this());
+	vector<string> stmfdArgs;
+	stmfdArgs.push_back("sp!");
+	stmfdArgs.push_back("{fp, lr}");
+	_instrs.push_back(AssemCom("stmfd", 2, stmfdArgs));							// stmfd sp!, {fp, lr}
+
+	vector<string> fpArgs;
+	fpArgs.push_back("fp");
+	fpArgs.push_back("sp");
+	fpArgs.push_back("#4");
+	_instrs.push_back(AssemCom("add", 3, fpArgs));								// add fp, sp, #4
+
+	vector<string> subArgs;
+	subArgs.push_back("sp");
+	subArgs.push_back("sp");
+	subArgs.push_back("#260");
+	_instrs.push_back(AssemCom("add", 3, subArgs));								// sub sp, sp, #260
+
+	vector<int> callableChildren;
+
+	int i = 0;
+	vector<boost::shared_ptr<ASTNode> >::iterator it;							// function body
+	for (it = children.begin(); it != children.end(); ++it) {
+		if ((*it)->getNodeName() == "FuncDec" 
+				|| (*it)->getNodeName() == "ProcDec") {
+			callableChildren.push_back(i);
+		} else {
+			(*it)->accept(shared_from_this());
+		}
+		i++;
+	}
+
+	vector<string> spArgs;
+	spArgs.push_back("sp");
+	spArgs.push_back("fp");
+	spArgs.push_back("#4");
+	_instrs.push_back(AssemCom("sub", 3, spArgs));								// sub sp, fp, #4
+
+	vector<string> ldmfdArgs;
+	ldmfdArgs.push_back("sp!");
+	ldmfdArgs.push_back("{fp, pc}");
+	_instrs.push_back(AssemCom("ldmfd", 2, ldmfdArgs));							// ldmfd sp!, {fp, pc}
+
+	// moved nested functions outside of parent function
+	vector<int>::iterator cIt;
+	for (cIt = callableChildren.begin(); cIt != callableChildren.end(); ++cIt) {
+		(*(children.begin() + (*cIt)))->accept(shared_from_this());				
 	}
 }
 
@@ -156,32 +242,31 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 	  = ExprGen::generateExpression(expr->getRoot(), st, _freeRegs);
 	string resultReg = res.get<0>();
 	if (resultReg != "r0") {
-		
 		vector<string> push;
 		push.push_back("{r0}");
-		_instrs.push_back(AssemCom("push", 1, push));
+		_instrs.push_back(AssemCom("push", 1, push));							// push {r0}
 
 		list<AssemCom> exprInstrs = res.get<1>();
+		_instrs.splice(_instrs.end(), exprInstrs);								// expr isntrs
 
-		_instrs.splice(_instrs.end(), exprInstrs);
+		vector<string> movArgs;
+		movArgs.push_back("r0");
+		movArgs.push_back(resultReg);
+		_instrs.push_back(AssemCom("mov", 2, movArgs));							// mov r0 resultReg
 
 		vector<string> printArg;
 		printArg.push_back("printf");
 
-		_instrs.push_back(AssemCom("bl", 1, printArg));
-		
-		_instrs.push_back(AssemCom("pop", 1, push));
-	
+		_instrs.push_back(AssemCom("bl", 1, printArg));							// bl printf
+		_instrs.push_back(AssemCom("pop", 1, push));							// pop {r0}
 	} else {
-		
 		list<AssemCom> exprInstrs = res.get<1>();
-
-		_instrs.splice(_instrs.end(), exprInstrs);
+		_instrs.splice(_instrs.end(), exprInstrs);								// expr instrs
 
 		vector<string> printArg;
 		printArg.push_back("printf");
 
-		_instrs.push_back(AssemCom("bl", 1, printArg));
+		_instrs.push_back(AssemCom("bl", 1, printArg));							// bl printf
 	}
 }
 

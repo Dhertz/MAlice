@@ -12,16 +12,12 @@ vector< boost::shared_ptr<ASTNode> > ASTNode::getChildren() {
     return _children;
 }
 
-void ASTNode::addChild(boost::shared_ptr<ASTNode> child, int childNum) {
-    if (_children.begin() + childNum >= _children.end()) {
-        _children.push_back(child);
-    } else {
-        _children.insert(_children.begin() + childNum, child);
-    }
+void ASTNode::addChild(boost::shared_ptr<ASTNode> child) {
+	_children.push_back(child);
 }
 
 boost::weak_ptr<ASTNode> ASTNode::getParent() {
     return _parent;
 }
 
-void ASTNode::accept(boost::shared_ptr<ASTVisitor> v) {cout<<"hello";}
+void ASTNode::accept(boost::shared_ptr<ASTVisitor> v) {}

@@ -1,5 +1,6 @@
 #include "ProcDecAST.hpp"
 #include "../idents/Variable.hpp"
+#include <sstream>
 
 ProcDecAST::ProcDecAST(boost::shared_ptr<SymbolTable> st, string name,
                          boost::shared_ptr<HeaderParamsAST> params,
@@ -36,6 +37,8 @@ void ProcDecAST::check() {
             }
         }
 
+        _name = checkFunctionName(_name, _st->getEncSymTable());
+
         boost::shared_ptr<Proc> p(new Proc(_st, v));
         _procObj = p;
         _st->getEncSymTable()->add(_name, _procObj);
@@ -55,5 +58,17 @@ void ProcDecAST::print() {
 }
 
 void ProcDecAST::accept(boost::shared_ptr<ASTVisitor> v) {
-    v->visitProcDec(_name, _params, _children, _st);
+    v->visitProcDec(_name, _params, _children, _st->getEncSymTable());
+}
+
+string ProcDecAST::checkFunctionName(string name, boost::shared_ptr<SymbolTable> st) {
+	boost::shared_ptr<Identifier> ident 
+	  = st->lookupCurrLevelAndEnclosingLevels(name);
+
+	if (ident && ident->getBaseName() == "Callable") {
+		std::ostringstream s;
+		s << name << "2";
+		return s.str();
+	}
+	return name;
 }
