@@ -420,7 +420,7 @@ void TreeWalker::processIF(pANTLR3_BASE_TREE tree,
         pANTLR3_BASE_TREE childTree = Utils::childByNum(tree, i);
         string childName = Utils::createStringFromTree(childTree);
         if (childName == "IF") {
-            processIF(childTree, st, ifnode, i);
+            processIF(childTree, st, parent, i);
         } else {
             boost::shared_ptr<IfBodyAST> elses(
               new IfBodyAST(st, parent, getLine(tree)));
