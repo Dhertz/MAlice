@@ -1,34 +1,37 @@
 #include "InstructionPrinter.hpp"
-#include <fstream>
+//#include <fstream>
+#include <iostream>
+
+// NB: change cout to file and uncomment things to write to "filename.s" - Owen
 
 void InstructionPrinter::printList(list<AssemCom> l, string filename) {
 	list<AssemCom>::const_iterator it;
 
-	ofstream file(filename.c_str());
+	//ofstream file(filename.c_str());
 
-	if (file.is_open()) {
+	//if (file.is_open()) {
 
-		file << endl;
+		cout << endl;
 
 		for (it = l.begin(); it != l.end(); ++it) {
 			AssemCom comm = *it;
 
 			if (comm.getArity() > 0) {
-				file << "\t";
+				cout << "\t";
 			}
-			file << comm.getName() << "\t";
+			cout << comm.getName() << "\t";
 
 			vector<string> args = comm.getArgs();
 
 			for (int i = 0; i < comm.getArity() - 1; ++i) {
-				file << args[i] << ", ";
+				cout << args[i] << ", ";
 			}
 
 			if (comm.getArity() > 0) {
-				file << args[comm.getArity() - 1];
+				cout << args[comm.getArity() - 1];
 			}
 
-			file << endl;
+			cout << endl;
 		}
-	}
+	//}
 }

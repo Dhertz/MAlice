@@ -9,10 +9,11 @@
 #include "ExprGen.hpp"
 #include "idents/Array.hpp"
 #include <boost/tuple/tuple.hpp>
-#include <sstream>
+#include <boost/lexical_cast.hpp>
 
 ASTVisitor::ASTVisitor(boost::shared_ptr<SymbolTable> st) {
 	_globalSt = st;
+	initFreeRegs();
 }
 
 void ASTVisitor::initFreeRegs() {
@@ -517,12 +518,10 @@ void ASTVisitor::visitFuncCall(string name,
 	  	_instrs.splice(_instrs.end(), pInstrs);
 
 	  	if (i < 4) {
-			std::ostringstream s;
-			s << "r" << i;
-	  		if (paramLoc != s.str()) {
+	  		if (paramLoc != "r" + boost::lexical_cast<string>(i)) {
 	  			//Parameter needs to be moved into correct register
 	  			vector<string> args;
-				args.push_back(s.str());
+				args.push_back("r" + boost::lexical_cast<string>(i));
 				args.push_back(paramLoc);
 				AssemCom mov("mov", args.size(), args);
 				_instrs.push_back(mov);

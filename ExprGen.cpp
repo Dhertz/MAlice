@@ -2,7 +2,7 @@
 #include "Utils.hpp"
 #include "idents/Array.hpp"
 #include "idents/Variable.hpp"
-#include <sstream>
+#include <boost/lexical_cast.hpp>
 
 boost::tuple< string, list<AssemCom>, vector<string> > ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<SymbolTable> st, vector<string> freeRegs) {
 	// These should be shared with ExprAST
@@ -60,14 +60,12 @@ boost::tuple< string, list<AssemCom>, vector<string> > ExprGen::generateExpressi
 			instrs.splice(instrs.end(), paramInstrs);
 
 			if (0 <= i && i < 4) {
-				std::ostringstream s;
-				s << "r" << i;
 				// First four arguments go in r0-r3 respectively
-				if (paramLoc != s.str()) {
+				if (paramLoc != "r" + boost::lexical_cast<string>(i)) {
 					// Argument isn't already in the right place
 					// mov r{i}, paramLoc
 					vector<string> args;
-					args.push_back(s.str());
+					args.push_back("r" + boost::lexical_cast<string>(i));
 					args.push_back(paramLoc);
 					AssemCom mov("mov", args.size(), args);
 					instrs.push_back(mov);
@@ -222,7 +220,7 @@ boost::tuple< string, list<AssemCom>, vector<string> > ExprGen::generateExpressi
 			// mov rx, charByte
 			vector<string> args;
 			args.push_back(reg);
-			args.push_back("#" + charByte);
+			args.push_back("#" + boost::lexical_cast<string>(charByte));
 			AssemCom mov("mov", args.size(), args);
 			instrs.push_back(mov);
 

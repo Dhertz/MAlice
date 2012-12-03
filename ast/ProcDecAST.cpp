@@ -1,6 +1,6 @@
 #include "ProcDecAST.hpp"
 #include "../idents/Variable.hpp"
-#include <sstream>
+#include <boost/lexical_cast.hpp>
 
 ProcDecAST::ProcDecAST(boost::shared_ptr<SymbolTable> st, string name,
                          boost::shared_ptr<HeaderParamsAST> params,
@@ -66,9 +66,7 @@ string ProcDecAST::checkFunctionName(string name, boost::shared_ptr<SymbolTable>
 	  = st->lookupCurrLevelAndEnclosingLevels(name);
 
 	if (ident && ident->getBaseName() == "Callable") {
-		std::ostringstream s;
-		s << name << "2";
-		return s.str();
+		return name + boost::lexical_cast<string>(2);
 	}
 	return name;
 }
