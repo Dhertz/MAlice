@@ -59,12 +59,14 @@ boost::tuple< string, list<AssemCom>, vector<string> > ExprGen::generateExpressi
 			instrs.splice(instrs.end(), paramInstrs);
 
 			if (0 <= i && i < 4) {
+				std::ostringstream s;
+				s << "r" << i;
 				// First four arguments go in r0-r3 respectively
-				if (paramLoc != ("r" + i)) {
+				if (paramLoc != s.str()) {
 					// Argument isn't already in the right place
 					// mov r{i}, paramLoc
 					vector<string> args;
-					args.push_back("r" + i);
+					args.push_back(s.str());
 					args.push_back(paramLoc);
 					AssemCom mov("mov", args.size(), args);
 					instrs.push_back(mov);
