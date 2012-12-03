@@ -2,6 +2,7 @@
 #include "Utils.hpp"
 #include "idents/Array.hpp"
 #include "idents/Variable.hpp"
+#include <sstream>
 
 boost::tuple< string, list<AssemCom>, vector<string> > ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<SymbolTable> st, vector<string> freeRegs) {
 	// These should be shared with ExprAST
