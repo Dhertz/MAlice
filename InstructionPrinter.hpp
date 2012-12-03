@@ -9,7 +9,7 @@ using namespace std;
 class InstructionPrinter {
 
 public:
-	static void printList(list<AssemCom> instrs);	
+	static void printList(list<AssemCom> instrs, string filename);	
 
 };
 

@@ -61,7 +61,7 @@ void ASTVisitor::visitProcDec(string name,
 		for (it = children.begin(); it != children.end(); ++it) {
 			if ((*it)->getNodeName() == "FuncDec" 
 					|| (*it)->getNodeName() == "ProcDec") {
-				callableChildren.push_back(i);
+				callableKids.push_back(i);
 			} else {
 				(*it)->accept(shared_from_this());
 			}
