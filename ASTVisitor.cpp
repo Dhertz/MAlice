@@ -17,7 +17,7 @@ ASTVisitor::ASTVisitor(boost::shared_ptr<SymbolTable> st) {
 
 void ASTVisitor::initFreeRegs() {
 	string regs[] = {"r4", "r5", "r6", "r7", "r8", "r9",
-					 "r10", "r11"};
+					 "r10"};
 
 	_freeRegs = vector<string>(regs, regs + sizeof(regs) / sizeof(string));
 }
@@ -38,58 +38,53 @@ void ASTVisitor::visitProcDec(string name,
 								boost::shared_ptr<HeaderParamsAST> params,
 								vector <boost::shared_ptr<ASTNode> > children, 
 								boost::shared_ptr<SymbolTable> st) {
-	vector<string> alignArg;
-	alignArg.push_back("2");
-	_instrs.push_back(AssemCom(".align", 1, alignArg));							// .align 2
 
-	_instrs.push_back(AssemCom(name + ":", 0, std::vector<string>()));			// name:
+	if (name == "hatta") {
+		vector<string> alignArg;
+		alignArg.push_back("2");
+		_instrs.push_back(AssemCom(".align", 1, alignArg));						// .align 2
 
-	vector<string> stmfdArgs;
-	stmfdArgs.push_back("sp!");
-	stmfdArgs.push_back("{r4, r5, r6, r7, r8, r9, r10, r11, fp, lr}");
-	_instrs.push_back(AssemCom("stmfd", 2, stmfdArgs));							// stmfd sp!, {r4, r5, r6, r7, r8, r9, r10, r11, fp, lr}
+		vector<string> globalArg;
+		globalArg.push_back("main");
+		_instrs.push_back(AssemCom(".global", 1, globalArg));					// .global main
 
-	vector<string> fpArgs;
-	fpArgs.push_back("fp");
-	fpArgs.push_back("sp");
-	fpArgs.push_back("#256");
-	_instrs.push_back(AssemCom("add", 3, fpArgs));								// add fp, sp, #256
+		_instrs.push_back(AssemCom("main:", 0, std::vector<string>()));			// main:
 
-	vector<string> subArgs;
-	subArgs.push_back("sp");
-	subArgs.push_back("sp");
-	subArgs.push_back("#260");
-	_instrs.push_back(AssemCom("add", 3, subArgs));								// sub sp, sp, #260
+		vector<string> pushArg;
+		pushArg.push_back("{lr}");
+		_instrs.push_back(AssemCom("push", 1, pushArg));						// push {lr}
 
-	vector<int> callableChildren;
+		vector<int> callableKids;
 
-	int i = 0;
-	vector<boost::shared_ptr<ASTNode> >::iterator it;							// function body
-	for (it = children.begin(); it != children.end(); ++it) {
-		if ((*it)->getNodeName() == "FuncDec" 
-				|| (*it)->getNodeName() == "ProcDec") {
-			callableChildren.push_back(i);
-		} else {
-			(*it)->accept(shared_from_this());
+		int i = 0;
+		vector<boost::shared_ptr<ASTNode> >::iterator it;						// function body
+		for (it = children.begin(); it != children.end(); ++it) {
+			if ((*it)->getNodeName() == "FuncDec" 
+					|| (*it)->getNodeName() == "ProcDec") {
+				callableChildren.push_back(i);
+			} else {
+				(*it)->accept(shared_from_this());
+			}
+			i++;
 		}
-		i++;
-	}
 
-	vector<string> spArgs;
-	spArgs.push_back("sp");
-	spArgs.push_back("fp");
-	spArgs.push_back("#256");
-	_instrs.push_back(AssemCom("sub", 3, spArgs));								// sub sp, fp, #256
+		vector<string> returnArg;
+		returnArg.push_back("r0");
+		returnArg.push_back("#0");
+		_instrs.push_back(AssemCom("mov", 2, returnArg));						// mov r0, #0
 
-	vector<string> ldmfdArgs;
-	ldmfdArgs.push_back("sp!");
-	ldmfdArgs.push_back("{r4, r5, r6, r7, r8, r9, r10, r11, fp, pc}");
-	_instrs.push_back(AssemCom("ldmfd", 2, ldmfdArgs));							// ldmfd sp!, {r4, r5, r6, r7, r8, r9, r10, r11, fp, pc}
+		vector<string> popArg;
+		popArg.push_back("{pc}");
+		_instrs.push_back(AssemCom("pop", 1, popArg));							// pop {pc}
 
-	// moved nested functions outside of parent function
-	vector<int>::iterator cIt;
-	for (cIt = callableChildren.begin(); cIt != callableChildren.end(); ++cIt) {
-		(*(children.begin() + (*cIt)))->accept(shared_from_this());				
+		// moved nested functions outside of parent function
+		vector<int>::iterator cIt;
+		for (cIt = callableKids.begin(); cIt != callableKids.end(); ++cIt) {
+			(*(children.begin() + (*cIt)))->accept(shared_from_this());				
+		}
+
+	} else {
+		visitFuncDec(name, "", params, children, st);
 	}
 }
 
@@ -106,8 +101,8 @@ void ASTVisitor::visitFuncDec(string name, string returnType,
 
 	vector<string> stmfdArgs;
 	stmfdArgs.push_back("sp!");
-	stmfdArgs.push_back("{r4, r5, r6, r7, r8, r9, r10, r11, fp, lr}");
-	_instrs.push_back(AssemCom("stmfd", 2, stmfdArgs));							// stmfd sp!, {r4, r5, r6, r7, r8, r9, r10, r11, fp, lr}
+	stmfdArgs.push_back("{r4-r10, fp, lr}");
+	_instrs.push_back(AssemCom("stmfd", 2, stmfdArgs));							// stmfd sp!, {r4-r10, fp, lr}
 
 	vector<string> fpArgs;
 	fpArgs.push_back("fp");
@@ -143,8 +138,8 @@ void ASTVisitor::visitFuncDec(string name, string returnType,
 
 	vector<string> ldmfdArgs;
 	ldmfdArgs.push_back("sp!");
-	ldmfdArgs.push_back("{r4, r5, r6, r7, r8, r9, r10, r11, fp, pc}");
-	_instrs.push_back(AssemCom("ldmfd", 2, ldmfdArgs));							// ldmfd sp!, {r4, r5, r6, r7, r8, r9, r10, r11, fp, pc}
+	ldmfdArgs.push_back("{r4-r10, fp, pc}");
+	_instrs.push_back(AssemCom("ldmfd", 2, ldmfdArgs));							// ldmfd sp!, {r4-r10, fp, pc}
 
 	// moved nested functions outside of parent function
 	vector<int>::iterator cIt;
