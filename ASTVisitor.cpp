@@ -14,6 +14,10 @@
 ASTVisitor::ASTVisitor(boost::shared_ptr<SymbolTable> st) {
 	_globalSt = st;
 	initFreeRegs();
+
+	vector<string> alignArg;
+	alignArg.push_back("2");
+	_endDefs.push_back(AssemCom(".align", 1, alignArg));						// .align 2
 }
 
 void ASTVisitor::initFreeRegs() {
@@ -247,11 +251,11 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 	Label strLbl;
 	_endDefs.push_back(AssemCom(strLbl.getLabel() + ":", 0 , std::vector<string>()));
 
-	vector<string> push1;
+	/*vector<string> push1;
 	push1.push_back("{r1}");
 
 	vector<string> push0;
-	push0.push_back("{r0}");
+	push0.push_back("{r0}");*/
 
 	if (resultReg[0] == '\"') {
 		vector<string> asciiArg;
@@ -262,8 +266,7 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 		asciiArg.push_back("\"%i\"");
 		_endDefs.push_back(AssemCom(".asciz", 1, asciiArg));
 
-		
-		_instrs.push_back(AssemCom("push", 1, push1));							// push {r1}
+		//_instrs.push_back(AssemCom("push", 1, push1));						
 
 		list<AssemCom> exprInstrs = res.get<1>();
 		_instrs.splice(_instrs.end(), exprInstrs);								// expr isntrs
@@ -273,7 +276,7 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 		movArgs.push_back(resultReg);
 		_instrs.push_back(AssemCom("mov", 2, movArgs));							// mov r1 resultReg
 	} else {
-		_instrs.push_back(AssemCom("push", 1, push0));							// push {r0}
+		//_instrs.push_back(AssemCom("push", 1, push0));						
 
 		list<AssemCom> exprInstrs = res.get<1>();
 		_instrs.splice(_instrs.end(), exprInstrs);								// expr instrs
@@ -288,11 +291,11 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 	printArg.push_back("printf");
 	_instrs.push_back(AssemCom("bl", 1, printArg));								// bl printf
 
-	if (resultReg != "r1") {
-		_instrs.push_back(AssemCom("pop", 1, push1));							// pop {r1}
+	/*if (resultReg != "r1") {
+		_instrs.push_back(AssemCom("pop", 1, push1));							
 	} else if (resultReg[0] != '\"') {
-		_instrs.push_back(AssemCom("pop", 1, push0));							// pop {r0}
-	}
+		_instrs.push_back(AssemCom("pop", 1, push0));							
+	}*/
 }
 
 void ASTVisitor::visitReturn(boost::shared_ptr<ExprAST> expr, 
@@ -313,55 +316,39 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 
 	_freeRegs = res.get<2>();
 	string resultReg = res.get<0>();
-	if (resultReg != "r0") {
-		
-		vector<string> push;
-		push.push_back("{r0}");
-		_instrs.push_back(AssemCom("push", 1, push));
 
-		list<AssemCom> exprInstrs = res.get<1>();
+	// non-sentence case atm
 
-		_instrs.splice(_instrs.end(), exprInstrs);
+	vector<string> strArgs;
+	strArgs.push_back(resultReg);
+	strArgs.push_back("[fp, #-8]");
+	_instrs.push_back(AssemCom("str", 2, strArgs));								// str resultReg [fp, #-8]
 
-		vector<string> movArg;
-		movArg.push_back("r0");
-		movArg.push_back("#1024");
-		_instrs.push_back(AssemCom("mov", 2, movArg));
-		
-		vector<string> mallocArg;
-		mallocArg.push_back("malloc");
+	Label strLbl;
+	_endDefs.push_back(
+		AssemCom(strLbl.getLabel() + ":", 0 , std::vector<string>()));			// strLbl:
+	vector<string> asciiArg;
+	asciiArg.push_back("\"%i\"");
+	_endDefs.push_back(AssemCom(".asciz", 1, asciiArg));						// .asciz "%i"
 
-		_instrs.push_back(AssemCom("bl", 1, mallocArg));
+	vector<string> ldr0Args;
+	ldr0Args.push_back("r0");
+	ldr0Args.push_back("=" + strLbl.getLabel());
+	_instrs.push_back(AssemCom("ldr", 2, ldr0Args));							// ldr r0 =strLbl
 
-		vector<string> stdinArg;
-		stdinArg.push_back("gets");
+	vector<string> ldr1Args;
+	ldr1Args.push_back("r1");
+	ldr1Args.push_back("[fp, #-8]");
+	_instrs.push_back(AssemCom("ldr", 2, ldr1Args));							// ldr r1 [fp, #-8]
 
-		vector<string> mov1Arg;
-		mov1Arg.push_back(resultReg);
-		mov1Arg.push_back("r0");
-		_instrs.push_back(AssemCom("mov", 2, mov1Arg));
-		mov1Arg.push_back("malloc");
+	vector<string> printArg;
+	printArg.push_back("__isoc99_scanf");
+	_instrs.push_back(AssemCom("bl", 1, printArg));								// bl __isoc99_scanf
 
-		_instrs.push_back(AssemCom("bl", 1, stdinArg));
-		
-		_instrs.push_back(AssemCom("pop", 1, push));
-	
-	} else {
-		
-		list<AssemCom> exprInstrs = res.get<1>();
-
-		_instrs.splice(_instrs.end(), exprInstrs);
-
-		vector<string> mallocArg;
-		mallocArg.push_back("malloc");
-
-		_instrs.push_back(AssemCom("bl", 1, mallocArg));
-
-		vector<string> stdinArg;
-		stdinArg.push_back("gets");
-
-		_instrs.push_back(AssemCom("bl", 1, stdinArg));
-	}
+	vector<string> ldrArgs;
+	ldrArgs.push_back(resultReg);
+	ldrArgs.push_back("[fp, #-8]");
+	_instrs.push_back(AssemCom("ldr", 2, ldrArgs));								// ldr resultReg [fp, #-8]
 }
 
 void ASTVisitor::visitWhile(boost::shared_ptr<ExprAST> cond, 
