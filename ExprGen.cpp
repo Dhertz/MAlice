@@ -215,14 +215,14 @@ boost::tuple< string, list<AssemCom>, vector<string> > ExprGen::generateExpressi
         // Char of form 'x'
 		// Put it in a register if possible, otherwise somehow allocate memory
 
+		string let = Utils::createStringFromTree(Utils::childByNum(root, 0));
+		char letChar = let[0];
+		int charByte = letChar; // TODO: check this is right
+
 		if (!freeRegs.empty()) {
 			// We have a free register, put the char in there
 			string reg = freeRegs.front();
 			freeRegs.erase(freeRegs.begin());
-
-			string let = Utils::createStringFromTree(Utils::childByNum(root, 0));
-			char letChar = let[0];
-			int charByte = letChar; // TODO: check this is right
 
 			// mov rx, charByte
 			vector<string> args;
@@ -239,6 +239,8 @@ boost::tuple< string, list<AssemCom>, vector<string> > ExprGen::generateExpressi
     } else if (tok == "\"") {
         // String of form "foo", evaluates to a Sentence
 
+    	assert(root->getChildCount(root) > 0);
+
     	string res = "\"" + Utils::createStringFromTree(Utils::childByNum(root, 0));
 
     	for (int i = 1; i < root->getChildCount(root); ++i) {
@@ -250,7 +252,36 @@ boost::tuple< string, list<AssemCom>, vector<string> > ExprGen::generateExpressi
 
 		return boost::tuple< string, list<AssemCom>, vector<string> >(res, instrs, freeRegs);
     } else {
-        // Recursive case, will resolve to a Boolean or Number
-		return boost::tuple< string, list<AssemCom>, vector<string> >("TODO", instrs, freeRegs);
+		return recurseTree(root, st, freeRegs);
     }
+}
+
+boost::tuple< string, list<AssemCom>, vector<string> > ExprGen::recurseTree(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, vector<string> freeRegs) {
+	list<AssemCom> instrs;
+
+    int children = tree->getChildCount(tree);
+
+    if (children == 0) {
+        // Number base case
+
+        string n = Utils::createStringFromTree(tree);
+        if (!freeRegs.empty()) {
+        	string reg = freeRegs.front();
+			freeRegs.erase(freeRegs.begin());
+
+			// mov rx, #n
+			vector<string> args;
+			args.push_back(reg);
+			args.push_back("#" + n);
+			AssemCom mov("mov", args.size(), args);
+			instrs.push_back(mov);
+
+			return boost::tuple< string, list<AssemCom>, vector<string> >(reg, instrs, freeRegs);
+        } else {
+			cout << "TODO: this case (~282 in ExprGen)" << endl;
+			return boost::tuple< string, list<AssemCom>, vector<string> >("TODO", instrs, freeRegs);
+        }
+    }
+
+	return boost::tuple< string, list<AssemCom>, vector<string> >("TODO", instrs, freeRegs);
 }
