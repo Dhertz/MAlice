@@ -505,7 +505,6 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 		}
 
 	} else {
-		cout << "yo" << endl;
 		string rhs = res.get<0>();
 		list<AssemCom> exprInstrs = res.get<1>();
 		_freeRegs = res.get<2>();

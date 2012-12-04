@@ -287,14 +287,13 @@ treble_t ExprGen::recurseTree(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTa
         string op = Utils::createStringFromTree(tree);
         pANTLR3_BASE_TREE arg = Utils::childByNum(tree, 0);
 
+		treble_t argEval = recurseTree(arg, st, freeRegs);
+    	string argLoc = argEval.get<0>();
+		list<AssemCom> argInstrs = argEval.get<1>();
+		freeRegs = argEval.get<2>();
+		instrs.splice(instrs.end(), argInstrs);
+
     	if (op == "!") {
-    		treble_t argEval = recurseTree(arg, st, freeRegs);
-    		string argLoc = argEval.get<0>();
-			list<AssemCom> argInstrs = argEval.get<1>();
-			freeRegs = argEval.get<2>();
-
-			instrs.splice(instrs.end(), argInstrs);
-
 	        if (!freeRegs.empty()) {
 	        	string reg = freeRegs.front();
 				freeRegs.erase(freeRegs.begin());
@@ -309,11 +308,26 @@ treble_t ExprGen::recurseTree(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTa
 
 				return treble_t(reg, instrs, freeRegs);
 	        } else {
-				cout << "TODO: this case (~282 in ExprGen)" << endl;
+				cout << "TODO: this case (~311 in ExprGen)" << endl;
 				return treble_t("TODO", instrs, freeRegs);
 	        }
     	} else if (op == "~") {
+	        if (!freeRegs.empty()) {
+	        	string reg = freeRegs.front();
+				freeRegs.erase(freeRegs.begin());
 
+				// mvn reg, argLoc
+				vector<string> args;
+				args.push_back(reg);
+				args.push_back(argLoc);
+				AssemCom mvn("mvn", args.size(), args);
+				instrs.push_back(mvn);
+
+				return treble_t(reg, instrs, freeRegs);
+	        } else {
+				cout << "TODO: this case (~328 in ExprGen)" << endl;
+				return treble_t("TODO", instrs, freeRegs);
+	        }
     	} else if (op == "+") {
 
     	} else if (op == "-") {
