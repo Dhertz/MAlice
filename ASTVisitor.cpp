@@ -475,17 +475,26 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 
 	if (var->getTypeName()->getTypeName() == "Sentence") {
 
+		vector<string> asciiArg;
+		asciiArg.push_back(res.get<0>());
 		if (loc == "") {
 			Label strLbl;
 			_endDefs.push_back(AssemCom(strLbl.getLabel() + ":", 0 , std::vector<string>()));
 			var->setAssLoc(strLbl.getLabel());
-			vector<string> asciiArg;
-			asciiArg.push_back(res.get<0>());
 			_endDefs.push_back(AssemCom(".asciz", 1, asciiArg));
+		} else {
+			// Insert in correct position in _endDefs
+			list<AssemCom>::iterator it;
+			for (it = _endDefs.begin(); it != _endDefs.end(); ++it) {
+				if (it->getName() == loc + ":") {
+					cout << "yo";
+					cout << res.get<0>() << endl;
+					_endDefs.erase(it);
+					return;
+				}
+			}
+			//_endDefs.insert(_endDefs.begin(), AssemCom(".asciz", 1, asciiArg));
 		}
-
-		// TODO: insert in the correct pos in _endDefs
-
 
 	} else {
 		string rhs = res.get<0>();
