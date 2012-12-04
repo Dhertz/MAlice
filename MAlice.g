@@ -318,7 +318,7 @@ atom: (ID APOSTROPHE) => ID APOSTROPHE 's' expression 'piece' -> ^(ARRMEMBER ID 
       ID -> ^(VAR ID) | 
       INT | 
       (APOSTROPHE^) (.) (APOSTROPHE!) | 
-      (DQ^) ( ~('"') )* (DQ!) | 
+      (DQ^) (~('"')*) (DQ!) | 
       '(' prec11 ')' -> prec11;
            
 delimiter: '.' | ',' | 'and' | 'but' | 'then';
