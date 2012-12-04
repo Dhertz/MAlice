@@ -98,8 +98,7 @@ boost::tuple< string, list<AssemCom>, vector<string> > ExprGen::generateExpressi
 					AssemCom mov("mov", args.size(), args);
 					instrs.push_back(mov);
 
-					// Need to check this works how I want it to
-					// i.e. re-use the push instruction above
+					// Re-use the push instruction from above
 					instrs.push_back(push);
 
 					args.clear();
@@ -164,16 +163,18 @@ boost::tuple< string, list<AssemCom>, vector<string> > ExprGen::generateExpressi
 			string loc = var->getAssLoc();
 
 			if (loc == "") {
-				// Is this an "access to uninitialised variable" error?
-				// Really can't get my head around it
+				// Allocate some space for the variable
 
-				// If it turns out that it isn't an error, we need to allocate
-				//   the variable
-				// Which is easy if there's a register, but I have no idea what
-				//   I'm doing if there isn't
+				if (freeRegs.empty()) {
+					cout << "TODO: this case (~169 in ExprGen)" << endl;
+					return boost::tuple< string, list<AssemCom>, vector<string> >("TODO", instrs, freeRegs);
+				} else {
+					string reg = freeRegs.front();
+					freeRegs.erase(freeRegs.begin());
 
-				cout << "TODO: this case (~163 in ExprGen)" << endl;
-				return boost::tuple< string, list<AssemCom>, vector<string> >("TODO", instrs, freeRegs);
+					var->setAssLoc(reg);
+					return boost::tuple< string, list<AssemCom>, vector<string> >(reg, instrs, freeRegs);
+				}
 			} else {
 				return loc;
 			}
