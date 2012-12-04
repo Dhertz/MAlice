@@ -167,6 +167,8 @@ boost::tuple< string, list<AssemCom>, vector<string> > ExprGen::generateExpressi
 
 				if (freeRegs.empty()) {
 					cout << "TODO: this case (~169 in ExprGen)" << endl;
+					AssemCom bl("blgag", 0, std::vector<string>());
+					instrs.push_back(bl);
 					return boost::tuple< string, list<AssemCom>, vector<string> >("TODO", instrs, freeRegs);
 				} else {
 					string reg = freeRegs.front();

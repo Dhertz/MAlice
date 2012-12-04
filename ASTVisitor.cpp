@@ -237,10 +237,13 @@ void ASTVisitor::visitDec(boost::shared_ptr<ExprAST> expr,
 
 void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr, 
 							  boost::shared_ptr<SymbolTable> st) {
+	
+	printFreeRegs();
 	boost::tuple< string, list<AssemCom>, vector<string> > res
 	  = ExprGen::generateExpression(expr->getRoot(), st, _freeRegs);
 
 	_freeRegs = res.get<2>();
+	printFreeRegs();
 	string resultReg = res.get<0>();
 	if (resultReg != "r0") {
 		vector<string> push;
@@ -472,7 +475,6 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 
 	boost::tuple< string, list<AssemCom>, vector<string> > res 
 	  = ExprGen::generateExpression(expr->getRoot(), st, _freeRegs);
-
 	if (var->getTypeName()->getTypeName() == "Sentence") {
 
 		vector<string> asciiArg;
@@ -497,6 +499,7 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 		}
 
 	} else {
+		cout << "yo" << endl;
 		string rhs = res.get<0>();
 		list<AssemCom> exprInstrs = res.get<1>();
 		_freeRegs = res.get<2>();
@@ -652,4 +655,11 @@ list<AssemCom> ASTVisitor::getInstrs() {
 
 list<AssemCom> ASTVisitor::getEndDefs() {
 	return _endDefs;
+}
+
+void ASTVisitor::printFreeRegs() {
+	std::vector<string>::iterator it;
+	for (it = _freeRegs.begin(); it != _freeRegs.end(); ++it) {
+		cout << *it << endl;
+	}
 }

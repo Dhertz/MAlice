@@ -84,6 +84,7 @@ public:
     
     list<AssemCom> getInstrs();
     list<AssemCom> getEndDefs();
+    void printFreeRegs();
 };
 
 #endif
