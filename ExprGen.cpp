@@ -167,6 +167,12 @@ boost::tuple< string, list<AssemCom>, vector<string> > ExprGen::generateExpressi
 
 				if (freeRegs.empty()) {
 					cout << "TODO: this case (~169 in ExprGen)" << endl;
+
+					// mov rx, charByte
+					vector<string> args;
+					AssemCom mov("!", args.size(), args);
+					instrs.push_back(mov);
+
 					return boost::tuple< string, list<AssemCom>, vector<string> >("TODO", instrs, freeRegs);
 				} else {
 					string reg = freeRegs.front();
@@ -176,7 +182,7 @@ boost::tuple< string, list<AssemCom>, vector<string> > ExprGen::generateExpressi
 					return boost::tuple< string, list<AssemCom>, vector<string> >(reg, instrs, freeRegs);
 				}
 			} else {
-				return loc;
+				return boost::tuple< string, list<AssemCom>, vector<string> >(loc, instrs, freeRegs);
 			}
         }
     } else if (tok == "ARRMEMBER") {
