@@ -190,7 +190,7 @@ void ASTVisitor::visitVarDec(string typeName, string varName,
 				_instrs.push_back(AssemCom(".word", 1, word));
 				var->setAssLoc(l.getLabel());
 			} else {
-				// TODO: string case
+				// String case
 			}
 		}
 	}
@@ -463,14 +463,6 @@ void ASTVisitor::visitIf(boost::shared_ptr<ExprAST> cond,
 
 void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr, 
 							   boost::shared_ptr<SymbolTable> st) {
-	boost::tuple< string, list<AssemCom>, vector<string> > res 
-	  = ExprGen::generateExpression(expr->getRoot(), st, _freeRegs);
-	string rhs = res.get<0>();
-	list<AssemCom> exprInstrs = res.get<1>();
-	_freeRegs = res.get<2>();
-
-	_instrs.splice(_instrs.end(), exprInstrs);
-
 	boost::shared_ptr<Identifier> varIdent 
 	  = st->lookupCurrLevelAndEnclosingLevels(varName);
 	boost::shared_ptr<Variable> var 
@@ -478,22 +470,48 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 
 	string loc = var->getAssLoc();
 
-	if (loc == "") {
-		if (_freeRegs.empty()) {
-			// TODO: memory allocation
-			loc = "TODO";
-		} else {
-			loc = _freeRegs.front();
-			_freeRegs.erase(_freeRegs.begin());
-		}
-	}
+	boost::tuple< string, list<AssemCom>, vector<string> > res 
+	  = ExprGen::generateExpression(expr->getRoot(), st, _freeRegs);
 
-	// mov loc, rhs
-	vector<string> args;
-	args.push_back(loc);
-	args.push_back(rhs);
-	AssemCom mov("mov", args.size(), args);
-	_instrs.push_back(mov);
+	if (var->getTypeName()->getTypeName() == "Sentence") {
+
+		if (loc == "") {
+			Label strLbl;
+			_endDefs.push_back(AssemCom(strLbl.getLabel() + ":", 0 , std::vector<string>()));
+			var->setAssLoc(strLbl.getLabel());
+			vector<string> asciiArg;
+			asciiArg.push_back(res.get<0>());
+			_endDefs.push_back(AssemCom(".asciz", 1, asciiArg));
+		}
+
+		// TODO: insert in the correct pos in _endDefs
+
+
+	} else {
+		string rhs = res.get<0>();
+		list<AssemCom> exprInstrs = res.get<1>();
+		_freeRegs = res.get<2>();
+
+		_instrs.splice(_instrs.end(), exprInstrs);
+
+		if (loc == "") {
+			if (_freeRegs.empty()) {
+				// TODO: memory allocation
+				loc = "TODO";
+			} else {
+				var->setAssLoc(_freeRegs.front());
+				_freeRegs.erase(_freeRegs.begin());
+			}
+		}
+
+		// mov loc, rhs
+		vector<string> args;
+		args.push_back(loc);
+		args.push_back(rhs);
+		AssemCom mov("mov", args.size(), args);
+		_instrs.push_back(mov);
+	}
+	
 }
 
 void ASTVisitor::visitFuncCall(string name,
@@ -621,4 +639,8 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 
 list<AssemCom> ASTVisitor::getInstrs() {
 	return _instrs;
+}
+
+list<AssemCom> ASTVisitor::getEndDefs() {
+	return _endDefs;
 }

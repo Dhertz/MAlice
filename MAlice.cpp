@@ -81,6 +81,11 @@ void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
 		InstructionPrinter::printList(
 			treeVisitor->getInstrs(), 
 			boost::lexical_cast<string>(filename).append(".s"));
+
+		// Might want to combine these in some way? - Owen
+		InstructionPrinter::printList(
+			treeVisitor->getEndDefs(), 
+			boost::lexical_cast<string>(filename).append(".s"));
     }
 
     parser->free(parser);

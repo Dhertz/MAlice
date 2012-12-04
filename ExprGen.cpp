@@ -231,7 +231,17 @@ boost::tuple< string, list<AssemCom>, vector<string> > ExprGen::generateExpressi
 		}
     } else if (tok == "\"") {
         // String of form "foo", evaluates to a Sentence
-		return boost::tuple< string, list<AssemCom>, vector<string> >("TODO", instrs, freeRegs);
+
+    	string res = "\"" + Utils::createStringFromTree(Utils::childByNum(root, 0));
+
+    	for (int i = 1; i < root->getChildCount(root); ++i) {
+    		res.append(
+    		  " " + Utils::createStringFromTree(Utils::childByNum(root, i)));
+    	}
+
+    	res.append("\"");
+
+		return boost::tuple< string, list<AssemCom>, vector<string> >(res, instrs, freeRegs);
     } else {
         // Recursive case, will resolve to a Boolean or Number
 		return boost::tuple< string, list<AssemCom>, vector<string> >("TODO", instrs, freeRegs);
