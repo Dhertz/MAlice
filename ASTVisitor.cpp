@@ -327,36 +327,61 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 
 	// non-sentence case atm
 
-	vector<string> strArgs;
-	strArgs.push_back(resultReg);
-	strArgs.push_back("[fp, #-8]");
-	_instrs.push_back(AssemCom("str", 2, strArgs));								// str resultReg [fp, #-8]
+	if (expr->getType()->getTypeName() == "String"){
+		
+		vector<string> subr0Args;
+		subr0Args.push_back("r0");
+		subr0Args.push_back("fp");
+		subr0Args.push_back("#260");
+		_instrs.push_back(AssemCom("sub", 3, subr0Args));						// sub r0, fp, #260
 
-	Label strLbl;
-	_endDefs.push_back(
-		AssemCom(strLbl.getLabel() + ":", 0 , std::vector<string>()));			// strLbl:
-	vector<string> asciiArg;
-	asciiArg.push_back("\"%i\"");
-	_endDefs.push_back(AssemCom(".asciz", 1, asciiArg));						// .asciz "%i"
+		vector<string> printArg;
+		printArg.push_back("__isoc99_scanf");
+		_instrs.push_back(AssemCom("bl", 1, printArg));							// bl __isoc99_scanf
 
-	vector<string> ldr0Args;
-	ldr0Args.push_back("r0");
-	ldr0Args.push_back("=" + strLbl.getLabel());
-	_instrs.push_back(AssemCom("ldr", 2, ldr0Args));							// ldr r0 =strLbl
+		vector<string> ldrArgs;
+		ldrArgs.push_back(resultReg);
+		ldrArgs.push_back("[fp, #-260]");
+		_instrs.push_back(AssemCom("ldr", 2, ldrArgs));							//ldr resultReg, [fp, #-260]
 
-	vector<string> ldr1Args;
-	ldr1Args.push_back("r1");
-	ldr1Args.push_back("[fp, #-8]");
-	_instrs.push_back(AssemCom("ldr", 2, ldr1Args));							// ldr r1 [fp, #-8]
+	} else {
+		
+		vector<string> strArgs;
+		strArgs.push_back(resultReg);
+		strArgs.push_back("[fp, #-8]");
+		_instrs.push_back(AssemCom("str", 2, strArgs));							// str resultReg [fp, #-8]
+		Label strLbl;
+		_endDefs.push_back(
+			AssemCom(strLbl.getLabel() + ":", 0 , std::vector<string>()));		// strLbl:
+		vector<string> asciiArg;
 
-	vector<string> printArg;
-	printArg.push_back("__isoc99_scanf");
-	_instrs.push_back(AssemCom("bl", 1, printArg));								// bl __isoc99_scanf
+		if (expr->getType()->getTypeName() == "Number") {	
+			asciiArg.push_back("\"%i\"");										// .asciz "%i"
+		} else if (expr->getType()->getTypeName() == "Letter") {
+			asciiArg.push_back("\"%c\"");										// .asciz "%c"
+		}
+		
+		_endDefs.push_back(AssemCom(".asciz", 1, asciiArg));
 
-	vector<string> ldrArgs;
-	ldrArgs.push_back(resultReg);
-	ldrArgs.push_back("[fp, #-8]");
-	_instrs.push_back(AssemCom("ldr", 2, ldrArgs));								// ldr resultReg [fp, #-8]
+		vector<string> ldr0Args;
+		ldr0Args.push_back("r0");
+		ldr0Args.push_back("=" + strLbl.getLabel());
+		_instrs.push_back(AssemCom("ldr", 2, ldr0Args));						// ldr r0 =strLbl
+
+		vector<string> ldr1Args;
+		ldr1Args.push_back("r1");
+		ldr1Args.push_back("[fp, #-8]");
+		_instrs.push_back(AssemCom("ldr", 2, ldr1Args));						// ldr r1 [fp, #-8]
+
+		vector<string> printArg;
+		printArg.push_back("__isoc99_scanf");
+		_instrs.push_back(AssemCom("bl", 1, printArg));							// bl __isoc99_scanf
+
+		vector<string> ldrArgs;
+		ldrArgs.push_back(resultReg);
+		ldrArgs.push_back("[fp, #-8]");
+		_instrs.push_back(AssemCom("ldr", 2, ldrArgs));							// ldr resultReg [fp, #-8]
+	}
 }
 
 void ASTVisitor::visitWhile(boost::shared_ptr<ExprAST> cond, 
