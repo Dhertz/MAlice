@@ -144,6 +144,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 				if (freeRegs.empty()) {
 					cout << "TODO: this case (~169 in ExprGen)" << endl;
 
+            
 					// mov rx, charByte
 					vector<string> args;
 					AssemCom mov("!", args.size(), args);

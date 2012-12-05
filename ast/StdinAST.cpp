@@ -26,6 +26,6 @@ string StdinAST::getNodeName() {
     return "Stdin";
 }
 
-void StdinAST::accept(boost::shared_ptr<ASTVisitor> v) {
-    v->visitStdin(_expr, _st);
+void StdinAST::accept(boost::shared_ptr<ASTVisitor> v, boost::shared_ptr<AssemFunc> func) {
+    v->visitStdin(_expr, _st, func);
 }

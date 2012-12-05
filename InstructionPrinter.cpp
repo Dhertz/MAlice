@@ -18,8 +18,6 @@ void InstructionPrinter::printList(list<AssemCom> l, string filename) {
 
 			if (comm.getArity() > 0) {
 				cout << "\t";
-			} else {
-				cout << "\n";
 			}
 			cout << comm.getName() << "\t";
 

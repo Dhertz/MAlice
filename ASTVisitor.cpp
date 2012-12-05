@@ -27,8 +27,7 @@ void ASTVisitor::initFreeRegs() {
 	_freeRegs = vector<string>(regs, regs + sizeof(regs) / sizeof(string));
 }
 
-void ASTVisitor::visitProg(vector <boost::shared_ptr<ASTNode> > children, 
-							 boost::shared_ptr<SymbolTable> st) {
+void ASTVisitor::visitProg(vector <boost::shared_ptr<ASTNode> > children) {
 	// I imagine some bollocks will go here...
 	
 	vector<boost::shared_ptr<ASTNode> >::iterator i;
@@ -44,22 +43,11 @@ void ASTVisitor::visitProcDec(string name,
 								vector <boost::shared_ptr<ASTNode> > children, 
 								boost::shared_ptr<SymbolTable> st) {
 
+	vector<int> callableKids;
+
 	if (name == "hatta") {
-		vector<string> alignArg;
-		alignArg.push_back("2");
-		_instrs.push_back(AssemCom(".align", 1, alignArg));						// .align 2
-
-		vector<string> globalArg;
-		globalArg.push_back("main");
-		_instrs.push_back(AssemCom(".global", 1, globalArg));					// .global main
-
-		_instrs.push_back(AssemCom("main:", 0, std::vector<string>()));			// main:
-
-		vector<string> pushArg;
-		pushArg.push_back("{lr}");
-		_instrs.push_back(AssemCom("push", 1, pushArg));						// push {lr}
-
-		vector<int> callableKids;
+		boost::shared_ptr<AssemFunc> func(new AssemFunc("main"));
+		_functions.push_back(func);
 
 		int i = 0;
 		vector<boost::shared_ptr<ASTNode> >::iterator it;						// function body
@@ -68,19 +56,10 @@ void ASTVisitor::visitProcDec(string name,
 					|| (*it)->getNodeName() == "ProcDec") {
 				callableKids.push_back(i);
 			} else {
-				(*it)->accept(shared_from_this());
+				(*it)->accept(shared_from_this(), func);
 			}
 			i++;
 		}
-
-		vector<string> returnArg;
-		returnArg.push_back("r0");
-		returnArg.push_back("#0");
-		_instrs.push_back(AssemCom("mov", 2, returnArg));						// mov r0, #0
-
-		vector<string> popArg;
-		popArg.push_back("{pc}");
-		_instrs.push_back(AssemCom("pop", 1, popArg));							// pop {pc}
 
 		// moved nested functions outside of parent function
 		vector<int>::iterator cIt;
@@ -98,63 +77,34 @@ void ASTVisitor::visitFuncDec(string name, string returnType,
 								boost::shared_ptr<HeaderParamsAST> params,
 								vector <boost::shared_ptr<ASTNode> > children,
 								boost::shared_ptr<SymbolTable> st) {
-	vector<string> alignArg;
-	alignArg.push_back("2");
-	_instrs.push_back(AssemCom(".align", 1, alignArg));							// .align 2
 
-	_instrs.push_back(AssemCom(name + ":", 0, std::vector<string>()));			// name:
+	vector<int> callableKids;
 
-	vector<string> stmfdArgs;
-	stmfdArgs.push_back("sp!");
-	stmfdArgs.push_back("{r4-r10, fp, lr}");
-	_instrs.push_back(AssemCom("stmfd", 2, stmfdArgs));							// stmfd sp!, {r4-r10, fp, lr}
-
-	vector<string> fpArgs;
-	fpArgs.push_back("fp");
-	fpArgs.push_back("sp");
-	fpArgs.push_back("#256");
-	_instrs.push_back(AssemCom("add", 3, fpArgs));								// add fp, sp, #256
-
-	vector<string> subArgs;
-	subArgs.push_back("sp");
-	subArgs.push_back("sp");
-	subArgs.push_back("#260");
-	_instrs.push_back(AssemCom("add", 3, subArgs));								// sub sp, sp, #260
-
-	vector<int> callableChildren;
+	boost::shared_ptr<AssemFunc> func(new AssemFunc(name));
+	_functions.push_back(func);
 
 	int i = 0;
 	vector<boost::shared_ptr<ASTNode> >::iterator it;							// function body
 	for (it = children.begin(); it != children.end(); ++it) {
 		if ((*it)->getNodeName() == "FuncDec" 
 				|| (*it)->getNodeName() == "ProcDec") {
-			callableChildren.push_back(i);
+			callableKids.push_back(i);
 		} else {
-			(*it)->accept(shared_from_this());
+			(*it)->accept(shared_from_this(), func);
 		}
 		i++;
 	}
 
-	vector<string> spArgs;
-	spArgs.push_back("sp");
-	spArgs.push_back("fp");
-	spArgs.push_back("#256");
-	_instrs.push_back(AssemCom("sub", 3, spArgs));								// sub sp, fp, #256
-
-	vector<string> ldmfdArgs;
-	ldmfdArgs.push_back("sp!");
-	ldmfdArgs.push_back("{r4-r10, fp, pc}");
-	_instrs.push_back(AssemCom("ldmfd", 2, ldmfdArgs));							// ldmfd sp!, {r4-r10, fp, pc}
-
 	// moved nested functions outside of parent function
 	vector<int>::iterator cIt;
-	for (cIt = callableChildren.begin(); cIt != callableChildren.end(); ++cIt) {
+	for (cIt = callableKids.begin(); cIt != callableKids.end(); ++cIt) {
 		(*(children.begin() + (*cIt)))->accept(shared_from_this());				
 	}
 }
 
 void ASTVisitor::visitVarDec(string typeName, string varName, 
-							   boost::shared_ptr<SymbolTable> st) {
+							   boost::shared_ptr<SymbolTable> st,
+							   boost::shared_ptr<AssemFunc> func) {
 	boost::shared_ptr<Identifier> varIdent = 
 	  _globalSt->lookupCurrLevelOnly(varName);
 
@@ -173,25 +123,23 @@ void ASTVisitor::visitVarDec(string typeName, string varName,
 				std::vector<string> comm;
 				comm.push_back(varName);
 				comm.push_back("4");
-				_instrs.push_back(AssemCom(".comm", 2, comm));
+				func->addBack(".comm", comm);
 				Label l;
-				_instrs.push_back(AssemCom(l.getLabel() + ":", 0, 
-												std::vector<string>()));
+				func->addBack(l.getLabel() + ":", std::vector<string>());
 				std::vector<string> word;
 				word.push_back(varName);
-				_instrs.push_back(AssemCom(".word", 1, word));
+				func->addBack(".word", word);
 				var->setAssLoc(l.getLabel());
 			} else if (varType->getTypeName() == "Letter") {
 				std::vector<string> comm;
 				comm.push_back(varName);
 				comm.push_back("1");
-				_instrs.push_back(AssemCom(".comm", 2, comm));
+				func->addBack(".comm", comm);
 				Label l;
-				_instrs.push_back(AssemCom(l.getLabel() + ":", 0,
-												std::vector<string>()));
+				func->addBack(l.getLabel() + ":", std::vector<string>());
 				std::vector<string> word;
 				word.push_back(varName);
-				_instrs.push_back(AssemCom(".word", 1, word));
+				func->addBack(".word", word);
 				var->setAssLoc(l.getLabel());
 			} else {
 				// String case
@@ -201,46 +149,39 @@ void ASTVisitor::visitVarDec(string typeName, string varName,
 }
 
 void ASTVisitor::visitInc(boost::shared_ptr<ExprAST> expr, 
-							boost::shared_ptr<SymbolTable> st) {
+							boost::shared_ptr<SymbolTable> st,
+							boost::shared_ptr<AssemFunc> func) {
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
 	  = ExprGen::generateExpression(expr->getRoot(), st, _freeRegs);
 	string resultReg = res->get<0>();
-
-	list<AssemCom> exprInstrs = res->get<1>();
-	_instrs.splice(_instrs.end(), exprInstrs);
-
+	func->addListBack(res->get<1>());
 	_freeRegs = res->get<2>();
 
-	vector<string> incArgs;
-	incArgs.push_back(resultReg);
-	incArgs.push_back(resultReg);
+	vector<string> incArgs(2, resultReg);
 	incArgs.push_back("#1");
 
-	_instrs.push_back(AssemCom("add", 3, incArgs));								// add resultReg resultReg #1
+	func->addBack("add", incArgs);												// add resultReg resultReg #1
 }
 
 void ASTVisitor::visitDec(boost::shared_ptr<ExprAST> expr,
-							boost::shared_ptr<SymbolTable> st) {
+							boost::shared_ptr<SymbolTable> st,
+							boost::shared_ptr<AssemFunc> func) {
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
 	  = ExprGen::generateExpression(expr->getRoot(), st, _freeRegs);
 	string resultReg = res->get<0>();
-
-	list<AssemCom> exprInstrs = res->get<1>();
-	_instrs.splice(_instrs.end(), exprInstrs);
-
+	func->addListBack(res->get<1>());
 	_freeRegs = res->get<2>();
 
-	vector<string> decArgs;
-	decArgs.push_back(resultReg);
-	decArgs.push_back(resultReg);
-	decArgs.push_back("#1");
+	vector<string> incArgs(2, resultReg);
+	incArgs.push_back("#1");
 
-	// May need to be "subs"
-	_instrs.push_back(AssemCom("sub", 3, decArgs));								// sub resultReg resultReg #1
+	func->addBack("dec", incArgs);												// add resultReg resultReg #1
+
 }
 
 void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr, 
-							  boost::shared_ptr<SymbolTable> st) {
+							  boost::shared_ptr<SymbolTable> st,
+							  boost::shared_ptr<AssemFunc> func) {
 
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
 	  = ExprGen::generateExpression(expr->getRoot(), st, _freeRegs);
@@ -249,68 +190,62 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 	string resultReg = res->get<0>();
 
 	Label strLbl;
-	_endDefs.push_back(AssemCom(strLbl.getLabel() + ":", 0 , std::vector<string>()));
+	if (resultReg[0] != '.') {
+		_endDefs.push_back(
+			AssemCom(strLbl.getLabel() + ":", 0 , std::vector<string>()));		// strLbl:
+	}
 
-	/*vector<string> push1;
-	push1.push_back("{r1}");
-
-	vector<string> push0;
-	push0.push_back("{r0}");*/
-
-	if (resultReg[0] == '\"') {
-		vector<string> asciiArg;
-		asciiArg.push_back(resultReg);
-		_endDefs.push_back(AssemCom(".asciz", 1, asciiArg));
+	if (expr->getType()->getTypeName() == "Sentence") {
+		if (resultReg[0] != '.') {
+			vector<string> asciiArg;
+			asciiArg.push_back(resultReg);
+			_endDefs.push_back(AssemCom(".asciz", 1, asciiArg));
+		}
 	} else if (resultReg != "r1") {
 		vector<string> asciiArg;
 		asciiArg.push_back("\"%i\"");
 		_endDefs.push_back(AssemCom(".asciz", 1, asciiArg));
 
-		//_instrs.push_back(AssemCom("push", 1, push1));						
-
-		list<AssemCom> exprInstrs = res->get<1>();
-		_instrs.splice(_instrs.end(), exprInstrs);								// expr isntrs
+		func->addListBack(res->get<1>());										// expr instrs
 
 		vector<string> movArgs;
 		movArgs.push_back("r1");
 		movArgs.push_back(resultReg);
-		_instrs.push_back(AssemCom("mov", 2, movArgs));							// mov r1 resultReg
+		func->addBack("mov", movArgs);											// mov r1 resultReg
 	} else {
-		//_instrs.push_back(AssemCom("push", 1, push0));						
-
-		list<AssemCom> exprInstrs = res->get<1>();
-		_instrs.splice(_instrs.end(), exprInstrs);								// expr instrs
+		func->addListBack(res->get<1>());										// expr instrs
 	}
 
 	vector<string> ldrArgs;
 	ldrArgs.push_back("r0");
-	ldrArgs.push_back("=" + strLbl.getLabel());
-	_instrs.push_back(AssemCom("ldr", 2, ldrArgs));								// ldr r0 =strLbl
+	if (resultReg[0] != '.') {
+		ldrArgs.push_back("=" + strLbl.getLabel());								
+	} else {
+		ldrArgs.push_back("=" + resultReg);	
+	}
+	func->addBack("ldr", ldrArgs);												// ldr r0 =strLbl
 
 	vector<string> printArg;
 	printArg.push_back("printf");
-	_instrs.push_back(AssemCom("bl", 1, printArg));								// bl printf
+	func->addBack("bl", printArg);												// bl printf
 
-	/*if (resultReg != "r1") {
-		_instrs.push_back(AssemCom("pop", 1, push1));							
-	} else if (resultReg[0] != '\"') {
-		_instrs.push_back(AssemCom("pop", 1, push0));							
-	}*/
 }
 
 void ASTVisitor::visitReturn(boost::shared_ptr<ExprAST> expr, 
-							   boost::shared_ptr<SymbolTable> st) {
+							   boost::shared_ptr<SymbolTable> st,
+							   boost::shared_ptr<AssemFunc> func) {
 	// I don't think I care about the expression, that can be handled in the 
 	// function call
 
 	vector<string> retArg;
 	retArg.push_back("lr");
 
-	_instrs.push_back(AssemCom("bx", 1, retArg));								// bx lr
+	func->addBack("bx", retArg);													// bx lr
 }
 
 void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr, 
-							  boost::shared_ptr<SymbolTable> st) {
+							  boost::shared_ptr<SymbolTable> st,
+							  boost::shared_ptr<AssemFunc> func) {
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
 	  = ExprGen::generateExpression(expr->getRoot(), st, _freeRegs);
 
@@ -321,27 +256,32 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 
 	if (expr->getType()->getTypeName() == "String"){
 		
+		func->increaseStackPointer(260);
+		string sp = boost::lexical_cast<string>(func->getStackPointer());
+
 		vector<string> subr0Args;
 		subr0Args.push_back("r0");
 		subr0Args.push_back("fp");
-		subr0Args.push_back("#260");
-		_instrs.push_back(AssemCom("sub", 3, subr0Args));						// sub r0, fp, #260
+		subr0Args.push_back("#" + sp);
+		func->addBack("sub", subr0Args);										// sub r0, fp, #sp
 
 		vector<string> printArg;
 		printArg.push_back("__isoc99_scanf");
-		_instrs.push_back(AssemCom("bl", 1, printArg));							// bl __isoc99_scanf
+		func->addBack("bl", printArg);											// bl __isoc99_scanf
 
 		vector<string> ldrArgs;
 		ldrArgs.push_back(resultReg);
-		ldrArgs.push_back("[fp, #-260]");
-		_instrs.push_back(AssemCom("ldr", 2, ldrArgs));							//ldr resultReg, [fp, #-260]
+		ldrArgs.push_back("[fp, #-" + sp + "]");
+		func->addBack("ldr", ldrArgs);											//ldr resultReg, [fp, #-sp]
 
 	} else {
-		
+		func->increaseStackPointer(8);
+		string sp = boost::lexical_cast<string>(func->getStackPointer());
+
 		vector<string> strArgs;
 		strArgs.push_back(resultReg);
-		strArgs.push_back("[fp, #-8]");
-		_instrs.push_back(AssemCom("str", 2, strArgs));							// str resultReg [fp, #-8]
+		strArgs.push_back("[fp, #-" + sp + "]");
+		func->addBack("str", strArgs);											// str resultReg [fp, #-sp]
 		Label strLbl;
 		_endDefs.push_back(
 			AssemCom(strLbl.getLabel() + ":", 0 , std::vector<string>()));		// strLbl:
@@ -358,31 +298,31 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 		vector<string> ldr0Args;
 		ldr0Args.push_back("r0");
 		ldr0Args.push_back("=" + strLbl.getLabel());
-		_instrs.push_back(AssemCom("ldr", 2, ldr0Args));						// ldr r0 =strLbl
+		func->addBack("ldr", ldr0Args);											// ldr r0 =strLbl
 
 		vector<string> ldr1Args;
 		ldr1Args.push_back("r1");
-		ldr1Args.push_back("[fp, #-8]");
-		_instrs.push_back(AssemCom("ldr", 2, ldr1Args));						// ldr r1 [fp, #-8]
+		ldr1Args.push_back("[fp, #-" + sp + "]");
+		func->addBack("ldr", ldr1Args);											// ldr r1 [fp, #-sp]
 
 		vector<string> printArg;
 		printArg.push_back("__isoc99_scanf");
-		_instrs.push_back(AssemCom("bl", 1, printArg));							// bl __isoc99_scanf
+		func->addBack("bl", printArg);											// bl __isoc99_scanf
 
 		vector<string> ldrArgs;
 		ldrArgs.push_back(resultReg);
-		ldrArgs.push_back("[fp, #-8]");
-		_instrs.push_back(AssemCom("ldr", 2, ldrArgs));							// ldr resultReg [fp, #-8]
+		ldrArgs.push_back("[fp, #-" + sp + "]");
+		func->addBack("ldr", ldrArgs);											// ldr resultReg [fp, #-sp]
 	}
 }
 
 void ASTVisitor::visitWhile(boost::shared_ptr<ExprAST> cond, 
 			   			   	  vector <boost::shared_ptr<ASTNode> > children, 
-							  boost::shared_ptr<SymbolTable> st) {
+							  boost::shared_ptr<SymbolTable> st,
+							  boost::shared_ptr<AssemFunc> func) {
 	Label loopLabel;
 
-	_instrs.push_back(
-	   AssemCom(loopLabel.getLabel() + ":", 0, std::vector<string>()));			// loop:
+	func->addBack(loopLabel.getLabel() + ":", std::vector<string>());			// loop:
 
 	vector<boost::shared_ptr<ASTNode> >::iterator i;							// loop body
 	for (i = children.begin(); i != children.end(); ++i) {
@@ -393,112 +333,101 @@ void ASTVisitor::visitWhile(boost::shared_ptr<ExprAST> cond,
 	  = ExprGen::generateExpression(cond->getRoot(), st, _freeRegs);
 	string resultReg = res->get<0>();
 	_freeRegs = res->get<2>();
-
-	list<AssemCom> condInstrs = res->get<1>();
-	_instrs.splice(_instrs.end(), condInstrs);
+	func->addListBack(res->get<1>());											// expr instrs
 
 	vector<string> cmpArgs;
 	cmpArgs.push_back(resultReg);
 	cmpArgs.push_back("#0");
-
-	_instrs.push_back(AssemCom("cmp", 2, cmpArgs));								// cmp resultReg #0
+	func->addBack("cmp", cmpArgs);												// cmp resultReg #0
 
 	vector<string> bneArgs;
 	bneArgs.push_back(loopLabel.getLabel());
-
-	_instrs.push_back(AssemCom("bne", 1, bneArgs));								// bne loop
+	func->addBack("bne", bneArgs);												// bne loop
 }
 
 void ASTVisitor::visitChoice(boost::shared_ptr<ExprAST> cond, 
 				   			   boost::shared_ptr<IfBodyAST> trueBody, 
 				   			   boost::shared_ptr<IfBodyAST> falseBody, 
-							   boost::shared_ptr<SymbolTable> st) {
+							   boost::shared_ptr<SymbolTable> st,
+							   boost::shared_ptr<AssemFunc> func) {
 	Label elseLabel;
 
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
 	  = ExprGen::generateExpression(cond->getRoot(), st, _freeRegs);
 	string resultReg = res->get<0>();
+	func->addListBack(res->get<1>());
 	_freeRegs = res->get<2>();
-
-	list<AssemCom> condInstrs = res->get<1>();
-	_instrs.splice(_instrs.end(), condInstrs);
 
 	std::vector<string> cmpArgs;
 	cmpArgs.push_back(resultReg);
 	cmpArgs.push_back("#0");
-
-	_instrs.push_back(AssemCom("cmp", 2, cmpArgs));								// cmp resultReg #0
+	func->addBack("cmp", cmpArgs);												// cmp resultReg #0
 
 	std::vector<string> bneArgs;
 	bneArgs.push_back(elseLabel.getLabel());
+	func->addBack("bne", bneArgs);												// bne else
 
-	_instrs.push_back(AssemCom("bne", 1, bneArgs));								// bne else
-
-	trueBody->accept(shared_from_this());										// if body
+	trueBody->accept(shared_from_this(), func);									// if body
 
 	Label endLabel;
 	vector<string> bArgs;
 	bArgs.push_back(endLabel.getLabel());
-	_instrs.push_back(AssemCom("b", 1, bArgs));									// b end
+	func->addBack("b", bArgs);													// b end
 
-	_instrs.push_back(
-	   AssemCom(elseLabel.getLabel() + ":", 0, std::vector<string>()));			// else:
+	func->addBack(elseLabel.getLabel() + ":", std::vector<string>());			// else:
 
-	falseBody->accept(shared_from_this());										// else body
+	falseBody->accept(shared_from_this(), func);								// else body
 
-	_instrs.push_back(
-	   AssemCom(endLabel.getLabel() + ":", 0, std::vector<string>()));			// end:
+	func->addBack(elseLabel.getLabel() + ":", std::vector<string>());			// end:
 }
 
 void ASTVisitor::visitIf(boost::shared_ptr<ExprAST> cond,
 			   			   boost::shared_ptr<IfBodyAST> trueBody, 
 			   			   vector <boost::shared_ptr<ASTNode> > children, 
-						   boost::shared_ptr<SymbolTable> st) {
+						   boost::shared_ptr<SymbolTable> st,
+						   boost::shared_ptr<AssemFunc> func) {
 
 	Label elseLabel;
 
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
 	  = ExprGen::generateExpression(cond->getRoot(), st, _freeRegs);
-	string resultReg = res->get<0>();
-	_freeRegs = res->get<2>();
 
-	list<AssemCom> condInstrs = res->get<1>();
-	_instrs.splice(_instrs.end(), condInstrs);
+	string resultReg = res->get<0>();
+	func->addListBack(res->get<1>());
+	_freeRegs = res->get<2>();
 
 	vector<string> cmpArgs;
 	cmpArgs.push_back(resultReg);
 	cmpArgs.push_back("#0");
-	_instrs.push_back(AssemCom("cmp", 2, cmpArgs));								// cmp resultReg #0
+	func->addBack("cmp", cmpArgs);												// cmp resultReg #0
 
 	vector<string> bneArgs;
 	bneArgs.push_back(elseLabel.getLabel());
-	_instrs.push_back(AssemCom("bne", 1, bneArgs));								// bne else
+	func->addBack("bne", bneArgs);												// bne else
 
-	(*children.begin())->accept(shared_from_this());							// if body
+	trueBody->accept(shared_from_this(), func);										// if body
 
 	if (children.size() == 1) {
-		_instrs.push_back(
-	   		AssemCom(elseLabel.getLabel() + ":", 0, std::vector<string>()));	// end:
+		func->addBack(elseLabel.getLabel() + ":", std::vector<string>());		// end:
 
 	} else {
 		Label endLabel;
 
 		vector<string> bArgs;
 		bArgs.push_back(endLabel.getLabel());
-		_instrs.push_back(AssemCom("b", 1, bArgs));								// b end
+		func->addBack("b", bArgs);												// b end
 
-		_instrs.push_back(
-	   		AssemCom(elseLabel.getLabel() + ":", 0, std::vector<string>()));	// else:
+		func->addBack(elseLabel.getLabel() + ":", std::vector<string>());		// else:
 
-		(*(children.begin() + 1))->accept(shared_from_this());	
+		(*(children.begin() + 1))->accept(shared_from_this(), func);	
 
-		_instrs.push_back(
-	   		AssemCom(endLabel.getLabel() + ":", 0, std::vector<string>()));		// end:
+		func->addBack(endLabel.getLabel() + ":", std::vector<string>());		// end:
 	}
 }
 
 void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr, 
-							   boost::shared_ptr<SymbolTable> st) {
+							   boost::shared_ptr<SymbolTable> st,
+							   boost::shared_ptr<AssemFunc> func) {
 	boost::shared_ptr<Identifier> varIdent 
 	  = st->lookupCurrLevelAndEnclosingLevels(varName);
 	boost::shared_ptr<Variable> var 
@@ -509,32 +438,17 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res 
 	  = ExprGen::generateExpression(expr->getRoot(), st, _freeRegs);
 	if (var->getTypeName()->getTypeName() == "Sentence") {
-
 		vector<string> asciiArg;
 		asciiArg.push_back(res->get<0>());
-		if (loc == "") {
-			Label strLbl;
-			_endDefs.push_back(AssemCom(strLbl.getLabel() + ":", 0 , std::vector<string>()));
-			var->setAssLoc(strLbl.getLabel());
-			_endDefs.push_back(AssemCom(".asciz", 1, asciiArg));
-		} else {
-			// Insert in correct position in _endDefs
-			list<AssemCom>::iterator it;
-			for (it = _endDefs.begin(); it != _endDefs.end(); ++it) {
-				if (it->getName() == loc + ":") {
-					++it;
-					(*it) = AssemCom(".asciz", 1, asciiArg);
-					break;
-				}
-			}
-		}
-
+		Label strLbl;
+		_endDefs.push_back(
+			AssemCom(strLbl.getLabel() + ":", 0 , std::vector<string>()));
+		var->setAssLoc(strLbl.getLabel());
+		_endDefs.push_back(AssemCom(".asciz", 1, asciiArg));
 	} else {
 		string rhs = res->get<0>();
-		list<AssemCom> exprInstrs = res->get<1>();
 		_freeRegs = res->get<2>();
-
-		_instrs.splice(_instrs.end(), exprInstrs);
+		func->addListBack(res->get<1>());										// expr instrs
 
 		if (loc == "") {
 			if (_freeRegs.empty()) {
@@ -548,17 +462,17 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 
 		// mov loc, rhs
 		vector<string> args;
-		args.push_back(loc);
+		args.push_back(var->getAssLoc());
 		args.push_back(rhs);
-		AssemCom mov("mov", args.size(), args);
-		_instrs.push_back(mov);
+		func->addBack("mov", args);												// mov var rhs
 	}
 	
 }
 
 void ASTVisitor::visitFuncCall(string name,
 						    	 boost::shared_ptr<CallParamsAST> params, 
-							     boost::shared_ptr<SymbolTable> st) {
+							     boost::shared_ptr<SymbolTable> st,
+							     boost::shared_ptr<AssemFunc> func) {
 
 
 	vector<boost::shared_ptr< ExprAST> > exprs = params->getParamExprs();
@@ -573,9 +487,8 @@ void ASTVisitor::visitFuncCall(string name,
 	  	  = ExprGen::generateExpression(cp, st, _freeRegs);
 
 	  	string paramLoc = genParam->get<0>();
-	  	list<AssemCom> pInstrs = genParam->get<1>();
+		func->addListBack(genParam->get<1>());
 		_freeRegs = genParam->get<2>();
-	  	_instrs.splice(_instrs.end(), pInstrs);
 
 	  	if (i < 4) {
 	  		if (paramLoc != "r" + boost::lexical_cast<string>(i)) {
@@ -583,48 +496,42 @@ void ASTVisitor::visitFuncCall(string name,
 	  			vector<string> args;
 				args.push_back("r" + boost::lexical_cast<string>(i));
 				args.push_back(paramLoc);
-				AssemCom mov("mov", args.size(), args);
-				_instrs.push_back(mov);
+				func->addBack("mov", args);
 	  		}
 	  	} else {
 	  		// Push any other params
 			if (paramLoc[0] == 'r') {
 				vector<string> args;
 				args.push_back("{" + paramLoc + "}");
-				AssemCom push("push", args.size(), args);
-				_instrs.push_back(push);										// push {ri}
+				func->addBack("push", args);									// push {ri}
 			} else if (_freeRegs.empty()) {
 				// Need to temporarily borrow a register
 				vector<string> args;
 				args.push_back("{r0}");
-				AssemCom push("push", args.size(), args);
-				_instrs.push_back(push);										// push {r0}
+				func->addBack("push", args);									// push {r0}
 
 				args.clear();
 				args.push_back("r0");
 				args.push_back(paramLoc);
-				AssemCom mov("mov", args.size(), args);
-				_instrs.push_back(mov);											// mov r0 ri
+				func->addBack("mov", args);										// mov r0 ri
 
-				_instrs.push_back(push);										// push {r0}
+				// WHy is this here? - Owen
+				//func->addBack("push");										// push {r0}
 
 				args.clear();
 				args.push_back("{r0}");
-				AssemCom pop("pop", args.size(), args);
-				_instrs.push_back(pop);											// pop {ro}
+				func->addBack("pop", args);										// pop {r0}
 			} else {
 				string reg = _freeRegs.front();
 
 				vector<string> args;
 				args.push_back(reg);
 				args.push_back(paramLoc);
-				AssemCom mov("mov", args.size(), args);
-				_instrs.push_back(mov);											// mov reg paramLoc
+				func->addBack("mov", args);										// mov reg paramLoc
 
 				args.clear();
 				args.push_back("{" + reg + "}");
-				AssemCom push("push", args.size(), args);
-				_instrs.push_back(push);										// push reg
+				func->addBack("push", args);									// push reg
 			}
 	  	}
 	  	i++;
@@ -632,13 +539,14 @@ void ASTVisitor::visitFuncCall(string name,
 
 	vector<string> blArgs;
 	blArgs.push_back(name);
-	_instrs.push_back(AssemCom("bl", 1, blArgs));
+	func->addBack("bl", blArgs);												// bl name
 }
 
 void ASTVisitor::visitArrayAssign(string name,
                   					boost::shared_ptr<ExprAST> index,
                   					boost::shared_ptr<ExprAST> value, 
-							        boost::shared_ptr<SymbolTable> st) {
+							        boost::shared_ptr<SymbolTable> st,
+							        boost::shared_ptr<AssemFunc> func) {
 	boost::shared_ptr<Identifier> arrIdent = 
 										st->lookupCurrLevelAndEnclosingLevels(name);
 	boost::shared_ptr<Array> arr =  
@@ -647,12 +555,14 @@ void ASTVisitor::visitArrayAssign(string name,
 	  			= ExprGen::generateExpression(index->getRoot(), st, _freeRegs);
 	
 	string resultReg = ind->get<0>();
+
+	//make size bigger for integers
 	if (arr->getTypeName() == "Number") {	
 		std::vector<string> mul;
-		mul.push_back(resultReg);												//make it bigger for integers
+		mul.push_back(resultReg);												
 		mul.push_back("4");														//mul resReg, 4, resReg
 		mul.push_back(resultReg);
-		_instrs.push_back(AssemCom("mul", 3, mul));		
+		func->addBack("mul", mul);		
 	}
 	
 	string reg = arr->getAssLoc();
@@ -660,17 +570,18 @@ void ASTVisitor::visitArrayAssign(string name,
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > val
 	  		= ExprGen::generateExpression(value->getRoot(), st, _freeRegs);
 	string valReg = val->get<0>();
+	func->addListBack(val->get<1>());
 		
 	std::vector<string> str;
 	str.push_back(valReg);
 	str.push_back("[" + resultReg + ", " + reg + "]");
-	_instrs.push_back(AssemCom("str", 2, str));	
-	
+	func->addBack("str", str);													// str valReg [resultReg, reg]
 }
 
 void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length, 
 								 boost::shared_ptr<Type> type, 
-							     boost::shared_ptr<SymbolTable> st) {
+							     boost::shared_ptr<SymbolTable> st,
+							     boost::shared_ptr<AssemFunc> func) {
 	boost::shared_ptr<Identifier> arrIdent = 
 										_globalSt->lookupCurrLevelOnly(name);
 	boost::shared_ptr<Array> arr =  
@@ -678,7 +589,7 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 	if (arrIdent) {
 		std::vector<string> comm;
 		comm.push_back(name);
-		int length = 0; //ToDo
+		int length = 0; //ToDo:make method to calculate.
 		if (type->getTypeName() == "Number") {
 			length *= 4;
 		}
@@ -687,46 +598,47 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 		convert << length;      
 
 		comm.push_back(convert.str());
-		_instrs.push_back(AssemCom(".comm", 2, comm));
+		func->addBack(".comm", comm);
 		Label l;
-		_instrs.push_back(AssemCom(l.getLabel() + ":", 0,
-										std::vector<string>()));
+		func->addBack(l.getLabel() + ":", std::vector<string>());
 		std::vector<string> word;
 		word.push_back(name);
-		_instrs.push_back(AssemCom(".word", 1, word));
+		func->addBack(".word", word);
 		arr->setAssLoc(l.getLabel());						
 	} else {
 		boost::shared_ptr<Identifier> arrIdent = 
-										st->lookupCurrLevelAndEnclosingLevels(name);
+			st->lookupCurrLevelAndEnclosingLevels(name);
 		boost::shared_ptr<Array> arr =  
 				boost::shared_polymorphic_downcast<Array>(arrIdent);
 		boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
 	  			= ExprGen::generateExpression(length->getRoot(), st, _freeRegs);
 		string resultReg = res->get<0>();
-		list<AssemCom> exprInstrs = res->get<1>();
+		func->addListBack(res->get<1>());
 		
+		//make it bigger for integers
 		if (type->getTypeName() == "Number") {
 			std::vector<string> mul;
-			mul.push_back(resultReg);											//make it bigger for integers
-			mul.push_back("4");													//mul resReg, 4, resReg
 			mul.push_back(resultReg);
-			_instrs.push_back(AssemCom("mul", 3, mul));
+			mul.push_back("4");
+			mul.push_back(resultReg);
+			func->addBack("mul", mul);											//mul resReg, 4, resReg
 		}
 
 		string reg = _freeRegs.front();
 
+		//make it point somewhere down the stack
 		vector<string> sub;
 		sub.push_back(reg);
-		_freeRegs.erase(_freeRegs.begin());										//make it point somewhere down the stack
+		_freeRegs.erase(_freeRegs.begin());
 		sub.push_back("fp");
-		sub.push_back(resultReg);											//ldr reg, [fp, r0]
-		_instrs.push_back(AssemCom("sub", 3, sub));
+		sub.push_back(resultReg);
+		func->addBack("sub", sub);
 		arr->setAssLoc(reg);
 	}
 }
 
-list<AssemCom> ASTVisitor::getInstrs() {
-	return _instrs;
+vector<boost::shared_ptr<AssemFunc> > ASTVisitor::getFunctions() {
+	return _functions;
 }
 
 list<AssemCom> ASTVisitor::getEndDefs() {

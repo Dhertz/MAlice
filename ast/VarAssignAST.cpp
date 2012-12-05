@@ -51,6 +51,6 @@ string VarAssignAST::getNodeName() {
     return "VarAssign";
 }
 
-void VarAssignAST::accept(boost::shared_ptr<ASTVisitor> v) {
-    v->visitVarAss(_varName, _expr, _st);
+void VarAssignAST::accept(boost::shared_ptr<ASTVisitor> v, boost::shared_ptr<AssemFunc> func) {
+    v->visitVarAss(_varName, _expr, _st, func);
 }

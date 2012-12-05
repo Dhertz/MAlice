@@ -11,7 +11,8 @@ public:
                    boost::weak_ptr<ASTNode> parent, int lineNo);
 	void print();
 	string getNodeName();
-	void accept(boost::shared_ptr<ASTVisitor>);
+	void accept(boost::shared_ptr<ASTVisitor> v,
+				  boost::shared_ptr<AssemFunc> func);
 };
 
 #endif

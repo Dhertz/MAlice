@@ -21,3 +21,5 @@ boost::weak_ptr<ASTNode> ASTNode::getParent() {
 }
 
 void ASTNode::accept(boost::shared_ptr<ASTVisitor> v) {}
+
+void ASTNode::accept(boost::shared_ptr<ASTVisitor> v, boost::shared_ptr<AssemFunc> func) {}

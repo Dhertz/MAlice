@@ -30,6 +30,6 @@ string DecAST::getNodeName() {
     return "Dec";
 }
 
-void DecAST::accept(boost::shared_ptr<ASTVisitor> v) {
-    v->visitDec(_expr, _st);
+void DecAST::accept(boost::shared_ptr<ASTVisitor> v, boost::shared_ptr<AssemFunc> func) {
+    v->visitDec(_expr, _st, func);
 }

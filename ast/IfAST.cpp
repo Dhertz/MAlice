@@ -31,6 +31,6 @@ string IfAST::getNodeName() {
     return "If";
 }
 
-void IfAST::accept(boost::shared_ptr<ASTVisitor> v) {
-    v->visitIf(_expr, _body, _children, _st);
+void IfAST::accept(boost::shared_ptr<ASTVisitor> v, boost::shared_ptr<AssemFunc> func) {
+    v->visitIf(_expr, _body, _children, _st, func);
 }
