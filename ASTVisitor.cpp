@@ -638,7 +638,35 @@ void ASTVisitor::visitFuncCall(string name,
 void ASTVisitor::visitArrayAssign(string name,
                   					boost::shared_ptr<ExprAST> index,
                   					boost::shared_ptr<ExprAST> value, 
-							        boost::shared_ptr<SymbolTable> st) {}
+							        boost::shared_ptr<SymbolTable> st) {
+	boost::shared_ptr<Identifier> arrIdent = 
+										st->lookupCurrLevelAndEnclosingLevels(name);
+	boost::shared_ptr<Array> arr =  
+				boost::shared_polymorphic_downcast<Array>(arrIdent);
+	boost::tuple< string, list<AssemCom>, vector<string> > ind
+	  			= ExprGen::generateExpression(index->getRoot(), st, _freeRegs);
+	
+	string resultReg = ind.get<0>();
+	if (arr->getTypeName() == "Number") {	
+		std::vector<string> mul;
+		mul.push_back(resultReg);												//make it bigger for integers
+		mul.push_back("4");														//mul resReg, 4, resReg
+		mul.push_back(resultReg);
+		_instrs.push_back(AssemCom("mul", 3, mul));		
+	}
+	
+	string reg = arr->getAssLoc();
+
+	boost::tuple< string, list<AssemCom>, vector<string> > val
+	  		= ExprGen::generateExpression(value->getRoot(), st, _freeRegs);
+	string valReg = val.get<0>();
+		
+	std::vector<string> str;
+	str.push_back(valReg);
+	str.push_back("[" + resultReg + "," + reg + "]");
+	_instrs.push_back(AssemCom("str", 2, str));	
+	
+}
 
 void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length, 
 								 boost::shared_ptr<Type> type, 
@@ -647,12 +675,11 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 										_globalSt->lookupCurrLevelOnly(name);
 	boost::shared_ptr<Array> arr =  
 			boost::shared_polymorphic_downcast<Array>(arrIdent);
-		boost::shared_ptr<Type> arrType = arr->getElemType();
 	if (arrIdent) {
 		std::vector<string> comm;
 		comm.push_back(name);
-		int length; //ToDo
-		if (arrType->getTypeName() == "Number") {
+		int length = 0; //ToDo
+		if (type->getTypeName() == "Number") {
 			length *= 4;
 		}
 
@@ -669,18 +696,21 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 		_instrs.push_back(AssemCom(".word", 1, word));
 		arr->setAssLoc(l.getLabel());						
 	} else {
+		boost::shared_ptr<Identifier> arrIdent = 
+										st->lookupCurrLevelAndEnclosingLevels(name);
+		boost::shared_ptr<Array> arr =  
+				boost::shared_polymorphic_downcast<Array>(arrIdent);
 		boost::tuple< string, list<AssemCom>, vector<string> > res
 	  			= ExprGen::generateExpression(length->getRoot(), st, _freeRegs);
 		string resultReg = res.get<0>();
 		list<AssemCom> exprInstrs = res.get<1>();
-		std::vector<string> mul;
-		if (arrType->getTypeName() == "Number") {
-			
+		
+		if (type->getTypeName() == "Number") {
+			std::vector<string> mul;
 			mul.push_back(resultReg);											//make it bigger for integers
 			mul.push_back("4");													//mul resReg, 4, resReg
 			mul.push_back(resultReg);
-			_instrs.push_back(AssemCom("mul", 3, mul));		
-
+			_instrs.push_back(AssemCom("mul", 3, mul));
 		}
 
 		vector<string> neg;														//negate the size to take away from fp
@@ -693,8 +723,9 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 		vector<string> ldrArgs;
 		ldrArgs.push_back(reg);
 		_freeRegs.erase(_freeRegs.begin());										//make it point somewhere down the stack
-		ldrArgs.push_back("[fp, r0 ]");											//ldr reg, [fp, r0]
+		ldrArgs.push_back("[fp, r0]");											//ldr reg, [fp, r0]
 		_instrs.push_back(AssemCom("ldr", 2, ldrArgs));
+		arr->setAssLoc(reg);
 	}
 }
 
