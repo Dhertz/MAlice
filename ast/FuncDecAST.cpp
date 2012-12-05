@@ -73,7 +73,7 @@ void FuncDecAST::print() {
 }
 
 void FuncDecAST::accept(boost::shared_ptr<ASTVisitor> v) {
-  	v->visitFuncDec(_name, _returnType, _params, _children, _st->getEncSymTable());
+  	v->visitFuncDec(_name, _returnType, _params, _children, _st);
 }
 
 string FuncDecAST::checkFunctionName(string name, boost::shared_ptr<SymbolTable> st) {

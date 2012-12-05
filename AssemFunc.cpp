@@ -1,10 +1,19 @@
 #include "AssemFunc.hpp"
 #include <iostream>
 #include <boost/lexical_cast.hpp>
+#include <algorithm>
 
 AssemFunc::AssemFunc(string name) {
 	_name = name;
 	stackPointer = 0;
+	initFreeRegs();
+}
+
+void AssemFunc::initFreeRegs() {
+	string regs[] = {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9",
+					 "r10"};
+
+	_freeRegs = vector<string>(regs, regs + sizeof(regs) / sizeof(string));
 }
 
 void AssemFunc::addFront(string name, vector<string> args) {
@@ -84,4 +93,21 @@ void AssemFunc::finalise() {
 
 list<AssemCom> AssemFunc::getComms() {
 	return _comms;
+}
+
+void AssemFunc::setFreeRegs(vector<string> v) {
+	_freeRegs = v;
+}
+
+void AssemFunc::removeReg(string reg) {
+	_freeRegs.erase(
+		std::remove(_freeRegs.begin(), _freeRegs.end(), reg), _freeRegs.end());
+}
+
+vector<string> AssemFunc::getFreeRegs() {
+	return _freeRegs;
+}
+
+bool AssemFunc::regIsFree(string reg) {
+	return find(_freeRegs.begin(), _freeRegs.end(), reg) != _freeRegs.end();
 }

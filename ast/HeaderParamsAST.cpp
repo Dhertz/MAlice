@@ -105,6 +105,10 @@ vector< boost::shared_ptr<Param> > HeaderParamsAST::getParams() {
     return _params;
 }
 
+pANTLR3_BASE_TREE HeaderParamsAST::getTree() {
+	return _tree;
+}
+
 string HeaderParamsAST::getNodeName() {
     return "HeaderParams";
 }

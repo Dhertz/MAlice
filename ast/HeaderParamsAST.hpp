@@ -18,6 +18,7 @@ public:
     vector< boost::shared_ptr<Param> > getParams();
     void print();
     string getNodeName();
+    pANTLR3_BASE_TREE getTree();
 };
 
 #endif

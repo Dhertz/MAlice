@@ -58,7 +58,7 @@ void ProcDecAST::print() {
 }
 
 void ProcDecAST::accept(boost::shared_ptr<ASTVisitor> v) {
-    v->visitProcDec(_name, _params, _children, _st->getEncSymTable());
+    v->visitProcDec(_name, _params, _children, _st);
 }
 
 string ProcDecAST::checkFunctionName(string name, boost::shared_ptr<SymbolTable> st) {
