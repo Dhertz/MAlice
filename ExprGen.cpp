@@ -322,10 +322,11 @@ treble_t ExprGen::recurseTree(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTa
 				cout << "TODO: this case (~322 in ExprGen)" << endl;
 				return treble_t("TODO", instrs, freeRegs);
 	        }
-    	} else if (op == "+") {
+    	} else if (op == "+" || op == "-") {
 	        if (argLoc[0] == 'r') {
 	        	// cmp argLoc, #0
-				// neglt argLoc, argLoc
+				// neglt argLoc, argLoc (+ case)
+				// neglt argLoc, argLoc (- case)
 
 				vector<string> args;
 				args.push_back(argLoc);
@@ -333,21 +334,20 @@ treble_t ExprGen::recurseTree(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTa
 				AssemCom cmp("cmp", args.size(), args);
 				instrs.push_back(cmp);
 
+				string negInstr = (op == "+") ? "neglt" : "neggt";
+
 				args.clear();
 				args.push_back(argLoc);
 				args.push_back(argLoc);
-				AssemCom neglt("neglt", args.size(), args);
-				instrs.push_back(neglt);
+				AssemCom neg(negInstr, args.size(), args);
+				instrs.push_back(neg);
 
 				return treble_t(argLoc, instrs, freeRegs);
 	        } else {
-				cout << "TODO: this case (~308 in ExprGen)" << endl;
+				cout << "TODO: this case (~347 in ExprGen)" << endl;
 				return treble_t("TODO", instrs, freeRegs);
 	        }
-    	} else if (op == "-") {
-
-    	}
-
+	    }
     }
 
 	return treble_t("TODO", instrs, freeRegs);
