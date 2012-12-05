@@ -643,10 +643,10 @@ void ASTVisitor::visitArrayAssign(string name,
 										st->lookupCurrLevelAndEnclosingLevels(name);
 	boost::shared_ptr<Array> arr =  
 				boost::shared_polymorphic_downcast<Array>(arrIdent);
-	boost::tuple< string, list<AssemCom>, vector<string> > ind
+	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > ind
 	  			= ExprGen::generateExpression(index->getRoot(), st, _freeRegs);
 	
-	string resultReg = ind.get<0>();
+	string resultReg = ind->get<0>();
 	if (arr->getTypeName() == "Number") {	
 		std::vector<string> mul;
 		mul.push_back(resultReg);												//make it bigger for integers
@@ -657,9 +657,9 @@ void ASTVisitor::visitArrayAssign(string name,
 	
 	string reg = arr->getAssLoc();
 
-	boost::tuple< string, list<AssemCom>, vector<string> > val
+	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > val
 	  		= ExprGen::generateExpression(value->getRoot(), st, _freeRegs);
-	string valReg = val.get<0>();
+	string valReg = val->get<0>();
 		
 	std::vector<string> str;
 	str.push_back(valReg);
@@ -700,10 +700,10 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 										st->lookupCurrLevelAndEnclosingLevels(name);
 		boost::shared_ptr<Array> arr =  
 				boost::shared_polymorphic_downcast<Array>(arrIdent);
-		boost::tuple< string, list<AssemCom>, vector<string> > res
+		boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
 	  			= ExprGen::generateExpression(length->getRoot(), st, _freeRegs);
-		string resultReg = res.get<0>();
-		list<AssemCom> exprInstrs = res.get<1>();
+		string resultReg = res->get<0>();
+		list<AssemCom> exprInstrs = res->get<1>();
 		
 		if (type->getTypeName() == "Number") {
 			std::vector<string> mul;
