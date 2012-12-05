@@ -136,6 +136,7 @@ treble_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<S
 		instrs.push_back(bl);
 		return treble_t("r0", instrs, freeRegs);
     } else if (tok == "VAR") {
+
         // Variable reference
         // Also allowed to be an array, so that function calls with array
         //   arguments are allowed
@@ -168,6 +169,7 @@ treble_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<S
 				if (freeRegs.empty()) {
 					cout << "TODO: this case (~169 in ExprGen)" << endl;
 
+            
 					// mov rx, charByte
 					vector<string> args;
 					AssemCom mov("!", args.size(), args);

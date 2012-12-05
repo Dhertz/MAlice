@@ -249,7 +249,9 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 	string resultReg = res.get<0>();
 
 	Label strLbl;
-	_endDefs.push_back(AssemCom(strLbl.getLabel() + ":", 0 , std::vector<string>()));
+	if (resultReg[0] != '.') {
+		_endDefs.push_back(AssemCom(strLbl.getLabel() + ":", 0 , std::vector<string>()));
+	}
 
 	/*vector<string> push1;
 	push1.push_back("{r1}");
@@ -257,16 +259,18 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 	vector<string> push0;
 	push0.push_back("{r0}");*/
 
-	if (resultReg[0] == '\"') {
-		vector<string> asciiArg;
-		asciiArg.push_back(resultReg);
-		_endDefs.push_back(AssemCom(".asciz", 1, asciiArg));
+	if (expr->getType()->getTypeName() == "Sentence") {
+		if (resultReg[0] != '.') {
+			vector<string> asciiArg;
+			asciiArg.push_back(resultReg);
+			_endDefs.push_back(AssemCom(".asciz", 1, asciiArg));
+		}
 	} else if (resultReg != "r1") {
 		vector<string> asciiArg;
 		asciiArg.push_back("\"%i\"");
 		_endDefs.push_back(AssemCom(".asciz", 1, asciiArg));
 
-		//_instrs.push_back(AssemCom("push", 1, push1));						
+		//_instrs.push_back(AssemCom("push", 1, push1));		
 
 		list<AssemCom> exprInstrs = res.get<1>();
 		_instrs.splice(_instrs.end(), exprInstrs);								// expr isntrs
@@ -284,8 +288,12 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 
 	vector<string> ldrArgs;
 	ldrArgs.push_back("r0");
-	ldrArgs.push_back("=" + strLbl.getLabel());
-	_instrs.push_back(AssemCom("ldr", 2, ldrArgs));								// ldr r0 =strLbl
+	if (resultReg[0] != '.') {
+		ldrArgs.push_back("=" + strLbl.getLabel());								// ldr r0 =strLbl
+	} else {
+		ldrArgs.push_back("=" + resultReg);	
+	}
+	_instrs.push_back(AssemCom("ldr", 2, ldrArgs));
 
 	vector<string> printArg;
 	printArg.push_back("printf");
@@ -484,26 +492,12 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 	boost::tuple< string, list<AssemCom>, vector<string> > res 
 	  = ExprGen::generateExpression(expr->getRoot(), st, _freeRegs);
 	if (var->getTypeName()->getTypeName() == "Sentence") {
-
 		vector<string> asciiArg;
 		asciiArg.push_back(res.get<0>());
-		if (loc == "") {
-			Label strLbl;
-			_endDefs.push_back(AssemCom(strLbl.getLabel() + ":", 0 , std::vector<string>()));
-			var->setAssLoc(strLbl.getLabel());
-			_endDefs.push_back(AssemCom(".asciz", 1, asciiArg));
-		} else {
-			// Insert in correct position in _endDefs
-			list<AssemCom>::iterator it;
-			for (it = _endDefs.begin(); it != _endDefs.end(); ++it) {
-				if (it->getName() == loc + ":") {
-					++it;
-					(*it) = AssemCom(".asciz", 1, asciiArg);
-					break;
-				}
-			}
-		}
-
+		Label strLbl;
+		_endDefs.push_back(AssemCom(strLbl.getLabel() + ":", 0 , std::vector<string>()));
+		var->setAssLoc(strLbl.getLabel());
+		_endDefs.push_back(AssemCom(".asciz", 1, asciiArg));
 	} else {
 		string rhs = res.get<0>();
 		list<AssemCom> exprInstrs = res.get<1>();
@@ -523,7 +517,7 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 
 		// mov loc, rhs
 		vector<string> args;
-		args.push_back(loc);
+		args.push_back(var->getAssLoc());
 		args.push_back(rhs);
 		AssemCom mov("mov", args.size(), args);
 		_instrs.push_back(mov);
