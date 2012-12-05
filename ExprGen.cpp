@@ -7,31 +7,6 @@
 typedef boost::tuple< string, list<AssemCom>, vector<string> > treble_t;
 
 treble_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<SymbolTable> st, vector<string> freeRegs) {
-	// These should be shared with ExprAST
-	// Actually, I'm not going to use these here anymore
-
-    set<string> boolArgsBoolRet;
-    set<string> mixedArgsMixedRet;
-    set<string> mixedArgsBoolRet;
-
-
-    boolArgsBoolRet.insert("||");
-    boolArgsBoolRet.insert("&&");
-    mixedArgsMixedRet.insert("|");
-    mixedArgsMixedRet.insert("^");
-    mixedArgsMixedRet.insert("&");
-    mixedArgsMixedRet.insert("+");
-    mixedArgsMixedRet.insert("-");
-    mixedArgsMixedRet.insert("*");
-    mixedArgsMixedRet.insert("/");
-    mixedArgsMixedRet.insert("%");
-    mixedArgsBoolRet.insert("==");
-    mixedArgsBoolRet.insert("!=");
-    mixedArgsBoolRet.insert(">");
-    mixedArgsBoolRet.insert("<");
-    mixedArgsBoolRet.insert(">=");
-    mixedArgsBoolRet.insert("<=");
-
 	string tok = Utils::createStringFromTree(root);
 	list<AssemCom> instrs;
 
@@ -252,103 +227,95 @@ treble_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<S
 
 		return treble_t(res, instrs, freeRegs);
     } else {
-		return recurseTree(root, st, freeRegs);
+    	int children = root->getChildCount(root);
+
+    	if (children == 0) {
+    	    // Number base case
+
+    	    string n = Utils::createStringFromTree(root);
+    	    if (!freeRegs.empty()) {
+    	    	string reg = freeRegs.front();
+    			freeRegs.erase(freeRegs.begin());
+
+    			// mov rx, #n
+    			vector<string> args;
+    			args.push_back(reg);
+    			args.push_back("#" + n);
+    			AssemCom mov("mov", args.size(), args);
+    			instrs.push_back(mov);
+
+    			return treble_t(reg, instrs, freeRegs);
+    	    } else {
+    			cout << "TODO: this case (~282 in ExprGen)" << endl;
+    			return treble_t("TODO", instrs, freeRegs);
+    	    }
+    	} else if (children == 1) {
+    		// Unary operator
+
+    	    string op = Utils::createStringFromTree(root);
+    	    pANTLR3_BASE_TREE arg = Utils::childByNum(root, 0);
+
+    		treble_t argEval = generateExpression(arg, st, freeRegs);
+    		string argLoc = argEval.get<0>();
+    		list<AssemCom> argInstrs = argEval.get<1>();
+    		freeRegs = argEval.get<2>();
+    		instrs.splice(instrs.end(), argInstrs);
+
+    		if (op == "!") {
+    	        if (argLoc[0] == 'r') {
+    				// xor argLoc, argLoc, #1
+    				vector<string> args;
+    				args.push_back(argLoc);
+    				args.push_back(argLoc);
+    				args.push_back("#1");
+    				AssemCom xorInstr("xor", args.size(), args);
+    				instrs.push_back(xorInstr);
+
+    				return treble_t(argLoc, instrs, freeRegs);
+    	        } else {
+    				cout << "TODO: this case (~308 in ExprGen)" << endl;
+    				return treble_t("TODO", instrs, freeRegs);
+    	        }
+    		} else if (op == "~") {
+    	        if (argLoc[0] == 'r') {
+    				// mvn argLoc, argLoc
+    				vector<string> args;
+    				args.push_back(argLoc);
+    				args.push_back(argLoc);
+    				AssemCom mvn("mvn", args.size(), args);
+    				instrs.push_back(mvn);
+
+    				return treble_t(argLoc, instrs, freeRegs);
+    	        } else {
+    				cout << "TODO: this case (~322 in ExprGen)" << endl;
+    				return treble_t("TODO", instrs, freeRegs);
+    	        }
+    		} else if (op == "+" || op == "-") {
+    	        if (argLoc[0] == 'r') {
+    	        	// cmp argLoc, #0
+    				// neglt argLoc, argLoc (+ case)
+    				// neglt argLoc, argLoc (- case)
+
+    				vector<string> args;
+    				args.push_back(argLoc);
+    				args.push_back("#0");
+    				AssemCom cmp("cmp", args.size(), args);
+    				instrs.push_back(cmp);
+
+    				string negInstr = (op == "+") ? "neglt" : "neggt";
+
+    				args.clear();
+    				args.push_back(argLoc);
+    				args.push_back(argLoc);
+    				AssemCom neg(negInstr, args.size(), args);
+    				instrs.push_back(neg);
+
+    				return treble_t(argLoc, instrs, freeRegs);
+    	        } else {
+    				cout << "TODO: this case (~347 in ExprGen)" << endl;
+    				return treble_t("TODO", instrs, freeRegs);
+    	        }
+    	    }
+    	}
     }
-}
-
-treble_t ExprGen::recurseTree(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTable> st, vector<string> freeRegs) {
-	list<AssemCom> instrs;
-
-    int children = tree->getChildCount(tree);
-
-    if (children == 0) {
-        // Number base case
-
-        string n = Utils::createStringFromTree(tree);
-        if (!freeRegs.empty()) {
-        	string reg = freeRegs.front();
-			freeRegs.erase(freeRegs.begin());
-
-			// mov rx, #n
-			vector<string> args;
-			args.push_back(reg);
-			args.push_back("#" + n);
-			AssemCom mov("mov", args.size(), args);
-			instrs.push_back(mov);
-
-			return treble_t(reg, instrs, freeRegs);
-        } else {
-			cout << "TODO: this case (~282 in ExprGen)" << endl;
-			return treble_t("TODO", instrs, freeRegs);
-        }
-    } else if (children == 1) {
-    	// Unary operator
-
-        string op = Utils::createStringFromTree(tree);
-        pANTLR3_BASE_TREE arg = Utils::childByNum(tree, 0);
-
-		treble_t argEval = recurseTree(arg, st, freeRegs);
-    	string argLoc = argEval.get<0>();
-		list<AssemCom> argInstrs = argEval.get<1>();
-		freeRegs = argEval.get<2>();
-		instrs.splice(instrs.end(), argInstrs);
-
-    	if (op == "!") {
-	        if (argLoc[0] == 'r') {
-				// xor argLoc, argLoc, #1
-				vector<string> args;
-				args.push_back(argLoc);
-				args.push_back(argLoc);
-				args.push_back("#1");
-				AssemCom xorInstr("xor", args.size(), args);
-				instrs.push_back(xorInstr);
-
-				return treble_t(argLoc, instrs, freeRegs);
-	        } else {
-				cout << "TODO: this case (~308 in ExprGen)" << endl;
-				return treble_t("TODO", instrs, freeRegs);
-	        }
-    	} else if (op == "~") {
-	        if (argLoc[0] == 'r') {
-				// mvn argLoc, argLoc
-				vector<string> args;
-				args.push_back(argLoc);
-				args.push_back(argLoc);
-				AssemCom mvn("mvn", args.size(), args);
-				instrs.push_back(mvn);
-
-				return treble_t(argLoc, instrs, freeRegs);
-	        } else {
-				cout << "TODO: this case (~322 in ExprGen)" << endl;
-				return treble_t("TODO", instrs, freeRegs);
-	        }
-    	} else if (op == "+" || op == "-") {
-	        if (argLoc[0] == 'r') {
-	        	// cmp argLoc, #0
-				// neglt argLoc, argLoc (+ case)
-				// neglt argLoc, argLoc (- case)
-
-				vector<string> args;
-				args.push_back(argLoc);
-				args.push_back("#0");
-				AssemCom cmp("cmp", args.size(), args);
-				instrs.push_back(cmp);
-
-				string negInstr = (op == "+") ? "neglt" : "neggt";
-
-				args.clear();
-				args.push_back(argLoc);
-				args.push_back(argLoc);
-				AssemCom neg(negInstr, args.size(), args);
-				instrs.push_back(neg);
-
-				return treble_t(argLoc, instrs, freeRegs);
-	        } else {
-				cout << "TODO: this case (~347 in ExprGen)" << endl;
-				return treble_t("TODO", instrs, freeRegs);
-	        }
-	    }
-    }
-
-	return treble_t("TODO", instrs, freeRegs);
 }
