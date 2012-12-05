@@ -638,44 +638,90 @@ void ASTVisitor::visitFuncCall(string name,
 void ASTVisitor::visitArrayAssign(string name,
                   					boost::shared_ptr<ExprAST> index,
                   					boost::shared_ptr<ExprAST> value, 
-							        boost::shared_ptr<SymbolTable> st) {}
+							        boost::shared_ptr<SymbolTable> st) {
+	boost::shared_ptr<Identifier> arrIdent = 
+										st->lookupCurrLevelAndEnclosingLevels(name);
+	boost::shared_ptr<Array> arr =  
+				boost::shared_polymorphic_downcast<Array>(arrIdent);
+	boost::tuple< string, list<AssemCom>, vector<string> > ind
+	  			= ExprGen::generateExpression(index->getRoot(), st, _freeRegs);
+	
+	string resultReg = ind.get<0>();
+	if (arr->getTypeName() == "Number") {	
+		std::vector<string> mul;
+		mul.push_back(resultReg);												//make it bigger for integers
+		mul.push_back("4");														//mul resReg, 4, resReg
+		mul.push_back(resultReg);
+		_instrs.push_back(AssemCom("mul", 3, mul));		
+	}
+	
+	string reg = arr->getAssLoc();
+
+	boost::tuple< string, list<AssemCom>, vector<string> > val
+	  		= ExprGen::generateExpression(value->getRoot(), st, _freeRegs);
+	string valReg = val.get<0>();
+		
+	std::vector<string> str;
+	str.push_back(valReg);
+	str.push_back("[" + resultReg + ", " + reg + "]");
+	_instrs.push_back(AssemCom("str", 2, str));	
+	
+}
 
 void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length, 
 								 boost::shared_ptr<Type> type, 
 							     boost::shared_ptr<SymbolTable> st) {
 	boost::shared_ptr<Identifier> arrIdent = 
 										_globalSt->lookupCurrLevelOnly(name);
-	if (arrIdent) {
-		boost::shared_ptr<Array> arr =  
+	boost::shared_ptr<Array> arr =  
 			boost::shared_polymorphic_downcast<Array>(arrIdent);
-		boost::shared_ptr<Type> arrType = arr->getElemType();
-		if (arrType->getTypeName() == "Number") {
-			std::vector<string> comm;
-			comm.push_back(name);
-			comm.push_back("4*something"); 										//need to access array length here.
-			_instrs.push_back(AssemCom(".comm", 2, comm));
-			Label l;
-			_instrs.push_back(AssemCom(l.getLabel() + ":", 0,
-											std::vector<string>()));
-			std::vector<string> word;
-			word.push_back(name);
-			_instrs.push_back(AssemCom(".word", 1, word));
-			arr->setAssLoc(l.getLabel());																	
-		} else if (arrType->getTypeName() == "Letter") {
-			std::vector<string> comm;
-			comm.push_back(name);
-			comm.push_back("1*something"); 										//need to access array length here.
-			_instrs.push_back(AssemCom(".comm", 2, comm));
-			Label l;
-			_instrs.push_back(AssemCom(l.getLabel() + ":", 0, 
-											std::vector<string>()));
-			std::vector<string> word;
-			word.push_back(name);
-			_instrs.push_back(AssemCom(".word", 1, word));	
-			arr->setAssLoc(l.getLabel());
-		} else {
-			// TODO: string case
+	if (arrIdent) {
+		std::vector<string> comm;
+		comm.push_back(name);
+		int length = 0; //ToDo
+		if (type->getTypeName() == "Number") {
+			length *= 4;
 		}
+
+		ostringstream convert;
+		convert << length;      
+
+		comm.push_back(convert.str());
+		_instrs.push_back(AssemCom(".comm", 2, comm));
+		Label l;
+		_instrs.push_back(AssemCom(l.getLabel() + ":", 0,
+										std::vector<string>()));
+		std::vector<string> word;
+		word.push_back(name);
+		_instrs.push_back(AssemCom(".word", 1, word));
+		arr->setAssLoc(l.getLabel());						
+	} else {
+		boost::shared_ptr<Identifier> arrIdent = 
+										st->lookupCurrLevelAndEnclosingLevels(name);
+		boost::shared_ptr<Array> arr =  
+				boost::shared_polymorphic_downcast<Array>(arrIdent);
+		boost::tuple< string, list<AssemCom>, vector<string> > res
+	  			= ExprGen::generateExpression(length->getRoot(), st, _freeRegs);
+		string resultReg = res.get<0>();
+		list<AssemCom> exprInstrs = res.get<1>();
+		
+		if (type->getTypeName() == "Number") {
+			std::vector<string> mul;
+			mul.push_back(resultReg);											//make it bigger for integers
+			mul.push_back("4");													//mul resReg, 4, resReg
+			mul.push_back(resultReg);
+			_instrs.push_back(AssemCom("mul", 3, mul));
+		}
+
+		string reg = _freeRegs.front();
+
+		vector<string> sub;
+		sub.push_back(reg);
+		_freeRegs.erase(_freeRegs.begin());										//make it point somewhere down the stack
+		sub.push_back("fp");
+		sub.push_back(resultReg);											//ldr reg, [fp, r0]
+		_instrs.push_back(AssemCom("sub", 3, sub));
+		arr->setAssLoc(reg);
 	}
 }
 
