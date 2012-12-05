@@ -314,6 +314,9 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 	boost::tuple< string, list<AssemCom>, vector<string> > res
 	  = ExprGen::generateExpression(expr->getRoot(), st, _freeRegs);
 
+	_freeRegs = res.get<2>();
+	string resultReg = res.get<0>();
+
 	// non-sentence case atm
 
 	vector<string> strArgs;
