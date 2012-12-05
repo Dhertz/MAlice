@@ -570,6 +570,7 @@ void ASTVisitor::visitArrayAssign(string name,
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > val
 	  		= ExprGen::generateExpression(value->getRoot(), st, _freeRegs);
 	string valReg = val->get<0>();
+	func->addListBack(val->get<1>());
 		
 	std::vector<string> str;
 	str.push_back(valReg);
@@ -588,7 +589,7 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 	if (arrIdent) {
 		std::vector<string> comm;
 		comm.push_back(name);
-		int length = 0; //ToDo
+		int length = 0; //ToDo:make method to calculate.
 		if (type->getTypeName() == "Number") {
 			length *= 4;
 		}
@@ -612,7 +613,7 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 		boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
 	  			= ExprGen::generateExpression(length->getRoot(), st, _freeRegs);
 		string resultReg = res->get<0>();
-		list<AssemCom> exprInstrs = res->get<1>();
+		func->addListBack(res->get<1>());
 		
 		//make it bigger for integers
 		if (type->getTypeName() == "Number") {
