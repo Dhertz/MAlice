@@ -645,37 +645,56 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 							     boost::shared_ptr<SymbolTable> st) {
 	boost::shared_ptr<Identifier> arrIdent = 
 										_globalSt->lookupCurrLevelOnly(name);
-	if (arrIdent) {
-		boost::shared_ptr<Array> arr =  
+	boost::shared_ptr<Array> arr =  
 			boost::shared_polymorphic_downcast<Array>(arrIdent);
 		boost::shared_ptr<Type> arrType = arr->getElemType();
+	if (arrIdent) {
+		std::vector<string> comm;
+		comm.push_back(name);
+		int length; //ToDo
 		if (arrType->getTypeName() == "Number") {
-			std::vector<string> comm;
-			comm.push_back(name);
-			comm.push_back("4*something"); 										//need to access array length here.
-			_instrs.push_back(AssemCom(".comm", 2, comm));
-			Label l;
-			_instrs.push_back(AssemCom(l.getLabel() + ":", 0,
-											std::vector<string>()));
-			std::vector<string> word;
-			word.push_back(name);
-			_instrs.push_back(AssemCom(".word", 1, word));
-			arr->setAssLoc(l.getLabel());																	
-		} else if (arrType->getTypeName() == "Letter") {
-			std::vector<string> comm;
-			comm.push_back(name);
-			comm.push_back("1*something"); 										//need to access array length here.
-			_instrs.push_back(AssemCom(".comm", 2, comm));
-			Label l;
-			_instrs.push_back(AssemCom(l.getLabel() + ":", 0, 
-											std::vector<string>()));
-			std::vector<string> word;
-			word.push_back(name);
-			_instrs.push_back(AssemCom(".word", 1, word));	
-			arr->setAssLoc(l.getLabel());
-		} else {
-			// TODO: string case
+			length *= 4;
 		}
+
+		ostringstream convert;
+		convert << length;      
+
+		comm.push_back(convert.str());
+		_instrs.push_back(AssemCom(".comm", 2, comm));
+		Label l;
+		_instrs.push_back(AssemCom(l.getLabel() + ":", 0,
+										std::vector<string>()));
+		std::vector<string> word;
+		word.push_back(name);
+		_instrs.push_back(AssemCom(".word", 1, word));
+		arr->setAssLoc(l.getLabel());						
+	} else {
+		boost::tuple< string, list<AssemCom>, vector<string> > res
+	  			= ExprGen::generateExpression(length->getRoot(), st, _freeRegs);
+		string resultReg = res.get<0>();
+		list<AssemCom> exprInstrs = res.get<1>();
+		std::vector<string> mul;
+		if (arrType->getTypeName() == "Number") {
+			
+			mul.push_back(resultReg);											//make it bigger for integers
+			mul.push_back("4");													//mul resReg, 4, resReg
+			mul.push_back(resultReg);
+			_instrs.push_back(AssemCom("mul", 3, mul));		
+
+		}
+
+		vector<string> neg;														//negate the size to take away from fp
+		neg.push_back("r0");													//neg r0, resReg
+		neg.push_back(resultReg);
+		_instrs.push_back(AssemCom("neg", 2, neg));
+
+		string reg = _freeRegs.front();
+
+		vector<string> ldrArgs;
+		ldrArgs.push_back(reg);
+		_freeRegs.erase(_freeRegs.begin());										//make it point somewhere down the stack
+		ldrArgs.push_back("[fp, r0 ]");											//ldr reg, [fp, r0]
+		_instrs.push_back(AssemCom("ldr", 2, ldrArgs));
 	}
 }
 
