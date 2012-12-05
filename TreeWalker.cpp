@@ -91,7 +91,7 @@ void TreeWalker::processPROCDEC(pANTLR3_BASE_TREE tree,
                                                        parent, getLine(tree)));
     boost::weak_ptr<ProcDecAST> d(dec);
     if(boost::shared_ptr<ASTNode> p = parent.lock()) {
-        p->addChild(dec, childNum);
+        p->addChild(dec);
     } else {
         cerr << "Bad parent of " << procName << "." << endl;
     }
@@ -145,7 +145,7 @@ void TreeWalker::processFUNCDEC(pANTLR3_BASE_TREE tree,
                             " does not have a return statement for all paths.");
     }
     if(boost::shared_ptr<ASTNode> p = parent.lock()) {
-        p->addChild(dec, childNum);
+        p->addChild(dec);
     } else {
         cerr << "Bad parent of " << funcName << "." << endl;
     }
@@ -189,7 +189,7 @@ void TreeWalker::processVARDEC(pANTLR3_BASE_TREE tree,
             if (exprTree == NULL) {
                 boost::shared_ptr<VarDecAST> dec(
                   new VarDecAST(st, typeName, varName, parent, getLine(tree)));
-                p->addChild(dec, childNum);
+                p->addChild(dec);
             } else {
                 boost::shared_ptr<VarDecAST> dec(
                   new VarDecAST(st, typeName, varName, parent, getLine(tree)));
@@ -199,8 +199,8 @@ void TreeWalker::processVARDEC(pANTLR3_BASE_TREE tree,
                 boost::shared_ptr<VarAssignAST> assign(
                   new VarAssignAST(st, varName, expr, parent, getLine(tree)));
 
-                p->addChild(dec, childNum);
-                p->addChild(assign, childNum + 1);
+                p->addChild(dec);
+                p->addChild(assign);
             }
         } else {
             boost::shared_ptr<ExprAST> expr(
@@ -210,8 +210,8 @@ void TreeWalker::processVARDEC(pANTLR3_BASE_TREE tree,
               new ArrayDecAST(st, expr, varName, typeName, parent, 
                                 getLine(tree)));
 
-            dec->addChild(expr, 0);
-            p->addChild(dec, childNum);
+            dec->addChild(expr);
+            p->addChild(dec);
         }
     } else {
         cerr << "Bad parent." << endl;
@@ -238,7 +238,7 @@ void TreeWalker::processVARSTAT(pANTLR3_BASE_TREE tree,
 
             boost::shared_ptr<ArrayAssignAST> assign(
               new ArrayAssignAST(st, varId, elem, val, parent, getLine(tree)));
-            p->addChild(assign, childNum);
+            p->addChild(assign);
         } else if (option == "FUNC") {
             boost::shared_ptr<CallParamsAST> params(
               new CallParamsAST(st, Utils::childByNum(optionsTree, 0), parent, 
@@ -247,7 +247,7 @@ void TreeWalker::processVARSTAT(pANTLR3_BASE_TREE tree,
             boost::shared_ptr<FuncProcCallAST> func(
               new FuncProcCallAST(st, varId, params, parent, getLine(tree)));
 
-            p->addChild(func, childNum);
+            p->addChild(func);
         } else if (option == "ASSIGN") {
             boost::shared_ptr<ExprAST> expr(
               new ExprAST(st, Utils::childByNum(optionsTree, 0), parent, 
@@ -256,7 +256,7 @@ void TreeWalker::processVARSTAT(pANTLR3_BASE_TREE tree,
             boost::shared_ptr<VarAssignAST> assign(
               new VarAssignAST(st, varId, expr, parent, getLine(tree)));
 
-            p->addChild(assign, childNum);
+            p->addChild(assign);
         }
     } else {
         cout << "Bad parent." << endl;
@@ -271,7 +271,7 @@ void TreeWalker::processINC(pANTLR3_BASE_TREE tree,
       new ExprAST(st, Utils::childByNum(tree, 0), parent, getLine(tree), true));
     boost::shared_ptr<IncAST> inc(new IncAST(st, expr, parent, getLine(tree)));
     if(boost::shared_ptr<ASTNode> p = parent.lock()) {
-        p->addChild(inc, childNum);
+        p->addChild(inc);
     } else {
         cout << "Bad parent." << endl;
     }
@@ -286,7 +286,7 @@ void TreeWalker::processDEC(pANTLR3_BASE_TREE tree,
 
     boost::shared_ptr<DecAST> dec(new DecAST(st, expr, parent, getLine(tree)));
     if(boost::shared_ptr<ASTNode> p = parent.lock()) {
-        p->addChild(dec, childNum);
+        p->addChild(dec);
     } else {
         cout << "Bad parent." << endl;
     }
@@ -304,7 +304,7 @@ void TreeWalker::processPRINT(pANTLR3_BASE_TREE tree,
       new PrintAST(st, expr, parent, getLine(tree)));
 
     if(boost::shared_ptr<ASTNode> p = parent.lock()) {
-        p->addChild(print, childNum);
+        p->addChild(print);
     } else {
         cout << "Bad parent." << endl;
     }
@@ -321,7 +321,7 @@ void TreeWalker::processRETURN(pANTLR3_BASE_TREE tree,
         new ReturnAST(st, expr, parent, getLine(tree)));
 
     if(boost::shared_ptr<ASTNode> p = parent.lock()) {
-        p->addChild(ret, childNum);
+        p->addChild(ret);
     } else {
         cout << "Bad parent." << endl;
     }
@@ -336,7 +336,7 @@ void TreeWalker::processSTDIN(pANTLR3_BASE_TREE tree,
     boost::shared_ptr<StdinAST> in(
       new StdinAST(st, expr, parent, getLine(tree)));
     if(boost::shared_ptr<ASTNode> p = parent.lock()) {
-        p->addChild(in, childNum);
+        p->addChild(in);
     } else {
         cout << "Bad parent." << endl;
     }
@@ -352,7 +352,7 @@ void TreeWalker::processWHILE(pANTLR3_BASE_TREE tree,
       new WhileAST(st, expr, parent, getLine(tree)));
 
     if(boost::shared_ptr<ASTNode> p = parent.lock()) {
-        p->addChild(whilenode, childNum);
+        p->addChild(whilenode);
     } else {
         cout << "Bad parent." << endl;
     }
@@ -376,11 +376,11 @@ void TreeWalker::processCHOICE(pANTLR3_BASE_TREE tree,
     boost::shared_ptr<ChoiceAST> choice(
       new ChoiceAST(st, expr, ifs, elses, parent, getLine(tree)));
 
-    choice->addChild(ifs, 0);
-    choice->addChild(elses, 1);
+    choice->addChild(ifs);
+    choice->addChild(elses);
     
     if(boost::shared_ptr<ASTNode> p = parent.lock()) {
-        p->addChild(choice, childNum);
+        p->addChild(choice);
     } else {
         cout << "Bad parent." << endl;
     }
@@ -408,7 +408,7 @@ void TreeWalker::processIF(pANTLR3_BASE_TREE tree,
     boost::shared_ptr<IfAST> ifnode(
       new IfAST(st, expr, body, parent, getLine(tree)));
 
-    ifnode->addChild(body, 0);
+    ifnode->addChild(body);
 
     pANTLR3_BASE_TREE ifTree = Utils::childByNum(tree, 1);
 
@@ -420,12 +420,12 @@ void TreeWalker::processIF(pANTLR3_BASE_TREE tree,
         pANTLR3_BASE_TREE childTree = Utils::childByNum(tree, i);
         string childName = Utils::createStringFromTree(childTree);
         if (childName == "IF") {
-            processIF(childTree, st, ifnode, i);
+            processIF(childTree, st, parent, i);
         } else {
             boost::shared_ptr<IfBodyAST> elses(
               new IfBodyAST(st, parent, getLine(tree)));
 
-            ifnode->addChild(elses, i);
+            ifnode->addChild(elses);
             pANTLR3_BASE_TREE elseTree = Utils::childByNum(tree, i);
             for (int i = 0; i < elseTree->getChildCount(elseTree); ++i) {
                 walk(Utils::childByNum(elseTree, i), st, elses, i);
@@ -434,7 +434,7 @@ void TreeWalker::processIF(pANTLR3_BASE_TREE tree,
     }
     
     if(boost::shared_ptr<ASTNode> p = parent.lock()) {
-        p->addChild(ifnode, childNum);
+        p->addChild(ifnode);
     } else {
         cout << "Bad parent." << endl;
     }

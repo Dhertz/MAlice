@@ -6,6 +6,7 @@
 #include "MAliceLexer.h"
 #include "MAliceParser.h"
 #include "InstructionPrinter.hpp"
+#include <boost/lexical_cast.hpp>
 
 using namespace std;
 
@@ -69,6 +70,7 @@ void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
 
     if (Utils::globalErrorCount > 0) {
         cerr << "Errors found. Stopping." << endl;
+        Utils::globalErrorCount = 0;
         return;
     }
 
@@ -76,7 +78,14 @@ void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
     	boost::shared_ptr<ASTVisitor> treeVisitor(new ASTVisitor(globalSt));
 	    semanticTree->getRoot()->accept(treeVisitor);
 
-		InstructionPrinter::printList(treeVisitor->getInstrs());
+		InstructionPrinter::printList(
+			treeVisitor->getInstrs(), 
+			boost::lexical_cast<string>(filename).append(".s"));
+
+		// Might want to combine these in some way? - Owen
+		InstructionPrinter::printList(
+			treeVisitor->getEndDefs(), 
+			boost::lexical_cast<string>(filename).append(".s"));
     }
 
     parser->free(parser);
