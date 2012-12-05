@@ -294,42 +294,56 @@ treble_t ExprGen::recurseTree(pANTLR3_BASE_TREE tree, boost::shared_ptr<SymbolTa
 		instrs.splice(instrs.end(), argInstrs);
 
     	if (op == "!") {
-	        if (!freeRegs.empty()) {
-	        	string reg = freeRegs.front();
-				freeRegs.erase(freeRegs.begin());
-
-				// xor reg, argLoc, #1
+	        if (argLoc[0] == 'r') {
+				// xor argLoc, argLoc, #1
 				vector<string> args;
-				args.push_back(reg);
+				args.push_back(argLoc);
 				args.push_back(argLoc);
 				args.push_back("#1");
 				AssemCom xorInstr("xor", args.size(), args);
 				instrs.push_back(xorInstr);
 
-				return treble_t(reg, instrs, freeRegs);
+				return treble_t(argLoc, instrs, freeRegs);
 	        } else {
-				cout << "TODO: this case (~311 in ExprGen)" << endl;
+				cout << "TODO: this case (~308 in ExprGen)" << endl;
 				return treble_t("TODO", instrs, freeRegs);
 	        }
     	} else if (op == "~") {
-	        if (!freeRegs.empty()) {
-	        	string reg = freeRegs.front();
-				freeRegs.erase(freeRegs.begin());
-
-				// mvn reg, argLoc
+	        if (argLoc[0] == 'r') {
+				// mvn argLoc, argLoc
 				vector<string> args;
-				args.push_back(reg);
+				args.push_back(argLoc);
 				args.push_back(argLoc);
 				AssemCom mvn("mvn", args.size(), args);
 				instrs.push_back(mvn);
 
-				return treble_t(reg, instrs, freeRegs);
+				return treble_t(argLoc, instrs, freeRegs);
 	        } else {
-				cout << "TODO: this case (~328 in ExprGen)" << endl;
+				cout << "TODO: this case (~322 in ExprGen)" << endl;
 				return treble_t("TODO", instrs, freeRegs);
 	        }
     	} else if (op == "+") {
+	        if (argLoc[0] == 'r') {
+	        	// cmp argLoc, #0
+				// neglt argLoc, argLoc
 
+				vector<string> args;
+				args.push_back(argLoc);
+				args.push_back("#0");
+				AssemCom cmp("cmp", args.size(), args);
+				instrs.push_back(cmp);
+
+				args.clear();
+				args.push_back(argLoc);
+				args.push_back(argLoc);
+				AssemCom neglt("neglt", args.size(), args);
+				instrs.push_back(neglt);
+
+				return treble_t(argLoc, instrs, freeRegs);
+	        } else {
+				cout << "TODO: this case (~308 in ExprGen)" << endl;
+				return treble_t("TODO", instrs, freeRegs);
+	        }
     	} else if (op == "-") {
 
     	}
