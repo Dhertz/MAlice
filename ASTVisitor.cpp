@@ -218,8 +218,12 @@ boost::tuple< string, list<AssemCom>, vector<string> > res
 		
 		vector<string> mallocArg;
 		mallocArg.push_back("malloc");
-
+		//when can I free this memory?
 		_instrs.push_back(AssemCom("bl", 1, mallocArg));
+		
+		vector<string> push;
+		push.push_back("{r0}");
+		_instrs.push_back(AssemCom("push", 1, push));
 
 		vector<string> stdinArg;
 		stdinArg.push_back("gets");
@@ -228,7 +232,6 @@ boost::tuple< string, list<AssemCom>, vector<string> > res
 		mov1Arg.push_back(resultReg);
 		mov1Arg.push_back("r0");
 		_instrs.push_back(AssemCom("mov", 2, mov1Arg));
-		mov1Arg.push_back("malloc");
 
 		_instrs.push_back(AssemCom("bl", 1, stdinArg));
 		
@@ -242,8 +245,12 @@ boost::tuple< string, list<AssemCom>, vector<string> > res
 
 		vector<string> mallocArg;
 		mallocArg.push_back("malloc");
-
+		//when can I free this memory?
 		_instrs.push_back(AssemCom("bl", 1, mallocArg));
+
+		vector<string> push;
+		push.push_back("{r0}");
+		_instrs.push_back(AssemCom("push", 1, push));
 
 		vector<string> stdinArg;
 		stdinArg.push_back("gets");
