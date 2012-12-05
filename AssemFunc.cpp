@@ -48,21 +48,33 @@ void AssemFunc::finalise() {
 		addBack("sub", fpArgs);
 	}
 
-	vector<string> args;
-	args.push_back("sp!");
-	args.push_back("{fp, lr}");
-	addFront("stmfd", args);
-
-	args.clear();
-	args.push_back("sp!");
-	args.push_back("{fp, pc}");
-	addBack("ldmfd", args);
-
-	addFront(_name + ":", vector<string>());
-
 	if (_name == "main") {
+		vector<string> args;
+		args.push_back("sp!");
+		args.push_back("{fp, lr}");
+		addFront("stmfd", args);
+
+		args.clear();
+		args.push_back("sp!");
+		args.push_back("{fp, pc}");
+		addBack("ldmfd", args);
+
+		addFront("main:", vector<string>());
+
 		vector<string> globArgs(1, _name);
 		addFront(".global", globArgs);
+	} else {
+		vector<string> args;
+		args.push_back("sp!");
+		args.push_back("{r4-r10, fp, lr}");
+		addFront("stmfd", args);
+
+		args.clear();
+		args.push_back("sp!");
+		args.push_back("{r4-r10, fp, pc}");
+		addBack("ldmfd", args);
+
+		addFront(_name + ":", vector<string>());
 	}
 
 	vector<string> alignArgs(1, "2");
