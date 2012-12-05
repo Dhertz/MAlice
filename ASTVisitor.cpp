@@ -46,7 +46,7 @@ void ASTVisitor::visitProcDec(string name,
 	vector<int> callableKids;
 
 	if (name == "hatta") {
-		boost::shared_ptr<AssemFunc> func(new AssemFunc());
+		boost::shared_ptr<AssemFunc> func(new AssemFunc("main"));
 		_functions.push_back(func);
 
 		int i = 0;
@@ -80,7 +80,7 @@ void ASTVisitor::visitFuncDec(string name, string returnType,
 
 	vector<int> callableKids;
 
-	boost::shared_ptr<AssemFunc> func(new AssemFunc());
+	boost::shared_ptr<AssemFunc> func(new AssemFunc(name));
 	_functions.push_back(func);
 
 	int i = 0;
@@ -256,12 +256,14 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 
 	if (expr->getType()->getTypeName() == "String"){
 		
+		func->increaseStackPointer(260);
+		string sp = boost::lexical_cast<string>(func->getStackPointer());
+
 		vector<string> subr0Args;
 		subr0Args.push_back("r0");
 		subr0Args.push_back("fp");
-		subr0Args.push_back("#260");
-		func->addBack("sub", subr0Args);											// sub r0, fp, #260
-		func->increaseStackPointer(260);
+		subr0Args.push_back("#" + sp);
+		func->addBack("sub", subr0Args);										// sub r0, fp, #sp
 
 		vector<string> printArg;
 		printArg.push_back("__isoc99_scanf");
@@ -269,15 +271,17 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 
 		vector<string> ldrArgs;
 		ldrArgs.push_back(resultReg);
-		ldrArgs.push_back("[fp, #-260]");
-		func->addBack("ldr", ldrArgs);											//ldr resultReg, [fp, #-260]
+		ldrArgs.push_back("[fp, #-" + sp + "]");
+		func->addBack("ldr", ldrArgs);											//ldr resultReg, [fp, #-sp]
 
 	} else {
-		
+		func->increaseStackPointer(8);
+		string sp = boost::lexical_cast<string>(func->getStackPointer());
+
 		vector<string> strArgs;
 		strArgs.push_back(resultReg);
-		strArgs.push_back("[fp, #-8]");
-		func->addBack("str", strArgs);											// str resultReg [fp, #-8]
+		strArgs.push_back("[fp, #-" + sp + "]");
+		func->addBack("str", strArgs);											// str resultReg [fp, #-sp]
 		Label strLbl;
 		_endDefs.push_back(
 			AssemCom(strLbl.getLabel() + ":", 0 , std::vector<string>()));		// strLbl:
@@ -298,8 +302,8 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 
 		vector<string> ldr1Args;
 		ldr1Args.push_back("r1");
-		ldr1Args.push_back("[fp, #-8]");
-		func->addBack("ldr", ldr1Args);											// ldr r1 [fp, #-8]
+		ldr1Args.push_back("[fp, #-" + sp + "]");
+		func->addBack("ldr", ldr1Args);											// ldr r1 [fp, #-sp]
 
 		vector<string> printArg;
 		printArg.push_back("__isoc99_scanf");
@@ -307,8 +311,8 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 
 		vector<string> ldrArgs;
 		ldrArgs.push_back(resultReg);
-		ldrArgs.push_back("[fp, #-8]");
-		func->addBack("ldr", ldrArgs);											// ldr resultReg [fp, #-8]
+		ldrArgs.push_back("[fp, #-" + sp + "]");
+		func->addBack("ldr", ldrArgs);											// ldr resultReg [fp, #-sp]
 	}
 }
 
@@ -330,7 +334,7 @@ void ASTVisitor::visitWhile(boost::shared_ptr<ExprAST> cond,
 	string resultReg = res.get<0>();
 	_freeRegs = res.get<2>();
 
-	func->addListBack(res.get<1>());												// expr instrs
+	func->addListBack(res.get<1>());											// expr instrs
 
 	vector<string> cmpArgs;
 	cmpArgs.push_back(resultReg);
@@ -363,7 +367,7 @@ void ASTVisitor::visitChoice(boost::shared_ptr<ExprAST> cond,
 	bneArgs.push_back(elseLabel.getLabel());
 	func->addBack("bne", bneArgs);												// bne else
 
-	trueBody->accept(shared_from_this(), func);										// if body
+	trueBody->accept(shared_from_this(), func);									// if body
 
 	Label endLabel;
 	vector<string> bArgs;
@@ -443,7 +447,7 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 	} else {
 		string rhs = res.get<0>();
 		_freeRegs = res.get<2>();
-		func->addListBack(res.get<1>());											// expr instrs
+		func->addListBack(res.get<1>());										// expr instrs
 
 		if (loc == "") {
 			if (_freeRegs.empty()) {
@@ -498,12 +502,12 @@ void ASTVisitor::visitFuncCall(string name,
 			if (paramLoc[0] == 'r') {
 				vector<string> args;
 				args.push_back("{" + paramLoc + "}");
-				func->addBack("push", args);										// push {ri}
+				func->addBack("push", args);									// push {ri}
 			} else if (_freeRegs.empty()) {
 				// Need to temporarily borrow a register
 				vector<string> args;
 				args.push_back("{r0}");
-				func->addBack("push", args);										// push {r0}
+				func->addBack("push", args);									// push {r0}
 
 				args.clear();
 				args.push_back("r0");
@@ -511,7 +515,7 @@ void ASTVisitor::visitFuncCall(string name,
 				func->addBack("mov", args);										// mov r0 ri
 
 				// WHy is this here? - Owen
-				//func->addBack("push");											// push {r0}
+				//func->addBack("push");										// push {r0}
 
 				args.clear();
 				args.push_back("{r0}");
@@ -526,7 +530,7 @@ void ASTVisitor::visitFuncCall(string name,
 
 				args.clear();
 				args.push_back("{" + reg + "}");
-				func->addBack("push", args);										// push reg
+				func->addBack("push", args);									// push reg
 			}
 	  	}
 	  	i++;
@@ -534,7 +538,7 @@ void ASTVisitor::visitFuncCall(string name,
 
 	vector<string> blArgs;
 	blArgs.push_back(name);
-	func->addBack("bl", blArgs);													// bl name
+	func->addBack("bl", blArgs);												// bl name
 }
 
 void ASTVisitor::visitArrayAssign(string name,

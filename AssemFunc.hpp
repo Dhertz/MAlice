@@ -6,11 +6,12 @@
 #include <vector>
 
 class AssemFunc {
-list<AssemCom> _comms;
-int stackPointer;
-vector<string> usedRegs;
+	list<AssemCom> _comms;
+	int stackPointer;
+	vector<string> usedRegs;
+	string _name;
 public:
-	AssemFunc();
+	AssemFunc(string name);
 	void addFront(string name, vector<string> args);
 	void addBack(string name, vector<string> args);
 	void addListBack(list<AssemCom> l);
