@@ -32,8 +32,9 @@ void ArrayDecAST::check() {
         Utils::printSemErr(_lineNo, "Array size must be a Number, not a " +
                              _length->getType()->getTypeName());
     } else {
-        boost::shared_ptr<Type> _typeObj =
+        boost::shared_ptr<Type> typeObj =
           boost::shared_polymorphic_downcast<Type>(type);
+        _typeObj = typeObj;  
         boost::shared_ptr<Array> a(new Array(_typeObj));
         _st->add(_name, a);
     }
