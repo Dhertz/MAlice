@@ -69,6 +69,6 @@ void FuncProcCallAST::print() {
     cout << "Function call" << endl;
 }
 
-void FuncProcCallAST::accept(boost::shared_ptr<ASTVisitor> v) {
-  	v->visitFuncCall(_name, _params, _st);
+void FuncProcCallAST::accept(boost::shared_ptr<ASTVisitor> v, boost::shared_ptr<AssemFunc> func) {
+  	v->visitFuncCall(_name, _params, _st, func);
 }

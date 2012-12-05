@@ -24,6 +24,6 @@ string PrintAST::getNodeName() {
     return "Print";
 }
 
-void PrintAST::accept(boost::shared_ptr<ASTVisitor> v) {
-    v->visitPrint(_expr, _st);
+void PrintAST::accept(boost::shared_ptr<ASTVisitor> v, boost::shared_ptr<AssemFunc> func) {
+    v->visitPrint(_expr, _st, func);
 }

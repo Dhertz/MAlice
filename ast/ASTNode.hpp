@@ -23,6 +23,7 @@ public:
     virtual string getNodeName() = 0;
     virtual void print() = 0;
     virtual void accept(boost::shared_ptr<ASTVisitor> v);
+    virtual void accept(boost::shared_ptr<ASTVisitor> v, boost::shared_ptr<AssemFunc> func);
 };
 
 #endif

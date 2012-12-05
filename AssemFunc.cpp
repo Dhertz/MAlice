@@ -1,6 +1,5 @@
 #include "AssemFunc.hpp"
-
-#include <vector>
+#include <iostream>
 
 void AssemFunc::addFront(string name, vector<string> args) {
 	_comms.push_front(AssemCom(name, args.size(), args));
@@ -16,4 +15,10 @@ void AssemFunc::setStackPointer(int i) {
 
 int AssemFunc::getStackPointer() {
 	return stackPointer;
+}
+
+void AssemFunc::finalise() {
+	cout << "Function pre-amble" << endl;
+	// TODO
+	cout << "Function post-amble" << endl;
 }

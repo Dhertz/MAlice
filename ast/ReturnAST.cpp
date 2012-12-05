@@ -93,6 +93,6 @@ string ReturnAST::getNodeName() {
     return "Return";
 }
 
-void ReturnAST::accept(boost::shared_ptr<ASTVisitor> v) {
-	v->visitReturn(_expr, _st);
+void ReturnAST::accept(boost::shared_ptr<ASTVisitor> v, boost::shared_ptr<AssemFunc> func) {
+	v->visitReturn(_expr, _st, func);
 }

@@ -34,6 +34,6 @@ string ChoiceAST::getNodeName() {
     return "Choice";
 }
 
-void ChoiceAST::accept(boost::shared_ptr<ASTVisitor> v) {
-	v->visitChoice(_expr, _ifs, _elses, _st);
+void ChoiceAST::accept(boost::shared_ptr<ASTVisitor> v, boost::shared_ptr<AssemFunc> func) {
+	v->visitChoice(_expr, _ifs, _elses, _st, func);
 }

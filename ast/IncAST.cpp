@@ -29,6 +29,6 @@ string IncAST::getNodeName() {
     return "Inc";
 }
 
-void IncAST::accept(boost::shared_ptr<ASTVisitor> v) {
-    v->visitInc(_expr, _st);
+void IncAST::accept(boost::shared_ptr<ASTVisitor> v, boost::shared_ptr<AssemFunc> func) {
+    v->visitInc(_expr, _st, func);
 }

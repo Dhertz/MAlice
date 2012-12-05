@@ -65,6 +65,6 @@ void ArrayAssignAST::print() {
     cout << "Array member assignment" << endl;
 }
 
-void ArrayAssignAST::accept(boost::shared_ptr<ASTVisitor> v) {
-    v->visitArrayAssign(_name, _element, _value, _st);
+void ArrayAssignAST::accept(boost::shared_ptr<ASTVisitor> v, boost::shared_ptr<AssemFunc> func) {
+    v->visitArrayAssign(_name, _element, _value, _st, func);
 }

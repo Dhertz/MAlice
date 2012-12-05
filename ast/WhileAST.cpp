@@ -30,6 +30,6 @@ string WhileAST::getNodeName() {
     return "While";
 }
 
-void WhileAST::accept(boost::shared_ptr<ASTVisitor> v) {
-    v->visitWhile(_expr, _children, _st);
+void WhileAST::accept(boost::shared_ptr<ASTVisitor> v, boost::shared_ptr<AssemFunc> func) {
+    v->visitWhile(_expr, _children, _st, func);
 }

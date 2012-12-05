@@ -27,8 +27,7 @@ void ASTVisitor::initFreeRegs() {
 	_freeRegs = vector<string>(regs, regs + sizeof(regs) / sizeof(string));
 }
 
-void ASTVisitor::visitProg(vector <boost::shared_ptr<ASTNode> > children, 
-							 boost::shared_ptr<SymbolTable> st) {
+void ASTVisitor::visitProg(vector <boost::shared_ptr<ASTNode> > children) {
 	// I imagine some bollocks will go here...
 	
 	vector<boost::shared_ptr<ASTNode> >::iterator i;
@@ -44,22 +43,10 @@ void ASTVisitor::visitProcDec(string name,
 								vector <boost::shared_ptr<ASTNode> > children, 
 								boost::shared_ptr<SymbolTable> st) {
 
+	vector<int> callableKids;
+
 	if (name == "hatta") {
-		vector<string> alignArg;
-		alignArg.push_back("2");
-		_instrs.push_back(AssemCom(".align", 1, alignArg));						// .align 2
-
-		vector<string> globalArg;
-		globalArg.push_back("main");
-		_instrs.push_back(AssemCom(".global", 1, globalArg));					// .global main
-
-		_instrs.push_back(AssemCom("main:", 0, std::vector<string>()));			// main:
-
-		vector<string> pushArg;
-		pushArg.push_back("{lr}");
-		_instrs.push_back(AssemCom("push", 1, pushArg));						// push {lr}
-
-		vector<int> callableKids;
+		boost::shared_ptr<AssemFunc> func(new AssemFunc());
 
 		int i = 0;
 		vector<boost::shared_ptr<ASTNode> >::iterator it;						// function body
@@ -68,19 +55,10 @@ void ASTVisitor::visitProcDec(string name,
 					|| (*it)->getNodeName() == "ProcDec") {
 				callableKids.push_back(i);
 			} else {
-				(*it)->accept(shared_from_this());
+				(*it)->accept(shared_from_this(), func);
 			}
 			i++;
 		}
-
-		vector<string> returnArg;
-		returnArg.push_back("r0");
-		returnArg.push_back("#0");
-		_instrs.push_back(AssemCom("mov", 2, returnArg));						// mov r0, #0
-
-		vector<string> popArg;
-		popArg.push_back("{pc}");
-		_instrs.push_back(AssemCom("pop", 1, popArg));							// pop {pc}
 
 		// moved nested functions outside of parent function
 		vector<int>::iterator cIt;
@@ -98,39 +76,19 @@ void ASTVisitor::visitFuncDec(string name, string returnType,
 								boost::shared_ptr<HeaderParamsAST> params,
 								vector <boost::shared_ptr<ASTNode> > children,
 								boost::shared_ptr<SymbolTable> st) {
-	vector<string> alignArg;
-	alignArg.push_back("2");
-	_instrs.push_back(AssemCom(".align", 1, alignArg));							// .align 2
 
-	_instrs.push_back(AssemCom(name + ":", 0, std::vector<string>()));			// name:
+	vector<int> callableKids;
 
-	vector<string> stmfdArgs;
-	stmfdArgs.push_back("sp!");
-	stmfdArgs.push_back("{r4-r10, fp, lr}");
-	_instrs.push_back(AssemCom("stmfd", 2, stmfdArgs));							// stmfd sp!, {r4-r10, fp, lr}
-
-	vector<string> fpArgs;
-	fpArgs.push_back("fp");
-	fpArgs.push_back("sp");
-	fpArgs.push_back("#256");
-	_instrs.push_back(AssemCom("add", 3, fpArgs));								// add fp, sp, #256
-
-	vector<string> subArgs;
-	subArgs.push_back("sp");
-	subArgs.push_back("sp");
-	subArgs.push_back("#260");
-	_instrs.push_back(AssemCom("add", 3, subArgs));								// sub sp, sp, #260
-
-	vector<int> callableChildren;
+	boost::shared_ptr<AssemFunc> func(new AssemFunc());
 
 	int i = 0;
 	vector<boost::shared_ptr<ASTNode> >::iterator it;							// function body
 	for (it = children.begin(); it != children.end(); ++it) {
 		if ((*it)->getNodeName() == "FuncDec" 
 				|| (*it)->getNodeName() == "ProcDec") {
-			callableChildren.push_back(i);
+			callableKids.push_back(i);
 		} else {
-			(*it)->accept(shared_from_this());
+			(*it)->accept(shared_from_this(), func);
 		}
 		i++;
 	}
@@ -148,13 +106,14 @@ void ASTVisitor::visitFuncDec(string name, string returnType,
 
 	// moved nested functions outside of parent function
 	vector<int>::iterator cIt;
-	for (cIt = callableChildren.begin(); cIt != callableChildren.end(); ++cIt) {
+	for (cIt = callableKids.begin(); cIt != callableKids.end(); ++cIt) {
 		(*(children.begin() + (*cIt)))->accept(shared_from_this());				
 	}
 }
 
 void ASTVisitor::visitVarDec(string typeName, string varName, 
-							   boost::shared_ptr<SymbolTable> st) {
+							   boost::shared_ptr<SymbolTable> st,
+							   boost::shared_ptr<AssemFunc> func) {
 	boost::shared_ptr<Identifier> varIdent = 
 	  _globalSt->lookupCurrLevelOnly(varName);
 
@@ -201,7 +160,8 @@ void ASTVisitor::visitVarDec(string typeName, string varName,
 }
 
 void ASTVisitor::visitInc(boost::shared_ptr<ExprAST> expr, 
-							boost::shared_ptr<SymbolTable> st) {
+							boost::shared_ptr<SymbolTable> st,
+							boost::shared_ptr<AssemFunc> func) {
 	boost::tuple< string, list<AssemCom>, vector<string> > res
 	  = ExprGen::generateExpression(expr->getRoot(), st, _freeRegs);
 	string resultReg = res.get<0>();
@@ -220,7 +180,8 @@ void ASTVisitor::visitInc(boost::shared_ptr<ExprAST> expr,
 }
 
 void ASTVisitor::visitDec(boost::shared_ptr<ExprAST> expr,
-							boost::shared_ptr<SymbolTable> st) {
+							boost::shared_ptr<SymbolTable> st,
+							boost::shared_ptr<AssemFunc> func) {
 	boost::tuple< string, list<AssemCom>, vector<string> > res
 	  = ExprGen::generateExpression(expr->getRoot(), st, _freeRegs);
 	string resultReg = res.get<0>();
@@ -240,7 +201,8 @@ void ASTVisitor::visitDec(boost::shared_ptr<ExprAST> expr,
 }
 
 void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr, 
-							  boost::shared_ptr<SymbolTable> st) {
+							  boost::shared_ptr<SymbolTable> st,
+							  boost::shared_ptr<AssemFunc> func) {
 
 	boost::tuple< string, list<AssemCom>, vector<string> > res
 	  = ExprGen::generateExpression(expr->getRoot(), st, _freeRegs);
@@ -307,7 +269,8 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 }
 
 void ASTVisitor::visitReturn(boost::shared_ptr<ExprAST> expr, 
-							   boost::shared_ptr<SymbolTable> st) {
+							   boost::shared_ptr<SymbolTable> st,
+							   boost::shared_ptr<AssemFunc> func) {
 	// I don't think I care about the expression, that can be handled in the 
 	// function call
 
@@ -318,7 +281,8 @@ void ASTVisitor::visitReturn(boost::shared_ptr<ExprAST> expr,
 }
 
 void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr, 
-							  boost::shared_ptr<SymbolTable> st) {
+							  boost::shared_ptr<SymbolTable> st,
+							  boost::shared_ptr<AssemFunc> func) {
 	boost::tuple< string, list<AssemCom>, vector<string> > res
 	  = ExprGen::generateExpression(expr->getRoot(), st, _freeRegs);
 
@@ -386,7 +350,8 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 
 void ASTVisitor::visitWhile(boost::shared_ptr<ExprAST> cond, 
 			   			   	  vector <boost::shared_ptr<ASTNode> > children, 
-							  boost::shared_ptr<SymbolTable> st) {
+							  boost::shared_ptr<SymbolTable> st,
+							  boost::shared_ptr<AssemFunc> func) {
 	Label loopLabel;
 
 	_instrs.push_back(
@@ -420,7 +385,8 @@ void ASTVisitor::visitWhile(boost::shared_ptr<ExprAST> cond,
 void ASTVisitor::visitChoice(boost::shared_ptr<ExprAST> cond, 
 				   			   boost::shared_ptr<IfBodyAST> trueBody, 
 				   			   boost::shared_ptr<IfBodyAST> falseBody, 
-							   boost::shared_ptr<SymbolTable> st) {
+							   boost::shared_ptr<SymbolTable> st,
+							   boost::shared_ptr<AssemFunc> func) {
 	Label elseLabel;
 
 	boost::tuple< string, list<AssemCom>, vector<string> > res
@@ -461,7 +427,8 @@ void ASTVisitor::visitChoice(boost::shared_ptr<ExprAST> cond,
 void ASTVisitor::visitIf(boost::shared_ptr<ExprAST> cond,
 			   			   boost::shared_ptr<IfBodyAST> trueBody, 
 			   			   vector <boost::shared_ptr<ASTNode> > children, 
-						   boost::shared_ptr<SymbolTable> st) {
+						   boost::shared_ptr<SymbolTable> st,
+						   boost::shared_ptr<AssemFunc> func) {
 
 	Label elseLabel;
 
@@ -506,7 +473,8 @@ void ASTVisitor::visitIf(boost::shared_ptr<ExprAST> cond,
 }
 
 void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr, 
-							   boost::shared_ptr<SymbolTable> st) {
+							   boost::shared_ptr<SymbolTable> st,
+							   boost::shared_ptr<AssemFunc> func) {
 	boost::shared_ptr<Identifier> varIdent 
 	  = st->lookupCurrLevelAndEnclosingLevels(varName);
 	boost::shared_ptr<Variable> var 
@@ -552,7 +520,8 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 
 void ASTVisitor::visitFuncCall(string name,
 						    	 boost::shared_ptr<CallParamsAST> params, 
-							     boost::shared_ptr<SymbolTable> st) {
+							     boost::shared_ptr<SymbolTable> st,
+							     boost::shared_ptr<AssemFunc> func) {
 
 
 	vector<boost::shared_ptr< ExprAST> > exprs = params->getParamExprs();
@@ -632,11 +601,13 @@ void ASTVisitor::visitFuncCall(string name,
 void ASTVisitor::visitArrayAssign(string name,
                   					boost::shared_ptr<ExprAST> index,
                   					boost::shared_ptr<ExprAST> value, 
-							        boost::shared_ptr<SymbolTable> st) {}
+							        boost::shared_ptr<SymbolTable> st,
+							        boost::shared_ptr<AssemFunc> func) {}
 
 void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length, 
 								 boost::shared_ptr<Type> type, 
-							     boost::shared_ptr<SymbolTable> st) {
+							     boost::shared_ptr<SymbolTable> st,
+							     boost::shared_ptr<AssemFunc> func) {
 	boost::shared_ptr<Identifier> arrIdent = 
 										_globalSt->lookupCurrLevelOnly(name);
 	if (arrIdent) {
