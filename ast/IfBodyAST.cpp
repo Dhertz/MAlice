@@ -14,10 +14,11 @@ string IfBodyAST::getNodeName() {
 
 void IfBodyAST::check() {}
 
-void IfBodyAST::accept(boost::shared_ptr<ASTVisitor> v) {
+void IfBodyAST::accept(boost::shared_ptr<ASTVisitor> v, 
+						 boost::shared_ptr<AssemFunc> func) {
 	vector< boost::shared_ptr<ASTNode> >::iterator i;
 
 	for (i = _children.begin(); i != _children.end(); ++i) {
-		(*i)->accept(v);
+		(*i)->accept(v, func);
 	}
 }

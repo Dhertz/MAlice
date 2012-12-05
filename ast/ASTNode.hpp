@@ -22,7 +22,9 @@ public:
     boost::weak_ptr<ASTNode> getParent();
     virtual string getNodeName() = 0;
     virtual void print() = 0;
+    // For nodes that don't have a function as a parent (Prog, FuncDec, ProcDec)
     virtual void accept(boost::shared_ptr<ASTVisitor> v);
+    // For nodes that do have a function as a parent
     virtual void accept(boost::shared_ptr<ASTVisitor> v, boost::shared_ptr<AssemFunc> func);
 };
 

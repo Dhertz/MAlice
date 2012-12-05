@@ -10,11 +10,14 @@ list<AssemCom> _comms;
 int stackPointer;
 vector<string> usedRegs;
 public:
+	AssemFunc();
 	void addFront(string name, vector<string> args);
 	void addBack(string name, vector<string> args);
-	void setStackPointer(int i);
-	int getStackPointer();
+	void addListBack(list<AssemCom> l);
+	void increaseStackPointer(int i);
+	int  getStackPointer();
 	void finalise();
+	list<AssemCom> getComms();
 };
 
 #endif
