@@ -202,14 +202,14 @@ void ASTVisitor::visitVarDec(string typeName, string varName,
 
 void ASTVisitor::visitInc(boost::shared_ptr<ExprAST> expr, 
 							boost::shared_ptr<SymbolTable> st) {
-	boost::tuple< string, list<AssemCom>, vector<string> > res
+	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
 	  = ExprGen::generateExpression(expr->getRoot(), st, _freeRegs);
-	string resultReg = res.get<0>();
+	string resultReg = res->get<0>();
 
-	list<AssemCom> exprInstrs = res.get<1>();
+	list<AssemCom> exprInstrs = res->get<1>();
 	_instrs.splice(_instrs.end(), exprInstrs);
 
-	_freeRegs = res.get<2>();
+	_freeRegs = res->get<2>();
 
 	vector<string> incArgs;
 	incArgs.push_back(resultReg);
@@ -221,14 +221,14 @@ void ASTVisitor::visitInc(boost::shared_ptr<ExprAST> expr,
 
 void ASTVisitor::visitDec(boost::shared_ptr<ExprAST> expr,
 							boost::shared_ptr<SymbolTable> st) {
-	boost::tuple< string, list<AssemCom>, vector<string> > res
+	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
 	  = ExprGen::generateExpression(expr->getRoot(), st, _freeRegs);
-	string resultReg = res.get<0>();
+	string resultReg = res->get<0>();
 
-	list<AssemCom> exprInstrs = res.get<1>();
+	list<AssemCom> exprInstrs = res->get<1>();
 	_instrs.splice(_instrs.end(), exprInstrs);
 
-	_freeRegs = res.get<2>();
+	_freeRegs = res->get<2>();
 
 	vector<string> decArgs;
 	decArgs.push_back(resultReg);
@@ -242,11 +242,11 @@ void ASTVisitor::visitDec(boost::shared_ptr<ExprAST> expr,
 void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr, 
 							  boost::shared_ptr<SymbolTable> st) {
 
-	boost::tuple< string, list<AssemCom>, vector<string> > res
+	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
 	  = ExprGen::generateExpression(expr->getRoot(), st, _freeRegs);
 
-	_freeRegs = res.get<2>();
-	string resultReg = res.get<0>();
+	_freeRegs = res->get<2>();
+	string resultReg = res->get<0>();
 
 	Label strLbl;
 	_endDefs.push_back(AssemCom(strLbl.getLabel() + ":", 0 , std::vector<string>()));
@@ -268,7 +268,7 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 
 		//_instrs.push_back(AssemCom("push", 1, push1));						
 
-		list<AssemCom> exprInstrs = res.get<1>();
+		list<AssemCom> exprInstrs = res->get<1>();
 		_instrs.splice(_instrs.end(), exprInstrs);								// expr isntrs
 
 		vector<string> movArgs;
@@ -278,7 +278,7 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 	} else {
 		//_instrs.push_back(AssemCom("push", 1, push0));						
 
-		list<AssemCom> exprInstrs = res.get<1>();
+		list<AssemCom> exprInstrs = res->get<1>();
 		_instrs.splice(_instrs.end(), exprInstrs);								// expr instrs
 	}
 
@@ -311,11 +311,11 @@ void ASTVisitor::visitReturn(boost::shared_ptr<ExprAST> expr,
 
 void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr, 
 							  boost::shared_ptr<SymbolTable> st) {
-	boost::tuple< string, list<AssemCom>, vector<string> > res
+	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
 	  = ExprGen::generateExpression(expr->getRoot(), st, _freeRegs);
 
-	_freeRegs = res.get<2>();
-	string resultReg = res.get<0>();
+	_freeRegs = res->get<2>();
+	string resultReg = res->get<0>();
 
 	// non-sentence case atm
 
@@ -389,12 +389,12 @@ void ASTVisitor::visitWhile(boost::shared_ptr<ExprAST> cond,
 		(*i)->accept(shared_from_this());
 	}
 
-	boost::tuple< string, list<AssemCom>, vector<string> > res
+	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
 	  = ExprGen::generateExpression(cond->getRoot(), st, _freeRegs);
-	string resultReg = res.get<0>();
-	_freeRegs = res.get<2>();
+	string resultReg = res->get<0>();
+	_freeRegs = res->get<2>();
 
-	list<AssemCom> condInstrs = res.get<1>();
+	list<AssemCom> condInstrs = res->get<1>();
 	_instrs.splice(_instrs.end(), condInstrs);
 
 	vector<string> cmpArgs;
@@ -415,12 +415,12 @@ void ASTVisitor::visitChoice(boost::shared_ptr<ExprAST> cond,
 							   boost::shared_ptr<SymbolTable> st) {
 	Label elseLabel;
 
-	boost::tuple< string, list<AssemCom>, vector<string> > res
+	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
 	  = ExprGen::generateExpression(cond->getRoot(), st, _freeRegs);
-	string resultReg = res.get<0>();
-	_freeRegs = res.get<2>();
+	string resultReg = res->get<0>();
+	_freeRegs = res->get<2>();
 
-	list<AssemCom> condInstrs = res.get<1>();
+	list<AssemCom> condInstrs = res->get<1>();
 	_instrs.splice(_instrs.end(), condInstrs);
 
 	std::vector<string> cmpArgs;
@@ -457,12 +457,12 @@ void ASTVisitor::visitIf(boost::shared_ptr<ExprAST> cond,
 
 	Label elseLabel;
 
-	boost::tuple< string, list<AssemCom>, vector<string> > res
+	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
 	  = ExprGen::generateExpression(cond->getRoot(), st, _freeRegs);
-	string resultReg = res.get<0>();
-	_freeRegs = res.get<2>();
+	string resultReg = res->get<0>();
+	_freeRegs = res->get<2>();
 
-	list<AssemCom> condInstrs = res.get<1>();
+	list<AssemCom> condInstrs = res->get<1>();
 	_instrs.splice(_instrs.end(), condInstrs);
 
 	vector<string> cmpArgs;
@@ -506,12 +506,12 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 
 	string loc = var->getAssLoc();
 
-	boost::tuple< string, list<AssemCom>, vector<string> > res 
+	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res 
 	  = ExprGen::generateExpression(expr->getRoot(), st, _freeRegs);
 	if (var->getTypeName()->getTypeName() == "Sentence") {
 
 		vector<string> asciiArg;
-		asciiArg.push_back(res.get<0>());
+		asciiArg.push_back(res->get<0>());
 		if (loc == "") {
 			Label strLbl;
 			_endDefs.push_back(AssemCom(strLbl.getLabel() + ":", 0 , std::vector<string>()));
@@ -530,9 +530,9 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 		}
 
 	} else {
-		string rhs = res.get<0>();
-		list<AssemCom> exprInstrs = res.get<1>();
-		_freeRegs = res.get<2>();
+		string rhs = res->get<0>();
+		list<AssemCom> exprInstrs = res->get<1>();
+		_freeRegs = res->get<2>();
 
 		_instrs.splice(_instrs.end(), exprInstrs);
 
@@ -569,12 +569,12 @@ void ASTVisitor::visitFuncCall(string name,
 	for (it = exprs.begin(); it != exprs.end(); ++it) {
 		pANTLR3_BASE_TREE cp = (*it)->getRoot();
 
-		boost::tuple< string, list<AssemCom>, vector<string> > genParam
+		boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > genParam
 	  	  = ExprGen::generateExpression(cp, st, _freeRegs);
 
-	  	string paramLoc = genParam.get<0>();
-	  	list<AssemCom> pInstrs = genParam.get<1>();
-		_freeRegs = genParam.get<2>();
+	  	string paramLoc = genParam->get<0>();
+	  	list<AssemCom> pInstrs = genParam->get<1>();
+		_freeRegs = genParam->get<2>();
 	  	_instrs.splice(_instrs.end(), pInstrs);
 
 	  	if (i < 4) {
