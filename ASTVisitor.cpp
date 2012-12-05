@@ -663,7 +663,7 @@ void ASTVisitor::visitArrayAssign(string name,
 		
 	std::vector<string> str;
 	str.push_back(valReg);
-	str.push_back("[" + resultReg + "," + reg + "]");
+	str.push_back("[" + resultReg + ", " + reg + "]");
 	_instrs.push_back(AssemCom("str", 2, str));	
 	
 }
@@ -713,18 +713,14 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 			_instrs.push_back(AssemCom("mul", 3, mul));
 		}
 
-		vector<string> neg;														//negate the size to take away from fp
-		neg.push_back("r0");													//neg r0, resReg
-		neg.push_back(resultReg);
-		_instrs.push_back(AssemCom("neg", 2, neg));
-
 		string reg = _freeRegs.front();
 
-		vector<string> ldrArgs;
-		ldrArgs.push_back(reg);
+		vector<string> sub;
+		sub.push_back(reg);
 		_freeRegs.erase(_freeRegs.begin());										//make it point somewhere down the stack
-		ldrArgs.push_back("[fp, r0]");											//ldr reg, [fp, r0]
-		_instrs.push_back(AssemCom("ldr", 2, ldrArgs));
+		sub.push_back("fp");
+		sub.push_back(resultReg);											//ldr reg, [fp, r0]
+		_instrs.push_back(AssemCom("sub", 3, sub));
 		arr->setAssLoc(reg);
 	}
 }
