@@ -11,8 +11,6 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 	string tok = Utils::createStringFromTree(root);
 	list<AssemCom> instrs;
 
-	cout << "tok: " << tok << endl;
-
     if (tok == "FUNC") {
         // Inline function call
 		// Basic idea here is to evaluate all arguments, put them in the right
@@ -26,12 +24,8 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 		for (int i = 0; i < cplTree->getChildCount(cplTree); ++i) {
 			pANTLR3_BASE_TREE cp = Utils::childByNum(cplTree, i);
 
-			cout << "Recursively calculating " << i << "th argument to " << funcName << endl;
 			treble_ptr_t genParam = generateExpression(cp, st, freeRegs);
-			assert(genParam);
-			cout << "calling get<0> on " << genParam << endl;
 			string paramLoc = genParam->get<0>();
-			cout << "Got " << paramLoc << endl;
 			list<AssemCom> paramInstrs = genParam->get<1>();
 			freeRegs = genParam->get<2>();
 
@@ -117,7 +111,6 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 		treble_ptr_t ret(new treble_t("r0", instrs, freeRegs)); 
 		return ret;
     } else if (tok == "VAR") {
-    	cout << "Var case" << endl;
         // Variable reference
         // Also allowed to be an array, so that function calls with array
         //   arguments are allowed
@@ -162,18 +155,15 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					string reg = freeRegs.front();
 					freeRegs.erase(freeRegs.begin());
 
-					cout << "2returning " << reg << endl;
 					treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
 					return ret;
 				}
 			} else {
 				treble_ptr_t ret(new treble_t(loc, instrs, freeRegs));
-				string test = ret->get<0>();
-				cout << "Returning " << ret << endl;
-				cout << "get<0> on " << ret << ": " << test << endl;
 				return ret;
 			}
         }
+        cout << "var case not returning" << endl;
     } else if (tok == "ARRMEMBER") {
         // Array member reference
 
@@ -244,8 +234,12 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 		treble_ptr_t ret(new treble_t(res, instrs, freeRegs));
 		return ret;
+	} else if (tok == "EXPR") {
+		pANTLR3_BASE_TREE expr = Utils::childByNum(root, 0);
+		return generateExpression(expr, st, freeRegs);
     } else {
     	int children = root->getChildCount(root);
+    	assert (0 <= children && children < 3);
 
     	if (children == 0) {
     	    // Number base case
@@ -292,6 +286,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     				instrs.push_back(xorInstr);
 
     				treble_ptr_t ret(new treble_t(argLoc, instrs, freeRegs));
+    				return ret;
     	        } else {
     				cout << "TODO: this case (~308 in ExprGen)" << endl;
     				treble_ptr_t ret(new treble_t("TODO", instrs, freeRegs));
