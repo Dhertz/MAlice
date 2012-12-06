@@ -7,7 +7,17 @@
 typedef boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > treble_ptr_t;
 typedef boost::tuple< string, list<AssemCom>, vector<string> > treble_t;
 
+void printVector(vector<string> vec) {
+	vector<string>::const_iterator i;
+	for (i = vec.begin(); i != vec.end(); ++i) cout << *i << ' ';
+	cout << endl;
+}
+
 treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<SymbolTable> st, vector<string> freeRegs) {
+	Utils::printTree(root);
+	printVector(freeRegs);
+	cout << endl << endl << endl;
+
 	string tok = Utils::createStringFromTree(root);
 	list<AssemCom> instrs;
 

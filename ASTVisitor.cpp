@@ -523,7 +523,8 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 				loc = "TODO";
 			} else {
 				var->setAssLoc(func->getFreeRegs().front());
-				func->removeReg(var->getAssLoc());
+				// Removed to try to fix freeRegs error
+				// func->removeReg(var->getAssLoc());
 			}
 		} else if (loc[0] == '.') {
 			// global variable assignment
