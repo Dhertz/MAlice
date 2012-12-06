@@ -91,7 +91,7 @@ void AssemFunc::finalise() {
 
 }
 
-list<AssemCom> AssemFunc::getComms() {
+list<AssemCom>& AssemFunc::getComms() {
 	return _comms;
 }
 

@@ -19,7 +19,7 @@ public:
 	void increaseStackPointer(int i);
 	int  getStackPointer();
 	void finalise();
-	list<AssemCom> getComms();
+	list<AssemCom>& getComms();
 	void setFreeRegs(vector<string> v);
 	void removeReg(string reg);
 	vector<string> getFreeRegs();

@@ -95,7 +95,7 @@ public:
                          boost::shared_ptr<AssemFunc> func);
     
     vector<boost::shared_ptr<AssemFunc> > getFunctions();
-    list<AssemCom> getEndDefs();
+    list<AssemCom>& getEndDefs();
 };
 
 #endif

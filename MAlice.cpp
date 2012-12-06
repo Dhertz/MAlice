@@ -78,18 +78,19 @@ void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
     	boost::shared_ptr<ASTVisitor> treeVisitor(new ASTVisitor(globalSt));
 	    semanticTree->getRoot()->accept(treeVisitor);
 
+	    list<AssemCom> program;
+
 	    vector<boost::shared_ptr<AssemFunc> > functions 
 	    	= treeVisitor->getFunctions();
 	    vector<boost::shared_ptr<AssemFunc> >::iterator i;
 	    for (i = functions.begin(); i != functions.end(); ++i) {
 	    	(*i)->finalise();
-	    	InstructionPrinter::printList(
-	    		(*i)->getComms(),
-	    		boost::lexical_cast<string>(filename).append(".s"));
+	    	program.splice(program.end(), (*i)->getComms());
 	    }
 
-		InstructionPrinter::printList(
-			treeVisitor->getEndDefs(), 
+	    program.splice(program.end(), treeVisitor->getEndDefs());
+
+		InstructionPrinter::printList(program, 
 			boost::lexical_cast<string>(filename).append(".s"));
     }
 

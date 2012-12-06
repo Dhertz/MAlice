@@ -207,25 +207,25 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 			asciiArg.push_back(resultReg);
 			_endDefs.push_back(AssemCom(".asciz", 1, asciiArg));
 		}
-	} else if (resultReg != "r1") {
+	} else {
 		vector<string> asciiArg;
 		asciiArg.push_back("\"%i\"");
 		_endDefs.push_back(AssemCom(".asciz", 1, asciiArg));
 
 		func->addListBack(res->get<1>());										// expr instrs
 
-		if (!func->regIsFree("r1")) {
-			vector<string> pushArg;
-			pushArg.push_back("{r1}");
-			func->addBack("push", pushArg);	
-		}																		// push {r1}
+		if (resultReg != "r1") {
+			if (!func->regIsFree("r1")) {
+				vector<string> pushArg;
+				pushArg.push_back("{r1}");
+				func->addBack("push", pushArg);	
+			}																	// push {r1}
 
-		vector<string> movArgs;
-		movArgs.push_back("r1");
-		movArgs.push_back(resultReg);
-		func->addBack("mov", movArgs);											// mov r1 resultReg
-	} else {
-		func->addListBack(res->get<1>());										// expr instrs
+			vector<string> movArgs;
+			movArgs.push_back("r1");
+			movArgs.push_back(resultReg);
+			func->addBack("mov", movArgs);										// mov r1 resultReg
+		}
 	}
 
 	if (!func->regIsFree("r0")) {
@@ -285,7 +285,7 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 
 	// non-sentence case atm
 
-	if (expr->getType()->getTypeName() == "String"){
+	if (expr->getType()->getTypeName() == "Sentence"){
 		
 		func->increaseStackPointer(260);
 		string sp = boost::lexical_cast<string>(func->getStackPointer());
@@ -672,6 +672,6 @@ vector<boost::shared_ptr<AssemFunc> > ASTVisitor::getFunctions() {
 	return _functions;
 }
 
-list<AssemCom> ASTVisitor::getEndDefs() {
+list<AssemCom>& ASTVisitor::getEndDefs() {
 	return _endDefs;
 }
