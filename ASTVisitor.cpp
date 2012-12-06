@@ -252,7 +252,12 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 			vector<string> ldrArgs;
 			ldrArgs.push_back("r1");
 			ldrArgs.push_back(resultReg);
-			func->addBack("ldr", ldrArgs);										// mov ldr resultReg
+			func->addBack("ldr", ldrArgs);
+
+			vector<string> ldr1Args;
+			ldr1Args.push_back("r1");
+			ldr1Args.push_back("[r1]");
+			func->addBack("ldr", ldr1Args);										// mov ldr resultReg
 		}
 
 	}
