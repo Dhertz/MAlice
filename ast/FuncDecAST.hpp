@@ -21,7 +21,6 @@ public:
     string getFuncName();
     void print();
     void accept(boost::shared_ptr<ASTVisitor> v);
-    string checkFunctionName(string name, boost::shared_ptr<SymbolTable> st);
 };
 
 #endif

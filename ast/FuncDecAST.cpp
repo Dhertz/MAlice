@@ -50,8 +50,6 @@ void FuncDecAST::check() {
             }
         }
 
-        _name = checkFunctionName(_name, _st->getEncSymTable());
-
         boost::shared_ptr<Type> typeCasted =
           boost::shared_polymorphic_downcast<Type>(type);
         boost::shared_ptr<Function> f(new Function(_st, v, typeCasted));
@@ -74,16 +72,4 @@ void FuncDecAST::print() {
 
 void FuncDecAST::accept(boost::shared_ptr<ASTVisitor> v) {
   	v->visitFuncDec(_name, _returnType, _params, _children, _st);
-}
-
-string FuncDecAST::checkFunctionName(string name, boost::shared_ptr<SymbolTable> st) {
-	boost::shared_ptr<Identifier> ident 
-	  = st->lookupCurrLevelAndEnclosingLevels(name);
-
-	if (ident && ident->getBaseName() == "Callable") {
-		std::ostringstream s;
-		s << name << "2";
-		return s.str();
-	}
-	return name;
 }

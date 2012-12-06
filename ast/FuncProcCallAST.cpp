@@ -1,5 +1,6 @@
 #include "FuncProcCallAST.hpp"
 #include <boost/lexical_cast.hpp>
+#include "ProcDecAST.hpp"
 
 FuncProcCallAST::FuncProcCallAST(boost::shared_ptr<SymbolTable> st, string name,
                    boost::shared_ptr<CallParamsAST> params,
@@ -13,6 +14,7 @@ FuncProcCallAST::FuncProcCallAST(boost::shared_ptr<SymbolTable> st, string name,
 }
 
 void FuncProcCallAST::check() {
+	_name = checkHatta();
     boost::shared_ptr<Identifier> function =
       _st->lookupCurrLevelAndEnclosingLevels(_name);
 
@@ -71,4 +73,20 @@ void FuncProcCallAST::print() {
 
 void FuncProcCallAST::accept(boost::shared_ptr<ASTVisitor> v, boost::shared_ptr<AssemFunc> func) {
   	v->visitFuncCall(_name, _params, _st, func);
+}
+
+string FuncProcCallAST::checkHatta() {
+	// make sure that hatta methods are named uniquely (makes life much simpler
+	// in codegen)
+
+	if (_name == "hatta") {
+		boost::shared_ptr<Identifier> name =
+	      _st->getEncSymTable()->lookupCurrLevelAndEnclosingLevels(_name);
+
+	    if (name) {
+	    	// nested function named hatta
+	    	return "hatta" + boost::lexical_cast<string>(ProcDecAST::hattaNum);
+	    }
+	}
+	return _name;
 }

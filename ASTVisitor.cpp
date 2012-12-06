@@ -269,13 +269,14 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 
 	}
 
-	if (!func->regIsFree("r0")) {
+	if (!func->regIsFree("r0") && resultReg[0] == '\"') {
 		vector<string> push0Arg;
 		push0Arg.push_back("{r0}");
 		func->addBack("push", push0Arg);										// push {r0}
 	}
 
-	if (resultReg[0] == '\"') {
+	if ((expr->getType()->getTypeName() == "Sentence" && resultReg[0] == '\"') 
+		|| !(expr->getType()->getTypeName() == "Sentence")) {
 		vector<string> ldrArgs;
 		ldrArgs.push_back("r0");
 		ldrArgs.push_back("=" + strLbl.getLabel());
@@ -286,7 +287,7 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 	printArg.push_back("printf");
 	func->addBack("bl", printArg);												// bl printf
 
-	if (!func->regIsFree("r0")) {
+	if (!func->regIsFree("r0") && resultReg[0] == '\"') {
 		vector<string> pop0Arg;
 		pop0Arg.push_back("{r0}");
 		func->addBack("pop", pop0Arg);											// pop {r0}
