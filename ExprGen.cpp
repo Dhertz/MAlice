@@ -227,19 +227,12 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 			treble_ptr_t ret(new treble_t("TODO", instrs, freeRegs));
 			return ret;
 		}
-    } else if (tok == "\"") {
+    } else if (tok == "STR") {
         // String of form "foo", evaluates to a Sentence
 
     	assert(root->getChildCount(root) > 0);
 
-    	string res = "\"" + Utils::createStringFromTree(Utils::childByNum(root, 0));
-
-    	for (int i = 1; i < root->getChildCount(root); ++i) {
-    		res.append(
-    		  " " + Utils::createStringFromTree(Utils::childByNum(root, i)));
-    	}
-
-    	res.append("\"");
+    	string res = Utils::createStringFromTree(Utils::childByNum(root, 0));
 
 		treble_ptr_t ret(new treble_t(res, instrs, freeRegs));
 		return ret;
