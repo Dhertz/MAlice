@@ -812,6 +812,14 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 		}
 		arr->setAssLoc(reg);
 
+		int len = ExprGen::evaluateExpression(length->getRoot(), st);
+
+		if (type->getTypeName() == "Number") {
+			len *= 4;
+		}
+
+		func->increaseStackPointer(len);
+		string sp = boost::lexical_cast<string>(func->getStackPointer());
 		//make it point somewhere down the stack
 		vector<string> sub;
 		sub.push_back(reg);
