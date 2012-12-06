@@ -13,7 +13,7 @@ void printVector(vector<string> vec) {
 	cout << endl;
 }
 
-treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<SymbolTable> st, vector<string> freeRegs) {
+treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<SymbolTable> st, vector<string> freeRegs, boost::shared_ptr<AssemFunc> func) {
 	/* Utils::printTree(root);
 	printVector(freeRegs);
 	cout << endl << endl << endl; */
@@ -34,7 +34,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 		for (int i = 0; i < cplTree->getChildCount(cplTree); ++i) {
 			pANTLR3_BASE_TREE cp = Utils::childByNum(cplTree, i);
 
-			treble_ptr_t genParam = generateExpression(cp, st, freeRegs);
+			treble_ptr_t genParam = generateExpression(cp, st, freeRegs, func);
 			string paramLoc = genParam->get<0>();
 			list<AssemCom> paramInstrs = genParam->get<1>();
 			freeRegs = genParam->get<2>();
@@ -185,7 +185,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 		pANTLR3_BASE_TREE index = Utils::childByNum(root, 1);
 
-		treble_ptr_t genIndex = generateExpression(index, st, freeRegs);
+		treble_ptr_t genIndex = generateExpression(index, st, freeRegs, func);
 		string indexLoc = genIndex->get<0>();
 		list<AssemCom> indexInstrs = genIndex->get<1>();
 		// Don't need to update freeRegs as long as indexLoc isn't used below
@@ -230,15 +230,13 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     } else if (tok == "STR") {
         // String of form "foo", evaluates to a Sentence
 
-    	assert(root->getChildCount(root) > 0);
-
     	string res = Utils::createStringFromTree(Utils::childByNum(root, 0));
 
 		treble_ptr_t ret(new treble_t(res, instrs, freeRegs));
 		return ret;
 	} else if (tok == "EXPR") {
 		pANTLR3_BASE_TREE expr = Utils::childByNum(root, 0);
-		return generateExpression(expr, st, freeRegs);
+		return generateExpression(expr, st, freeRegs, func);
     } else {
     	int children = root->getChildCount(root);
     	assert (0 <= children && children < 3);
@@ -271,7 +269,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     	    string op = Utils::createStringFromTree(root);
     	    pANTLR3_BASE_TREE arg = Utils::childByNum(root, 0);
 
-    		treble_ptr_t argEval = generateExpression(arg, st, freeRegs);
+    		treble_ptr_t argEval = generateExpression(arg, st, freeRegs, func);
     		string argLoc = argEval->get<0>();
     		list<AssemCom> argInstrs = argEval->get<1>();
     		freeRegs = argEval->get<2>();
@@ -365,14 +363,14 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 		    string op = Utils::createStringFromTree(root);
 
 		    pANTLR3_BASE_TREE lhs = Utils::childByNum(root, 0);
-			treble_ptr_t lhsEval = generateExpression(lhs, st, freeRegs);
+			treble_ptr_t lhsEval = generateExpression(lhs, st, freeRegs, func);
 			string lhsLoc = lhsEval->get<0>();
 			list<AssemCom> lhsInstrs = lhsEval->get<1>();
 			freeRegs = lhsEval->get<2>();
 			instrs.splice(instrs.end(), lhsInstrs);
 
 			pANTLR3_BASE_TREE rhs = Utils::childByNum(root, 1);
-			treble_ptr_t rhsEval = generateExpression(rhs, st, freeRegs);
+			treble_ptr_t rhsEval = generateExpression(rhs, st, freeRegs, func);
 			string rhsLoc = rhsEval->get<0>();
 			list<AssemCom> rhsInstrs = rhsEval->get<1>();
 			freeRegs = rhsEval->get<2>();

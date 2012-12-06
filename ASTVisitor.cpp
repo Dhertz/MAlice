@@ -169,7 +169,7 @@ void ASTVisitor::visitInc(boost::shared_ptr<ExprAST> expr,
 							boost::shared_ptr<SymbolTable> st,
 							boost::shared_ptr<AssemFunc> func) {
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
-	  = ExprGen::generateExpression(expr->getRoot(), st, func->getFreeRegs());
+	  = ExprGen::generateExpression(expr->getRoot(), st, func->getFreeRegs(), func);
 	string resultReg = res->get<0>();
 	func->addListBack(res->get<1>());
 	func->setFreeRegs(res->get<2>());
@@ -184,7 +184,7 @@ void ASTVisitor::visitDec(boost::shared_ptr<ExprAST> expr,
 							boost::shared_ptr<SymbolTable> st,
 							boost::shared_ptr<AssemFunc> func) {
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
-	  = ExprGen::generateExpression(expr->getRoot(), st, func->getFreeRegs());
+	  = ExprGen::generateExpression(expr->getRoot(), st, func->getFreeRegs(), func);
 	string resultReg = res->get<0>();
 	func->addListBack(res->get<1>());
 	func->setFreeRegs(res->get<2>());
@@ -201,7 +201,7 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 							  boost::shared_ptr<AssemFunc> func) {
 
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
-	  = ExprGen::generateExpression(expr->getRoot(), st, func->getFreeRegs());
+	  = ExprGen::generateExpression(expr->getRoot(), st, func->getFreeRegs(), func);
 
 	func->setFreeRegs(res->get<2>());
 	string resultReg = res->get<0>();
@@ -306,7 +306,7 @@ void ASTVisitor::visitReturn(boost::shared_ptr<ExprAST> expr,
 							   boost::shared_ptr<SymbolTable> st,
 							   boost::shared_ptr<AssemFunc> func) {
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
-	  = ExprGen::generateExpression(expr->getRoot(), st, func->getFreeRegs());
+	  = ExprGen::generateExpression(expr->getRoot(), st, func->getFreeRegs(), func);
 
 	string resultReg = res->get<0>();
 	func->addListBack(res->get<1>());
@@ -328,7 +328,7 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 							  boost::shared_ptr<SymbolTable> st,
 							  boost::shared_ptr<AssemFunc> func) {
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
-	  = ExprGen::generateExpression(expr->getRoot(), st, func->getFreeRegs());
+	  = ExprGen::generateExpression(expr->getRoot(), st, func->getFreeRegs(), func);
 
 	func->setFreeRegs(res->get<2>());
 	string resultReg = res->get<0>();
@@ -410,7 +410,7 @@ void ASTVisitor::visitWhile(boost::shared_ptr<ExprAST> cond,
 	}
 
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
-	  = ExprGen::generateExpression(cond->getRoot(), st, func->getFreeRegs());
+	  = ExprGen::generateExpression(cond->getRoot(), st, func->getFreeRegs(), func);
 	string resultReg = res->get<0>();
 	func->setFreeRegs(res->get<2>());
 	func->addListBack(res->get<1>());											// expr instrs
@@ -433,7 +433,7 @@ void ASTVisitor::visitChoice(boost::shared_ptr<ExprAST> cond,
 	Label elseLabel;
 
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
-	  = ExprGen::generateExpression(cond->getRoot(), st, func->getFreeRegs());
+	  = ExprGen::generateExpression(cond->getRoot(), st, func->getFreeRegs(), func);
 	string resultReg = res->get<0>();
 	func->addListBack(res->get<1>());
 	func->setFreeRegs(res->get<2>());
@@ -470,7 +470,7 @@ void ASTVisitor::visitIf(boost::shared_ptr<ExprAST> cond,
 	Label elseLabel;
 
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
-	  = ExprGen::generateExpression(cond->getRoot(), st, func->getFreeRegs());
+	  = ExprGen::generateExpression(cond->getRoot(), st, func->getFreeRegs(), func);
 
 	string resultReg = res->get<0>();
 	func->addListBack(res->get<1>());
@@ -514,7 +514,7 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 	  = boost::shared_polymorphic_downcast<Variable>(varIdent);
 
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res 
-	  = ExprGen::generateExpression(expr->getRoot(), st, func->getFreeRegs());
+	  = ExprGen::generateExpression(expr->getRoot(), st, func->getFreeRegs(), func);
 
 	string loc = var->getAssLoc();
 
@@ -602,7 +602,7 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 	_globalInlines.push_back(AssemCom("ldr", ldArgs));							// ldr wordLoc loc
 
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res 
-	  = ExprGen::generateExpression(expr->getRoot(), st, freeRegs);
+	  = ExprGen::generateExpression(expr->getRoot(), st, freeRegs, boost::shared_ptr<AssemFunc>());
 	if (var->getTypeName()->getTypeName() == "Sentence") {
 		vector<string> asciiArg;
 		asciiArg.push_back(res->get<0>());
@@ -650,7 +650,7 @@ void ASTVisitor::visitFuncCall(string name,
 		pANTLR3_BASE_TREE cp = (*it)->getRoot();
 
 		boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > genParam
-	  	  = ExprGen::generateExpression(cp, st, func->getFreeRegs());
+	  	  = ExprGen::generateExpression(cp, st, func->getFreeRegs(), func);
 
 	  	string paramLoc = genParam->get<0>();
 		func->addListBack(genParam->get<1>());
@@ -732,7 +732,7 @@ void ASTVisitor::visitArrayAssign(string name,
 	boost::shared_ptr<Array> arr =  
 				boost::shared_polymorphic_downcast<Array>(arrIdent);
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > ind
-	  			= ExprGen::generateExpression(index->getRoot(), st, func->getFreeRegs());
+	  			= ExprGen::generateExpression(index->getRoot(), st, func->getFreeRegs(), func);
 	
 	string resultReg = ind->get<0>();
 
@@ -748,7 +748,7 @@ void ASTVisitor::visitArrayAssign(string name,
 	string reg = arr->getAssLoc();
 
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > val
-	  		= ExprGen::generateExpression(value->getRoot(), st, func->getFreeRegs());
+	  		= ExprGen::generateExpression(value->getRoot(), st, func->getFreeRegs(), func);
 	string valReg = val->get<0>();
 	func->addListBack(val->get<1>());
 		
@@ -767,7 +767,7 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 	boost::shared_ptr<Array> arr =  
 			boost::shared_polymorphic_downcast<Array>(arrIdent);
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
-  			= ExprGen::generateExpression(length->getRoot(), st, func->getFreeRegs());
+  			= ExprGen::generateExpression(length->getRoot(), st, func->getFreeRegs(), func);
 	string resultReg = res->get<0>();
 	func->addListBack(res->get<1>());
 	
