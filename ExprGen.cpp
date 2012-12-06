@@ -277,46 +277,67 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     		instrs.splice(instrs.end(), argInstrs);
 
     		if (op == "!") {
-    	        if (argLoc[0] == 'r') {
-    				// xor argLoc, argLoc, #1
-    				vector<string> args;
-    				args.push_back(argLoc);
-    				args.push_back(argLoc);
-    				args.push_back("#1");
-    				AssemCom xorInstr("xor", args.size(), args);
-    				instrs.push_back(xorInstr);
+			    if (!freeRegs.empty()) {
+			    	string reg = freeRegs.front();
+					freeRegs.erase(freeRegs.begin());
 
-    				treble_ptr_t ret(new treble_t(argLoc, instrs, freeRegs));
-    				return ret;
-    	        } else {
-    				cout << "TODO: this case (~308 in ExprGen)" << endl;
-    				treble_ptr_t ret(new treble_t("TODO", instrs, freeRegs));
-    				return ret;
-    	        }
+					// xor reg, argLoc, #1
+					vector<string> args;
+					args.push_back(reg);
+					args.push_back(argLoc);
+					args.push_back("#1");
+					AssemCom xorInstr("xor", args.size(), args);
+					instrs.push_back(xorInstr);
+
+					treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
+					return ret;
+				} else {
+					cout << "TODO: this case (~295 in ExprGen)" << endl;
+					treble_ptr_t ret(new treble_t("TODO", instrs, freeRegs));
+					return ret;
+				}
     		} else if (op == "~") {
-    	        if (argLoc[0] == 'r') {
-    				// mvn argLoc, argLoc
-    				vector<string> args;
-    				args.push_back(argLoc);
-    				args.push_back(argLoc);
-    				AssemCom mvn("mvn", args.size(), args);
-    				instrs.push_back(mvn);
+			    if (!freeRegs.empty()) {
+			    	string reg = freeRegs.front();
+					freeRegs.erase(freeRegs.begin());
 
-    				treble_ptr_t ret(new treble_t(argLoc, instrs, freeRegs));
-    				return ret;
-    	        } else {
-    				cout << "TODO: this case (~322 in ExprGen)" << endl;
-    				treble_ptr_t ret(new treble_t("TODO", instrs, freeRegs));
-    				return ret;
-    	        }
+					// mvn reg, argLoc
+					vector<string> args;
+					args.push_back(reg);
+					args.push_back(argLoc);
+					AssemCom mvn("mvn", args.size(), args);
+					instrs.push_back(mvn);
+
+					treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
+					return ret;
+				} else {
+					cout << "TODO: this case (~317 in ExprGen)" << endl;
+					treble_ptr_t ret(new treble_t("TODO", instrs, freeRegs));
+					return ret;
+				}
     		} else if (op == "+" || op == "-") {
-    	        if (argLoc[0] == 'r') {
-    	        	// cmp argLoc, #0
-    				// neglt argLoc, argLoc (+ case)
-    				// neglt argLoc, argLoc (- case)
+			    if (!freeRegs.empty()) {
+			    	string reg = freeRegs.front();
+					freeRegs.erase(freeRegs.begin());
+
+					// unary +:
+					// mov reg, argLoc
+    	        	// cmp reg, #0
+    				// neglt reg, reg
+
+					// unary -:
+					// mov reg, argLoc
+					// cmp reg, #0
+    				// neggt reg, reg
 
     				vector<string> args;
+    				args.push_back(reg);
     				args.push_back(argLoc);
+    				AssemCom mov("mov", args.size(), args);
+    				instrs.push_back(mov);
+
+    				args.clear();
+    				args.push_back(reg);
     				args.push_back("#0");
     				AssemCom cmp("cmp", args.size(), args);
     				instrs.push_back(cmp);
@@ -324,18 +345,18 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     				string negInstr = (op == "+") ? "neglt" : "neggt";
 
     				args.clear();
-    				args.push_back(argLoc);
-    				args.push_back(argLoc);
+    				args.push_back(reg);
+    				args.push_back(reg);
     				AssemCom neg(negInstr, args.size(), args);
     				instrs.push_back(neg);
 
-    				treble_ptr_t ret(new treble_t(argLoc, instrs, freeRegs));
+    				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
     				return ret;
-    	        } else {
-    				cout << "TODO: this case (~347 in ExprGen)" << endl;
-    				treble_ptr_t ret(new treble_t("TODO", instrs, freeRegs));
-    				return ret;
-    	        }
+				} else {
+					cout << "TODO: this case (~317 in ExprGen)" << endl;
+					treble_ptr_t ret(new treble_t("TODO", instrs, freeRegs));
+					return ret;
+				}
     	    }
     	} else if (children == 2) {
 			// Binary operator
