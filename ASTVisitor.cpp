@@ -69,27 +69,31 @@ void ASTVisitor::visitFuncDec(string name, string returnType,
 								boost::shared_ptr<SymbolTable> st) {
 	boost::shared_ptr<AssemFunc> func(new AssemFunc(name));
 	_functions.push_back(func);
+	vector< boost::shared_ptr<Param> > v = params->getParams();
+    vector< boost::shared_ptr<Param> >::iterator param;
 
-	pANTLR3_BASE_TREE paramTree = params->getTree();
-
-	for (int i = 1; i < paramTree->getChildCount(paramTree); i+=2) {
-		string paramName = 
-			Utils::createStringFromTree(Utils::childByNum(paramTree, i));
-
-		boost::shared_ptr<Identifier> id = st->lookupCurrLevelOnly(paramName);
-
-		// Pretty sure I don't have to check anything due to semantic analysis
-		boost::shared_ptr<Variable> p 
-		  = boost::shared_polymorphic_downcast<Variable>(id);
-
-		int rNum = ((i + 1) / 2) - 1;
-		p->setAssLoc("r" + boost::lexical_cast<string>(rNum));
-
-		func->removeReg("r" + boost::lexical_cast<string>(rNum));
+    int i = 0;
+    for (param = v.begin(); param != v.end(); ++param, ++i) {
+       	boost::shared_ptr<Identifier> id = 
+       		st->lookupCurrLevelOnly((*param)->getName());
+        
+        if ((*param)->getType()->getTypeName() == "Array") {
+            boost::shared_ptr<Array> a 
+            	= boost::shared_polymorphic_downcast<Array>(id);
+            int rNum = ((i + 1) / 2) - 1;
+			a->setAssLoc("r" + boost::lexical_cast<string>(rNum));
+			func->removeReg("r" + boost::lexical_cast<string>(rNum));
+        } else {
+            boost::shared_ptr<Variable> v 
+            	= boost::shared_polymorphic_downcast<Variable>(id);
+            int rNum = ((i + 1) / 2) - 1;
+			v->setAssLoc("r" + boost::lexical_cast<string>(rNum));
+			func->removeReg("r" + boost::lexical_cast<string>(rNum));
+    	}
 	}
 
 	vector<int> callableKids;
-	int i = 0;
+	i = 0;
 	vector<boost::shared_ptr<ASTNode> >::iterator it;							// function body
 	for (it = children.begin(); it != children.end(); ++it) {
 		if ((*it)->getNodeName() == "FuncDec" 
@@ -626,17 +630,16 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 			length *= 4;
 		}
 
-		ostringstream convert;
-		convert << length;      
+		string convert = boost::lexical_cast<string>(length);      
 
-		comm.push_back(convert.str());
+		comm.push_back(convert);
 		func->addBack(".comm", comm);
 		Label l;
 		func->addBack(l.getLabel() + ":", std::vector<string>());
 		std::vector<string> word;
 		word.push_back(name);
 		func->addBack(".word", word);
-		arr->setAssLoc(l.getLabel());						
+		arr->setAssLoc(l.getLabel());
 	} else {
 		boost::shared_ptr<Identifier> arrIdent = 
 			st->lookupCurrLevelAndEnclosingLevels(name);
@@ -657,15 +660,21 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 		}
 
 		string reg = func->getFreeRegs().front();
+		if (func->getFreeRegs().empty()) {
+			// TODO: memory allocation
+			reg = "TODO";
+		} else {
+			reg = func->getFreeRegs().front();
+			func->removeReg(reg);
+		}
+		arr->setAssLoc(reg);
 
 		//make it point somewhere down the stack
 		vector<string> sub;
 		sub.push_back(reg);
-		func->getFreeRegs().erase(func->getFreeRegs().begin());
 		sub.push_back("fp");
 		sub.push_back(resultReg);
 		func->addBack("sub", sub);
-		arr->setAssLoc(reg);
 	}
 }
 
