@@ -313,12 +313,6 @@ void ASTVisitor::visitReturn(boost::shared_ptr<ExprAST> expr,
 	func->setFreeRegs(res->get<2>());
 
 	if (resultReg != "r0") {
-		if (!func->regIsFree("r0")) {
-			vector<string> pushArg;
-			pushArg.push_back("{r0}");
-			func->addBack("push", pushArg);	
-		}																		// push {r0}
-
 		vector<string> movArgs;
 		movArgs.push_back("r0");
 		movArgs.push_back(resultReg);
