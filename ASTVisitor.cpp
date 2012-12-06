@@ -328,8 +328,8 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 
 		vector<string> ldr0Args;
 		ldr0Args.push_back("r0");
-		ldr0Args.push_back("=" + strLbl.getLabel());
-		func->addBack("ldr", ldr0Args);											// ldr r0 =strLbl
+		ldr0Args.push_back(strLbl.getLabel());
+		func->addBack("ldr", ldr0Args);											// ldr r0 strLbl
 
 		vector<string> ldr1Args;
 		ldr1Args.push_back("r1");
