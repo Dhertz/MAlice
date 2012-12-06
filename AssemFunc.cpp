@@ -64,6 +64,11 @@ void AssemFunc::finalise() {
 		addFront("stmfd", args);
 
 		args.clear();
+		args.push_back("r0");
+		args.push_back("#0");
+		addBack("mov", args);
+
+		args.clear();
 		args.push_back("sp!");
 		args.push_back("{fp, pc}");
 		addBack("ldmfd", args);
@@ -77,6 +82,11 @@ void AssemFunc::finalise() {
 		args.push_back("sp!");
 		args.push_back("{r4-r10, fp, lr}");
 		addFront("stmfd", args);
+
+		args.clear();
+		args.push_back("r0");
+		args.push_back("#0");
+		addBack("mov", args);
 
 		args.clear();
 		args.push_back("sp!");
