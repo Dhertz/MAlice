@@ -743,63 +743,72 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 							     boost::shared_ptr<SymbolTable> st,
 							     boost::shared_ptr<AssemFunc> func) {
 	boost::shared_ptr<Identifier> arrIdent = 
-										_globalSt->lookupCurrLevelOnly(name);
+		st->lookupCurrLevelAndEnclosingLevels(name);
 	boost::shared_ptr<Array> arr =  
 			boost::shared_polymorphic_downcast<Array>(arrIdent);
-	if (arrIdent) {
-		std::vector<string> comm;
-		comm.push_back(name);
-		int length = 0; //ToDo:make method to calculate.
-		if (type->getTypeName() == "Number") {
-			length *= 4;
-		}
-
-		string convert = boost::lexical_cast<string>(length);      
-
-		comm.push_back(convert);
-		func->addBack(".comm", comm);
-		Label l;
-		func->addBack(l.getLabel() + ":", std::vector<string>());
-		std::vector<string> word;
-		word.push_back(name);
-		func->addBack(".word", word);
-		arr->setAssLoc(l.getLabel());
-	} else {
-		boost::shared_ptr<Identifier> arrIdent = 
-			st->lookupCurrLevelAndEnclosingLevels(name);
-		boost::shared_ptr<Array> arr =  
-				boost::shared_polymorphic_downcast<Array>(arrIdent);
-		boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
-	  			= ExprGen::generateExpression(length->getRoot(), st, func->getFreeRegs());
-		string resultReg = res->get<0>();
-		func->addListBack(res->get<1>());
-		
-		//make it bigger for integers
-		if (type->getTypeName() == "Number") {
-			std::vector<string> mul;
-			mul.push_back(resultReg);
-			mul.push_back("4");
-			mul.push_back(resultReg);
-			func->addBack("mul", mul);											//mul resReg, 4, resReg
-		}
-
-		string reg = func->getFreeRegs().front();
-		if (func->getFreeRegs().empty()) {
-			// TODO: memory allocation
-			reg = "TODO";
-		} else {
-			reg = func->getFreeRegs().front();
-			func->removeReg(reg);
-		}
-		arr->setAssLoc(reg);
-
-		//make it point somewhere down the stack
-		vector<string> sub;
-		sub.push_back(reg);
-		sub.push_back("fp");
-		sub.push_back(resultReg);
-		func->addBack("sub", sub);
+	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
+  			= ExprGen::generateExpression(length->getRoot(), st, func->getFreeRegs());
+	string resultReg = res->get<0>();
+	func->addListBack(res->get<1>());
+	
+	//make it bigger for integers
+	if (type->getTypeName() == "Number") {
+		std::vector<string> mul;
+		mul.push_back(resultReg);
+		mul.push_back("4");
+		mul.push_back(resultReg);
+		func->addBack("mul", mul);											//mul resReg, 4, resReg
 	}
+
+	string reg = func->getFreeRegs().front();
+	if (func->getFreeRegs().empty()) {
+		// TODO: memory allocation
+		reg = "TODO";
+	} else {
+		reg = func->getFreeRegs().front();
+		func->removeReg(reg);
+	}
+	arr->setAssLoc(reg);
+
+	//make it point somewhere down the stack
+	vector<string> sub;
+	sub.push_back(reg);
+	sub.push_back("fp");
+	sub.push_back(resultReg);
+	func->addBack("sub", sub);
+
+}
+
+void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length, 
+								 boost::shared_ptr<Type> type, 
+							     boost::shared_ptr<SymbolTable> st) {
+	boost::shared_ptr<Identifier> arrIdent = 
+										_globalSt->lookupCurrLevelOnly(name);
+	cout << "Hello" << endl;
+	boost::shared_ptr<Array> arr =  
+		boost::shared_polymorphic_downcast<Array>(arrIdent);
+	std::vector<string> comm;
+	comm.push_back(name);
+	int len = ExprGen::evaluateExpression(length->getRoot(), st);
+	//assert(len == 0);
+	
+	if (type->getTypeName() == "Number") {
+		len *= 4;
+	}
+
+	string convert = boost::lexical_cast<string>(length);      
+
+	comm.push_back(convert);
+	
+	_startDefs.push_back(AssemCom(".comm", comm));
+
+	Label l;
+	_startDefs.push_back(AssemCom(l.getLabel() + ":", std::vector<string>()));
+	std::vector<string> word;
+	word.push_back(name);
+	_startDefs.push_back(AssemCom(".word", word));
+	arr->setAssLoc(l.getLabel());
+		
 }
 
 vector<boost::shared_ptr<AssemFunc> > ASTVisitor::getFunctions() {
