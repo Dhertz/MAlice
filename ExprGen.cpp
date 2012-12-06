@@ -499,9 +499,11 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					return ret;
 				}
 			} else if (op == "/") {
-				
+				treble_ptr_t ret(new treble_t("TODO", instrs, freeRegs));
+				return ret;
 			} else if (op == "%") {
-				
+				treble_ptr_t ret(new treble_t("TODO", instrs, freeRegs));
+				return ret;
 			} else if (op == "==") {
 				if (!freeRegs.empty()) {
 			    	string reg = freeRegs.front();
@@ -570,17 +572,138 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					return ret;
 				}
 			} else if (op == ">") {
-				
-			} else if (op == "<") {
-				
-			} else if (op == ">=") {
-				
-			} else if (op == "<=") {
-				
-			}
+				if (!freeRegs.empty()) {
+			    	string reg = freeRegs.front();
+					freeRegs.erase(freeRegs.begin());
 
-			treble_ptr_t ret(new treble_t("TODO", instrs, freeRegs));
-			return ret;
+					// eor reg, reg, reg
+					// cmp lhsLoc, rhsLoc
+					// movgt reg, #0x7FFFFFFF
+					vector<string> args;
+    				args.push_back(reg);
+    				args.push_back(reg);
+    				args.push_back(reg);
+    				AssemCom eor("eor", args.size(), args);
+    				instrs.push_back(eor);
+
+    				args.clear();
+    				args.push_back(lhsLoc);
+    				args.push_back(rhsLoc);
+    				AssemCom cmp("cmp", args.size(), args);
+    				instrs.push_back(cmp);
+
+    				args.push_back(reg);
+    				args.push_back("#0x7FFFFFFF");
+    				AssemCom movgt("movgt", args.size(), args);
+    				instrs.push_back(movgt);
+
+    				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
+    				return ret;
+				} else {
+					cout << "TODO: this case (~601 in ExprGen)" << endl;
+					treble_ptr_t ret(new treble_t("TODO", instrs, freeRegs));
+					return ret;
+				}
+			} else if (op == "<") {
+				if (!freeRegs.empty()) {
+			    	string reg = freeRegs.front();
+					freeRegs.erase(freeRegs.begin());
+
+					// eor reg, reg, reg
+					// cmp lhsLoc, rhsLoc
+					// movlt reg, #0x7FFFFFFF
+					vector<string> args;
+    				args.push_back(reg);
+    				args.push_back(reg);
+    				args.push_back(reg);
+    				AssemCom eor("eor", args.size(), args);
+    				instrs.push_back(eor);
+
+    				args.clear();
+    				args.push_back(lhsLoc);
+    				args.push_back(rhsLoc);
+    				AssemCom cmp("cmp", args.size(), args);
+    				instrs.push_back(cmp);
+
+    				args.push_back(reg);
+    				args.push_back("#0x7FFFFFFF");
+    				AssemCom movlt("movlt", args.size(), args);
+    				instrs.push_back(movlt);
+
+    				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
+    				return ret;
+				} else {
+					cout << "TODO: this case (~634 in ExprGen)" << endl;
+					treble_ptr_t ret(new treble_t("TODO", instrs, freeRegs));
+					return ret;
+				}
+			} else if (op == ">=") {
+				if (!freeRegs.empty()) {
+			    	string reg = freeRegs.front();
+					freeRegs.erase(freeRegs.begin());
+
+					// eor reg, reg, reg
+					// cmp lhsLoc, rhsLoc
+					// movge reg, #0x7FFFFFFF
+					vector<string> args;
+    				args.push_back(reg);
+    				args.push_back(reg);
+    				args.push_back(reg);
+    				AssemCom eor("eor", args.size(), args);
+    				instrs.push_back(eor);
+
+    				args.clear();
+    				args.push_back(lhsLoc);
+    				args.push_back(rhsLoc);
+    				AssemCom cmp("cmp", args.size(), args);
+    				instrs.push_back(cmp);
+
+    				args.push_back(reg);
+    				args.push_back("#0x7FFFFFFF");
+    				AssemCom movge("movge", args.size(), args);
+    				instrs.push_back(movge);
+
+    				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
+    				return ret;
+				} else {
+					cout << "TODO: this case (~667 in ExprGen)" << endl;
+					treble_ptr_t ret(new treble_t("TODO", instrs, freeRegs));
+					return ret;
+				}
+			} else if (op == "<=") {
+				if (!freeRegs.empty()) {
+			    	string reg = freeRegs.front();
+					freeRegs.erase(freeRegs.begin());
+
+					// eor reg, reg, reg
+					// cmp lhsLoc, rhsLoc
+					// movle reg, #0x7FFFFFFF
+					vector<string> args;
+    				args.push_back(reg);
+    				args.push_back(reg);
+    				args.push_back(reg);
+    				AssemCom eor("eor", args.size(), args);
+    				instrs.push_back(eor);
+
+    				args.clear();
+    				args.push_back(lhsLoc);
+    				args.push_back(rhsLoc);
+    				AssemCom cmp("cmp", args.size(), args);
+    				instrs.push_back(cmp);
+
+    				args.push_back(reg);
+    				args.push_back("#0x7FFFFFFF");
+    				AssemCom movle("movle", args.size(), args);
+    				instrs.push_back(movle);
+
+    				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
+    				return ret;
+				} else {
+					cout << "TODO: this case (~700 in ExprGen)" << endl;
+					treble_ptr_t ret(new treble_t("TODO", instrs, freeRegs));
+					return ret;
+				}
+			}
     	}
     }
 }
