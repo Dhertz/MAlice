@@ -113,11 +113,11 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 		}
 
 		// bl funcName
-		// (presumably we'll have a method that takes a funcName and gives back a label name?)
 		vector<string> args;
 		args.push_back(funcName);
 		AssemCom bl("bl", args);
 		instrs.push_back(bl);
+
 		treble_ptr_t ret(new treble_t("r0", instrs, freeRegs)); 
 		return ret;
     } else if (tok == "VAR") {
@@ -149,7 +149,15 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 			if (loc == "") {
 				// Allocate some space for the variable
 
-				if (freeRegs.empty()) {
+				if (!freeRegs.empty()) {
+					string reg = freeRegs.front();
+					freeRegs.erase(freeRegs.begin());
+
+					var->setAssLoc(reg);
+
+					treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
+					return ret;
+				} else {
 					cout << "TODO: this case (~169 in ExprGen)" << endl;
 
 					// mov rx, charByte
@@ -158,14 +166,6 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					instrs.push_back(mov);
 
 					treble_ptr_t ret(new treble_t("TODO", instrs, freeRegs));
-					return ret;
-				} else {
-					string reg = freeRegs.front();
-					freeRegs.erase(freeRegs.begin());
-
-					var->setAssLoc(reg);
-
-					treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
 					return ret;
 				}
 			} else {
@@ -291,8 +291,19 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
 					return ret;
 				} else {
-					cout << "TODO: this case (~295 in ExprGen)" << endl;
-					treble_ptr_t ret(new treble_t("TODO", instrs, freeRegs));
+					int currPtr = func->getStackPointer() + 4;
+					string stackLoc = "DWORD PTR [fp-" + boost::lexical_cast<string>(currPtr) + "]";
+					func->increaseStackPointer(4);
+
+					// eor stackLoc, argLoc, #1
+					vector<string> args;
+					args.push_back(stackLoc);
+					args.push_back(argLoc);
+					args.push_back("#1");
+					AssemCom eor("eor", args);
+					instrs.push_back(eor);
+
+					treble_ptr_t ret(new treble_t(stackLoc, instrs, freeRegs));
 					return ret;
 				}
     		} else if (op == "~") {
