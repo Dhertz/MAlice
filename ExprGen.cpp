@@ -525,6 +525,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     				AssemCom cmp("cmp", args);
     				instrs.push_back(cmp);
 
+    				args.clear();
     				args.push_back(reg);
     				args.push_back("#0x7FFFFFFF");
     				AssemCom moveq("moveq", args);
@@ -558,6 +559,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     				AssemCom cmp("cmp", args);
     				instrs.push_back(cmp);
 
+    				args.clear();
     				args.push_back(reg);
     				args.push_back(reg);
     				args.push_back(reg);
@@ -592,6 +594,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     				AssemCom cmp("cmp", args);
     				instrs.push_back(cmp);
 
+    				args.clear();
     				args.push_back(reg);
     				args.push_back("#0x7FFFFFFF");
     				AssemCom movgt("movgt", args);
@@ -625,6 +628,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     				AssemCom cmp("cmp", args);
     				instrs.push_back(cmp);
 
+    				args.clear();
     				args.push_back(reg);
     				args.push_back("#0x7FFFFFFF");
     				AssemCom movlt("movlt", args);
@@ -658,6 +662,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     				AssemCom cmp("cmp", args);
     				instrs.push_back(cmp);
 
+    				args.clear();
     				args.push_back(reg);
     				args.push_back("#0x7FFFFFFF");
     				AssemCom movge("movge", args);
@@ -691,6 +696,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     				AssemCom cmp("cmp", args);
     				instrs.push_back(cmp);
 
+					args.clear();
     				args.push_back(reg);
     				args.push_back("#0x7FFFFFFF");
     				AssemCom movle("movle", args);
