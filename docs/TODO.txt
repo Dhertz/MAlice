@@ -1,4 +1,4 @@
 TODO list:
-Part 2:
-	- Remove duplication in ExprAST recursive method
-
+Part 3:
+	- Use Variable::getVal() in optimisation?
+	  Perhaps in the ExprGen VAR case, for example

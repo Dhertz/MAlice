@@ -37,6 +37,7 @@ tokens {
       ELSEIF;
     EXPR;
     VAR;
+    STR;
     CHAR;
     NS;
 }
@@ -318,7 +319,7 @@ atom: (ID APOSTROPHE) => ID APOSTROPHE 's' expression 'piece' -> ^(ARRMEMBER ID 
       ID -> ^(VAR ID) | 
       INT | 
       (APOSTROPHE^) (.) (APOSTROPHE!) | 
-      (DQ^) (~('"')*) (DQ!) | 
+      STRING -> ^(STR STRING) | 
       '(' prec11 ')' -> prec11;
            
 delimiter: '.' | ',' | 'and' | 'but' | 'then';
@@ -326,6 +327,8 @@ delimiter: '.' | ',' | 'and' | 'but' | 'then';
 /*
   Lexer rules
 */
+STRING: DQ ~('"')* DQ;
+
 ID: ('a'..'z'|'A'..'Z') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*;
 
 INT: '0'..'9'+;

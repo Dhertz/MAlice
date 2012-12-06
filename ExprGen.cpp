@@ -518,7 +518,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 					// eor reg, reg, reg
 					// cmp lhsLoc, rhsLoc
-					// moveq reg, #-1
+					// moveq reg, #0xFFFFFFFF
 					vector<string> args;
     				args.push_back(reg);
     				args.push_back(reg);
@@ -534,7 +534,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
     				args.clear();
     				args.push_back(reg);
-    				args.push_back("#-1");
+    				args.push_back("#0xFFFFFFFF");
     				AssemCom moveq("moveq", args);
     				instrs.push_back(moveq);
 
@@ -550,13 +550,13 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 			    	string reg = freeRegs.front();
 					freeRegs.erase(freeRegs.begin());
 
-					// mov reg, #-1
+					// mov reg, #0xFFFFFFFF
 					// cmp lhsLoc, rhsLoc
 					// eoreq reg, reg, reg
 
 					vector<string> args;
     				args.push_back(reg);
-    				args.push_back("#-1");
+    				args.push_back("#0xFFFFFFFF");
     				AssemCom mov("mov", args);
     				instrs.push_back(mov);
 
@@ -587,7 +587,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 					// eor reg, reg, reg
 					// cmp lhsLoc, rhsLoc
-					// movgt reg, #-1
+					// movgt reg, #0xFFFFFFFF
 					vector<string> args;
     				args.push_back(reg);
     				args.push_back(reg);
@@ -603,7 +603,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
     				args.clear();
     				args.push_back(reg);
-    				args.push_back("#-1");
+    				args.push_back("#0xFFFFFFFF");
     				AssemCom movgt("movgt", args);
     				instrs.push_back(movgt);
 
@@ -621,7 +621,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 					// eor reg, reg, reg
 					// cmp lhsLoc, rhsLoc
-					// movlt reg, #-1
+					// movlt reg, #0xFFFFFFFF
 					vector<string> args;
     				args.push_back(reg);
     				args.push_back(reg);
@@ -637,7 +637,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
     				args.clear();
     				args.push_back(reg);
-    				args.push_back("#-1");
+    				args.push_back("#0xFFFFFFFF");
     				AssemCom movlt("movlt", args);
     				instrs.push_back(movlt);
 
@@ -655,7 +655,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 					// eor reg, reg, reg
 					// cmp lhsLoc, rhsLoc
-					// movge reg, #-1
+					// movge reg, #0xFFFFFFFF
 					vector<string> args;
     				args.push_back(reg);
     				args.push_back(reg);
@@ -671,7 +671,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
     				args.clear();
     				args.push_back(reg);
-    				args.push_back("#-1");
+    				args.push_back("#0xFFFFFFFF");
     				AssemCom movge("movge", args);
     				instrs.push_back(movge);
 
@@ -689,7 +689,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 					// eor reg, reg, reg
 					// cmp lhsLoc, rhsLoc
-					// movle reg, #-1
+					// movle reg, #0xFFFFFFFF
 					vector<string> args;
     				args.push_back(reg);
     				args.push_back(reg);
@@ -705,7 +705,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 					args.clear();
     				args.push_back(reg);
-    				args.push_back("#-1");
+    				args.push_back("#0xFFFFFFFF");
     				AssemCom movle("movle", args);
     				instrs.push_back(movle);
 
@@ -721,11 +721,17 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     }
 }
 
-int evaluateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<SymbolTable> st) {
+int ExprGen::evaluateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<SymbolTable> st) {
 	string tok = Utils::createStringFromTree(root);
 
 	if (tok == "VAR") {
-		return 0;
+		string varName = Utils::createStringFromTree(Utils::childByNum(root, 0));
+	    boost::shared_ptr<Identifier> varIdent = st->lookupCurrLevelAndEnclosingLevels(varName);
+
+		if (varIdent->getBaseName() != "Type") {
+            boost::shared_ptr<Variable> var = boost::shared_polymorphic_downcast<Variable>(varIdent);
+            return var->getVal();
+        }
 	} else if (tok == "EXPR") {
 		pANTLR3_BASE_TREE expr = Utils::childByNum(root, 0);
 		return evaluateExpression(expr, st);
@@ -736,42 +742,45 @@ int evaluateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<SymbolTable> st
     	if (children == 0) {
     	    // Number base case
 
-    	    return 0;
+			string n = Utils::createStringFromTree(root);
+    	    return atoi(n.c_str());
     	} else if (children == 1) {
     		// Unary operator
 
     	    string op = Utils::createStringFromTree(root);
-    	    pANTLR3_BASE_TREE arg = Utils::childByNum(root, 0);
+    	    int arg = evaluateExpression(Utils::childByNum(root, 0), st);
 
     		if (op == "~") {
-    			return 0;
-    		} else if (op == "+" || op == "-") {
-    			return 0;
+    			return ~arg;
+    		} else if (op == "+") {
+    			return +arg;
+    	    } else if (op == "-") {
+    	    	return -arg;
     	    }
     	} else if (children == 2) {
 			// Binary operator
 
 		    string op = Utils::createStringFromTree(root);
 
-		    pANTLR3_BASE_TREE lhs = Utils::childByNum(root, 0);
-			pANTLR3_BASE_TREE rhs = Utils::childByNum(root, 1);
+		    int lhs = evaluateExpression(Utils::childByNum(root, 0), st);
+		    int rhs = evaluateExpression(Utils::childByNum(root, 1), st);
 
 			if (op == "|") {
-				return 0;
+				return lhs | rhs;
 			} else if (op == "&") {
-				return 0;
+				return lhs & rhs;
 			} else if (op == "^") {
-				return 0;
+				return lhs ^ rhs;
 			} else if (op == "+") {
-				return 0;
+				return lhs + rhs;
 			} else if (op == "-") {
-				return 0;
+				return lhs - rhs;
 			} else if (op == "*") {
-				return 0;
+				return lhs * rhs;
 			} else if (op == "/") {
-				return 0;
+				return lhs / rhs;
 			} else if (op == "%") {
-				return 0;
+				return lhs % rhs;
 			}
     	}
     }

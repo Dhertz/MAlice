@@ -20,3 +20,11 @@ string Variable::getAssLoc() {
 void Variable::setAssLoc(string assLoc) {
 	_assLoc = assLoc;
 }
+
+int Variable::getVal() {
+	return _val;
+}
+
+void Variable::setVal(int val) {
+	_val = val;
+}

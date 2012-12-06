@@ -282,9 +282,9 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 		pop0Arg.push_back("{r0}");
 		func->addBack("pop", pop0Arg);											// pop {r0}
 	}
-
+	
 	if (!func->regIsFree("r1")) {
-		if (resultReg != "r1") {
+		if (resultReg != "r1" && expr->getType()->getTypeName() != "Sentence") {
 			vector<string> pop1Arg;
 			pop1Arg.push_back("{r1}");
 			func->addBack("pop", pop1Arg);										// pop {r1}
@@ -621,6 +621,7 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 			_globalInlines.push_back(AssemCom("strb", strbArgs));				// strb rhs [wordloc]
 		} else {
 			// must be a global number
+			var->setVal(ExprGen::evaluateExpression(expr->getRoot(), st));
 			vector<string> strbArgs;
 			strbArgs.push_back(rhs);
 			strbArgs.push_back("[" + wordLoc + ", #0]");
