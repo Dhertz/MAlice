@@ -14,9 +14,9 @@ void printVector(vector<string> vec) {
 }
 
 treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<SymbolTable> st, vector<string> freeRegs) {
-	Utils::printTree(root);
+	/* Utils::printTree(root);
 	printVector(freeRegs);
-	cout << endl << endl << endl;
+	cout << endl << endl << endl; */
 
 	string tok = Utils::createStringFromTree(root);
 	list<AssemCom> instrs;
@@ -139,8 +139,6 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
             boost::shared_ptr<Array> arr = boost::shared_polymorphic_downcast<Array>(varType);
 
 			// Array will definitely have already been allocated by now
-			// Do I need an error if this is "" just like I might have below?
-			// Or is that case impossible?
 			string loc = arr->getAssLoc();
 			treble_ptr_t ret(new treble_t(loc, instrs, freeRegs));
 			return ret;
@@ -154,7 +152,6 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 				if (freeRegs.empty()) {
 					cout << "TODO: this case (~169 in ExprGen)" << endl;
 
-            
 					// mov rx, charByte
 					vector<string> args;
 					AssemCom mov("!", args);
@@ -166,6 +163,8 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					string reg = freeRegs.front();
 					freeRegs.erase(freeRegs.begin());
 
+					var->setAssLoc(reg);
+
 					treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
 					return ret;
 				}
@@ -174,7 +173,6 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 				return ret;
 			}
         }
-        cout << "var case not returning" << endl;
     } else if (tok == "ARRMEMBER") {
         // Array member reference
 
@@ -386,7 +384,6 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 			list<AssemCom> rhsInstrs = rhsEval->get<1>();
 			freeRegs = rhsEval->get<2>();
 			instrs.splice(instrs.end(), rhsInstrs);
-
 
 			if (op == "||" || op == "|") {
 				if (!freeRegs.empty()) {

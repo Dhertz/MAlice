@@ -504,10 +504,11 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 	boost::shared_ptr<Variable> var 
 	  = boost::shared_polymorphic_downcast<Variable>(varIdent);
 
-	string loc = var->getAssLoc();
-
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res 
 	  = ExprGen::generateExpression(expr->getRoot(), st, func->getFreeRegs());
+
+	string loc = var->getAssLoc();
+
 	if (var->getTypeName()->getTypeName() == "Sentence") {
 		vector<string> asciiArg;
 		asciiArg.push_back(res->get<0>());
@@ -526,9 +527,8 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 				// TODO: memory allocation
 				loc = "TODO";
 			} else {
-				var->setAssLoc(func->getFreeRegs().front());
-				// Removed to try to fix freeRegs error
-				// func->removeReg(var->getAssLoc());
+				var->setAssLoc(rhs);
+				func->removeReg(var->getAssLoc());
 			}
 		} else if (loc[0] == '.') {
 			// global variable assignment
