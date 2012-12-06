@@ -45,5 +45,9 @@ string VarDecAST::getNodeName() {
 }
 
 void VarDecAST::accept(boost::shared_ptr<ASTVisitor> v, boost::shared_ptr<AssemFunc> func) {
-  v->visitVarDec(_typeName, _varName, _st, func);
+  	v->visitVarDec(_typeName, _varName, _st, func);
+}
+
+void VarDecAST::accept(boost::shared_ptr<ASTVisitor> v) {
+  	v->visitVarDec(_typeName, _varName, _st, boost::shared_ptr<AssemFunc>());
 }

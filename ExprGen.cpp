@@ -41,7 +41,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					vector<string> args;
 					args.push_back("r" + boost::lexical_cast<string>(i));
 					args.push_back(paramLoc);
-					AssemCom mov("mov", args.size(), args);
+					AssemCom mov("mov", args);
 					instrs.push_back(mov);
 				}
 			} else {
@@ -52,7 +52,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 					vector<string> args;
 					args.push_back("{" + paramLoc + "}");
-					AssemCom push("push", args.size(), args);
+					AssemCom push("push", args);
 					instrs.push_back(push);
 				} else if (freeRegs.empty()) {
 					// Need to temporarily borrow a register (I've chosen r0)
@@ -63,13 +63,13 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 					vector<string> args;
 					args.push_back("{r0}");
-					AssemCom push("push", args.size(), args);
+					AssemCom push("push", args);
 					instrs.push_back(push);
 
 					args.clear();
 					args.push_back("r0");
 					args.push_back(paramLoc);
-					AssemCom mov("mov", args.size(), args);
+					AssemCom mov("mov", args);
 					instrs.push_back(mov);
 
 					// Re-use the push instruction from above
@@ -77,7 +77,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 					args.clear();
 					args.push_back("{r0}");
-					AssemCom pop("pop", args.size(), args);
+					AssemCom pop("pop", args);
 					instrs.push_back(pop);
 				} else {
 					// Use first free register to save need for extra push/pop
@@ -91,12 +91,12 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					vector<string> args;
 					args.push_back(reg);
 					args.push_back(paramLoc);
-					AssemCom mov("mov", args.size(), args);
+					AssemCom mov("mov", args);
 					instrs.push_back(mov);
 
 					args.clear();
 					args.push_back("{" + reg + "}");
-					AssemCom push("push", args.size(), args);
+					AssemCom push("push", args);
 					instrs.push_back(push);
 				}
 			}
@@ -106,7 +106,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 		// (presumably we'll have a method that takes a funcName and gives back a label name?)
 		vector<string> args;
 		args.push_back(funcName);
-		AssemCom bl("bl", args.size(), args);
+		AssemCom bl("bl", args);
 		instrs.push_back(bl);
 		treble_ptr_t ret(new treble_t("r0", instrs, freeRegs)); 
 		return ret;
@@ -147,7 +147,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
             
 					// mov rx, charByte
 					vector<string> args;
-					AssemCom mov("!", args.size(), args);
+					AssemCom mov("!", args);
 					instrs.push_back(mov);
 
 					treble_ptr_t ret(new treble_t("TODO", instrs, freeRegs));
@@ -209,7 +209,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 			vector<string> args;
 			args.push_back(reg);
 			args.push_back("#" + boost::lexical_cast<string>(charByte));
-			AssemCom mov("mov", args.size(), args);
+			AssemCom mov("mov", args);
 			instrs.push_back(mov);
 
 			treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
@@ -254,7 +254,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     			vector<string> args;
     			args.push_back(reg);
     			args.push_back("#" + n);
-    			AssemCom mov("mov", args.size(), args);
+    			AssemCom mov("mov", args);
     			instrs.push_back(mov);
 
     			treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
@@ -286,7 +286,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					args.push_back(reg);
 					args.push_back(argLoc);
 					args.push_back("#1");
-					AssemCom xorInstr("xor", args.size(), args);
+					AssemCom xorInstr("xor", args);
 					instrs.push_back(xorInstr);
 
 					treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
@@ -305,7 +305,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					vector<string> args;
 					args.push_back(reg);
 					args.push_back(argLoc);
-					AssemCom mvn("mvn", args.size(), args);
+					AssemCom mvn("mvn", args);
 					instrs.push_back(mvn);
 
 					treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
@@ -333,13 +333,13 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     				vector<string> args;
     				args.push_back(reg);
     				args.push_back(argLoc);
-    				AssemCom mov("mov", args.size(), args);
+    				AssemCom mov("mov", args);
     				instrs.push_back(mov);
 
     				args.clear();
     				args.push_back(reg);
     				args.push_back("#0");
-    				AssemCom cmp("cmp", args.size(), args);
+    				AssemCom cmp("cmp", args);
     				instrs.push_back(cmp);
 
     				string negInstr = (op == "+") ? "neglt" : "neggt";
@@ -347,7 +347,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     				args.clear();
     				args.push_back(reg);
     				args.push_back(reg);
-    				AssemCom neg(negInstr, args.size(), args);
+    				AssemCom neg(negInstr, args);
     				instrs.push_back(neg);
 
     				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
