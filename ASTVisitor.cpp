@@ -406,7 +406,7 @@ void ASTVisitor::visitWhile(boost::shared_ptr<ExprAST> cond,
 
 	vector<boost::shared_ptr<ASTNode> >::iterator i;							// loop body
 	for (i = children.begin(); i != children.end(); ++i) {
-		(*i)->accept(shared_from_this());
+		(*i)->accept(shared_from_this(), func);
 	}
 
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
@@ -579,6 +579,7 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 
 void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr, 
 							   boost::shared_ptr<SymbolTable> st) {
+	cout << "hello" << endl;
 	// Global inline assignments
 
 	string regs[] = {"r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9",
@@ -811,7 +812,6 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 							     boost::shared_ptr<SymbolTable> st) {
 	boost::shared_ptr<Identifier> arrIdent = 
 										_globalSt->lookupCurrLevelOnly(name);
-	cout << "Hello" << endl;
 	boost::shared_ptr<Array> arr =  
 		boost::shared_polymorphic_downcast<Array>(arrIdent);
 	std::vector<string> comm;
