@@ -377,12 +377,49 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 			freeRegs = rhsEval->get<2>();
 			instrs.splice(instrs.end(), rhsInstrs);
 
-			if (op == "|") {
 
+			if (op == "||" || op == "|") {
+				if (!freeRegs.empty()) {
+			    	string reg = freeRegs.front();
+					freeRegs.erase(freeRegs.begin());
+
+					// orr reg, lhsLoc, rhsLoc
+					vector<string> args;
+    				args.push_back(reg);
+    				args.push_back(lhsLoc);
+    				args.push_back(rhsLoc);
+    				AssemCom orr("orr", args.size(), args);
+    				instrs.push_back(orr);
+
+    				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
+    				return ret;
+				} else {
+					cout << "TODO: this case (~396 in ExprGen)" << endl;
+					treble_ptr_t ret(new treble_t("TODO", instrs, freeRegs));
+					return ret;
+				}
+			} else if (op == "&&" || op == "&") {
+				if (!freeRegs.empty()) {
+			    	string reg = freeRegs.front();
+					freeRegs.erase(freeRegs.begin());
+
+					// and reg, lhsLoc, rhsLoc
+					vector<string> args;
+    				args.push_back(reg);
+    				args.push_back(lhsLoc);
+    				args.push_back(rhsLoc);
+    				AssemCom andInstr("and", args.size(), args);
+    				instrs.push_back(andInstr);
+
+    				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
+    				return ret;
+				} else {
+					cout << "TODO: this case (~417 in ExprGen)" << endl;
+					treble_ptr_t ret(new treble_t("TODO", instrs, freeRegs));
+					return ret;
+				}
 			} else if (op == "^") {
 
-			} else if (op == "&") {
-				
 			} else if (op == "+") {
 				
 			} else if (op == "-") {
