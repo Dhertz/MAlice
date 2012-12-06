@@ -797,7 +797,7 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 		len *= 4;
 	}
 
-	string convert = boost::lexical_cast<string>(length);      
+	string convert = boost::lexical_cast<string>(len);      
 
 	comm.push_back(convert);
 	
