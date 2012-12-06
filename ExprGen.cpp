@@ -423,7 +423,25 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					return ret;
 				}
 			} else if (op == "^") {
+				if (!freeRegs.empty()) {
+			    	string reg = freeRegs.front();
+					freeRegs.erase(freeRegs.begin());
 
+					// eor reg, lhsLoc, rhsLoc
+					vector<string> args;
+    				args.push_back(reg);
+    				args.push_back(lhsLoc);
+    				args.push_back(rhsLoc);
+    				AssemCom eor("eor", args.size(), args);
+    				instrs.push_back(eor);
+
+    				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
+    				return ret;
+				} else {
+					cout << "TODO: this case (~441 in ExprGen)" << endl;
+					treble_ptr_t ret(new treble_t("TODO", instrs, freeRegs));
+					return ret;
+				}
 			} else if (op == "+") {
 				
 			} else if (op == "-") {
