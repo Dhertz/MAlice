@@ -730,7 +730,7 @@ int ExprGen::evaluateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<Symbol
 
 		if (varIdent->getBaseName() != "Type") {
             boost::shared_ptr<Variable> var = boost::shared_polymorphic_downcast<Variable>(varIdent);
-            return 0;
+            return var->getVal();
         }
 	} else if (tok == "EXPR") {
 		pANTLR3_BASE_TREE expr = Utils::childByNum(root, 0);
@@ -742,42 +742,45 @@ int ExprGen::evaluateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<Symbol
     	if (children == 0) {
     	    // Number base case
 
-    	    return 0;
+			string n = Utils::createStringFromTree(root);
+    	    return atoi(n.c_str());
     	} else if (children == 1) {
     		// Unary operator
 
     	    string op = Utils::createStringFromTree(root);
-    	    pANTLR3_BASE_TREE arg = Utils::childByNum(root, 0);
+    	    int arg = evaluateExpression(Utils::childByNum(root, 0), st);
 
     		if (op == "~") {
-    			return 0;
-    		} else if (op == "+" || op == "-") {
-    			return 0;
+    			return ~arg;
+    		} else if (op == "+") {
+    			return +arg;
+    	    } else if (op == "-") {
+    	    	return -arg;
     	    }
     	} else if (children == 2) {
 			// Binary operator
 
 		    string op = Utils::createStringFromTree(root);
 
-		    pANTLR3_BASE_TREE lhs = Utils::childByNum(root, 0);
-			pANTLR3_BASE_TREE rhs = Utils::childByNum(root, 1);
+		    int lhs = evaluateExpression(Utils::childByNum(root, 0), st);
+		    int rhs = evaluateExpression(Utils::childByNum(root, 1), st);
 
 			if (op == "|") {
-				return 0;
+				return lhs | rhs;
 			} else if (op == "&") {
-				return 0;
+				return lhs & rhs;
 			} else if (op == "^") {
-				return 0;
+				return lhs ^ rhs;
 			} else if (op == "+") {
-				return 0;
+				return lhs + rhs;
 			} else if (op == "-") {
-				return 0;
+				return lhs - rhs;
 			} else if (op == "*") {
-				return 0;
+				return lhs * rhs;
 			} else if (op == "/") {
-				return 0;
+				return lhs / rhs;
 			} else if (op == "%") {
-				return 0;
+				return lhs % rhs;
 			}
     	}
     }
