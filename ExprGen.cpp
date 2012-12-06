@@ -720,3 +720,62 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     	}
     }
 }
+
+int evaluateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<SymbolTable> st) {
+	string tok = Utils::createStringFromTree(root);
+
+	if (tok == "VAR") {
+		return 0;
+	} else if (tok == "EXPR") {
+		pANTLR3_BASE_TREE expr = Utils::childByNum(root, 0);
+		return evaluateExpression(expr, st);
+    } else {
+    	int children = root->getChildCount(root);
+    	assert (0 <= children && children < 3);
+
+    	if (children == 0) {
+    	    // Number base case
+
+    	    return 0;
+    	} else if (children == 1) {
+    		// Unary operator
+
+    	    string op = Utils::createStringFromTree(root);
+    	    pANTLR3_BASE_TREE arg = Utils::childByNum(root, 0);
+
+    		if (op == "~") {
+    			return 0;
+    		} else if (op == "+" || op == "-") {
+    			return 0;
+    	    }
+    	} else if (children == 2) {
+			// Binary operator
+
+		    string op = Utils::createStringFromTree(root);
+
+		    pANTLR3_BASE_TREE lhs = Utils::childByNum(root, 0);
+			pANTLR3_BASE_TREE rhs = Utils::childByNum(root, 1);
+
+			if (op == "|") {
+				return 0;
+			} else if (op == "&") {
+				return 0;
+			} else if (op == "^") {
+				return 0;
+			} else if (op == "+") {
+				return 0;
+			} else if (op == "-") {
+				return 0;
+			} else if (op == "*") {
+				return 0;
+			} else if (op == "/") {
+				return 0;
+			} else if (op == "%") {
+				return 0;
+			}
+    	}
+    }
+
+    cout << "Nope." << endl;
+    return -1;
+}
