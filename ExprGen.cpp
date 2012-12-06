@@ -8,6 +8,10 @@ typedef boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> 
 typedef boost::tuple< string, list<AssemCom>, vector<string> > treble_t;
 
 treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<SymbolTable> st, vector<string> freeRegs) {
+
+	Utils::printTree(root);
+	cout << endl << endl << endl;
+
 	string tok = Utils::createStringFromTree(root);
 	list<AssemCom> instrs;
 
@@ -370,7 +374,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 			freeRegs = lhsEval->get<2>();
 			instrs.splice(instrs.end(), lhsInstrs);
 
-			pANTLR3_BASE_TREE rhs = Utils::childByNum(root, 0);
+			pANTLR3_BASE_TREE rhs = Utils::childByNum(root, 1);
 			treble_ptr_t rhsEval = generateExpression(rhs, st, freeRegs);
 			string rhsLoc = rhsEval->get<0>();
 			list<AssemCom> rhsInstrs = rhsEval->get<1>();
