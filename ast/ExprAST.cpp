@@ -178,9 +178,8 @@ void ExprAST::check() {
             boost::shared_ptr<Type> letter(new Letter);
             _type = letter;
         }
-    } else if (tok == "\"") {
+    } else if (tok == "STR") {
         // String of form "foo", evaluates to a Sentence
-
         boost::shared_ptr<Type> sentence(new Sentence);
         _type = sentence;
     } else {
@@ -239,7 +238,7 @@ boost::shared_ptr<Type> ExprAST::recurseTree(pANTLR3_BASE_TREE tree,
 
             boost::shared_ptr<Type> letter(new Letter);
             return letter;
-        } else if (op == "\"") {
+        } else if (op == "STR") {
             // String base case, error case
 
             Utils::printSemErr(_lineNo, (string) "Invalid usage of Sentence " + 

@@ -13,6 +13,8 @@ ProcDecAST::ProcDecAST(boost::shared_ptr<SymbolTable> st, string name,
     check();
 }
 
+int ProcDecAST::hattaNum = 1;
+
 void ProcDecAST::check() {
     boost::shared_ptr<Identifier> name =
       _st->getEncSymTable()->lookupCurrLevelOnly(_name);
@@ -37,7 +39,7 @@ void ProcDecAST::check() {
             }
         }
 
-        _name = checkFunctionName(_name, _st->getEncSymTable());
+        _name = checkHatta();
 
         boost::shared_ptr<Proc> p(new Proc(_st, v));
         _procObj = p;
@@ -61,12 +63,19 @@ void ProcDecAST::accept(boost::shared_ptr<ASTVisitor> v) {
     v->visitProcDec(_name, _params, _children, _st);
 }
 
-string ProcDecAST::checkFunctionName(string name, boost::shared_ptr<SymbolTable> st) {
-	boost::shared_ptr<Identifier> ident 
-	  = st->lookupCurrLevelAndEnclosingLevels(name);
+string ProcDecAST::checkHatta() {
+	// make sure that hatta methods are named uniquely (makes life much simpler
+	// in codegen)
 
-	if (ident && ident->getBaseName() == "Callable") {
-		return name + boost::lexical_cast<string>(2);
+	if (_name == "hatta") {
+		boost::shared_ptr<Identifier> name =
+	      _st->getEncSymTable()->lookupCurrLevelAndEnclosingLevels(_name);
+
+	    if (name) {
+	    	// nested function named hatta
+	    	hattaNum++;
+	    	return "hatta" + boost::lexical_cast<string>(hattaNum);
+	    }
 	}
-	return name;
+	return _name;
 }

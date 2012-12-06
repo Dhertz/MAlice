@@ -6,6 +6,7 @@
 #include "MAliceLexer.h"
 #include "MAliceParser.h"
 #include "InstructionPrinter.hpp"
+#include "Label.hpp"
 #include <boost/lexical_cast.hpp>
 
 using namespace std;
@@ -96,6 +97,8 @@ void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
 		InstructionPrinter::printList(program, 
 			boost::lexical_cast<string>(filename).append(".s"));
     }
+
+    Label::nextUnusedLabel = 0;
 
     parser->free(parser);
     tokens->free(tokens);

@@ -68,7 +68,7 @@ void ASTVisitor::visitFuncDec(string name, string returnType,
 	vector< boost::shared_ptr<Param> > v = params->getParams();
     vector< boost::shared_ptr<Param> >::iterator param;
 
-    int i = 0;
+    int i = 1;
     for (param = v.begin(); param != v.end(); ++param, ++i) {
        	boost::shared_ptr<Identifier> id = 
        		st->lookupCurrLevelOnly((*param)->getName());
@@ -79,6 +79,8 @@ void ASTVisitor::visitFuncDec(string name, string returnType,
             int rNum = ((i + 1) / 2) - 1;
 			a->setAssLoc("r" + boost::lexical_cast<string>(rNum));
 			func->removeReg("r" + boost::lexical_cast<string>(rNum));
+		} else if ((*param)->getType()->getTypeName() == "Sentence") {
+
         } else {
             boost::shared_ptr<Variable> v 
             	= boost::shared_polymorphic_downcast<Variable>(id);
@@ -86,6 +88,7 @@ void ASTVisitor::visitFuncDec(string name, string returnType,
 			v->setAssLoc("r" + boost::lexical_cast<string>(rNum));
 			func->removeReg("r" + boost::lexical_cast<string>(rNum));
     	}
+    	i++;
 	}
 
 	vector<int> callableKids;
@@ -204,21 +207,25 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 	string resultReg = res->get<0>();
 
 	Label strLbl;
-	_endDefs.push_back(
-		AssemCom(strLbl.getLabel() + ":", std::vector<string>()));				// strLbl:
 
 	if (expr->getType()->getTypeName() == "Sentence") {
-		if (resultReg[0] != '.') {
+		if (resultReg[0] != '.' && resultReg[0] == '\"') {
+			_endDefs.push_back(
+				AssemCom(strLbl.getLabel() + ":", std::vector<string>()));		// strLbl:
 			vector<string> asciiArg;
 			asciiArg.push_back(resultReg);
 			_endDefs.push_back(AssemCom(".asciz", asciiArg));
 		}
 	} else {
 		if (expr->getType()->getTypeName() == "Number") {
+			_endDefs.push_back(
+				AssemCom(strLbl.getLabel() + ":", std::vector<string>()));		// strLbl:
 			vector<string> asciiArg;
 			asciiArg.push_back("\"%i\"");
 			_endDefs.push_back(AssemCom(".asciz", asciiArg));
 		} else {
+			_endDefs.push_back(
+				AssemCom(strLbl.getLabel() + ":", std::vector<string>()));		// strLbl:
 			vector<string> asciiArg;
 			asciiArg.push_back("\"%c\"");
 			_endDefs.push_back(AssemCom(".asciz", asciiArg));
@@ -262,22 +269,25 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 
 	}
 
-	if (!func->regIsFree("r0")) {
+	if (!func->regIsFree("r0") && resultReg[0] == '\"') {
 		vector<string> push0Arg;
 		push0Arg.push_back("{r0}");
 		func->addBack("push", push0Arg);										// push {r0}
 	}
 
-	vector<string> ldrArgs;
-	ldrArgs.push_back("r0");
-	ldrArgs.push_back("=" + strLbl.getLabel());
-	func->addBack("ldr", ldrArgs);												// ldr r0 =strLbl
+	if ((expr->getType()->getTypeName() == "Sentence" && resultReg[0] == '\"') 
+		|| !(expr->getType()->getTypeName() == "Sentence")) {
+		vector<string> ldrArgs;
+		ldrArgs.push_back("r0");
+		ldrArgs.push_back("=" + strLbl.getLabel());
+		func->addBack("ldr", ldrArgs);											// ldr r0 =strLbl
+	}
 
 	vector<string> printArg;
 	printArg.push_back("printf");
 	func->addBack("bl", printArg);												// bl printf
 
-	if (!func->regIsFree("r0")) {
+	if (!func->regIsFree("r0") && resultReg[0] == '\"') {
 		vector<string> pop0Arg;
 		pop0Arg.push_back("{r0}");
 		func->addBack("pop", pop0Arg);											// pop {r0}
@@ -303,12 +313,6 @@ void ASTVisitor::visitReturn(boost::shared_ptr<ExprAST> expr,
 	func->setFreeRegs(res->get<2>());
 
 	if (resultReg != "r0") {
-		if (!func->regIsFree("r0")) {
-			vector<string> pushArg;
-			pushArg.push_back("{r0}");
-			func->addBack("push", pushArg);	
-		}																		// push {r0}
-
 		vector<string> movArgs;
 		movArgs.push_back("r0");
 		movArgs.push_back(resultReg);
@@ -418,7 +422,7 @@ void ASTVisitor::visitWhile(boost::shared_ptr<ExprAST> cond,
 
 	vector<string> bneArgs;
 	bneArgs.push_back(loopLabel.getLabel());
-	func->addBack("bne", bneArgs);												// bne loop
+	func->addBack("beq", bneArgs);												// bne loop
 }
 
 void ASTVisitor::visitChoice(boost::shared_ptr<ExprAST> cond, 
@@ -441,7 +445,7 @@ void ASTVisitor::visitChoice(boost::shared_ptr<ExprAST> cond,
 
 	std::vector<string> bneArgs;
 	bneArgs.push_back(elseLabel.getLabel());
-	func->addBack("bne", bneArgs);												// bne else
+	func->addBack("beq", bneArgs);												// bne else
 
 	trueBody->accept(shared_from_this(), func);									// if body
 
@@ -479,7 +483,7 @@ void ASTVisitor::visitIf(boost::shared_ptr<ExprAST> cond,
 
 	vector<string> bneArgs;
 	bneArgs.push_back(elseLabel.getLabel());
-	func->addBack("bne", bneArgs);												// bne else
+	func->addBack("beq", bneArgs);												// bne else
 
 	trueBody->accept(shared_from_this(), func);										// if body
 
@@ -651,7 +655,21 @@ void ASTVisitor::visitFuncCall(string name,
 		func->addListBack(genParam->get<1>());
 		func->setFreeRegs(genParam->get<2>());
 
-	  	if (i < 4) {
+		if ((*it)->getType()->getTypeName() == "Sentence") {
+			vector<string> asciiArg;
+			asciiArg.push_back(paramLoc);
+			Label strLbl;
+			_endDefs.push_back(
+				AssemCom(strLbl.getLabel() + ":", std::vector<string>()));
+			_endDefs.push_back(AssemCom(".asciz", asciiArg));
+
+			//Parameter needs to be moved into correct register
+  			vector<string> args;
+			args.push_back("r" + boost::lexical_cast<string>(i));
+			args.push_back("=" + strLbl.getLabel());
+			func->addBack("ldr", args);
+
+		} else if (i < 4) {
 	  		if (paramLoc != "r" + boost::lexical_cast<string>(i)) {
 	  			//Parameter needs to be moved into correct register
 	  			vector<string> args;

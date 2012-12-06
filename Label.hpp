@@ -4,9 +4,9 @@
 #include <string>
 
 class Label {
-	static int nextUnusedLabel;
 	int id;
 public:
+	static int nextUnusedLabel;
 	Label();
 	std::string getLabel();
 };

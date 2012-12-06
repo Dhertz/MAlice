@@ -14,6 +14,7 @@ class ProcDecAST : public ASTNode {
     int _lineNo;
     void check();
 public:
+	static int hattaNum;
     ProcDecAST(boost::shared_ptr<SymbolTable> st, string name,
     	         boost::shared_ptr<HeaderParamsAST> params,
     	         boost::weak_ptr<ASTNode> parent, int lineNo);
@@ -21,7 +22,7 @@ public:
     string getNodeName();
     void print();
     void accept(boost::shared_ptr<ASTVisitor> v);
-    string checkFunctionName(string name, boost::shared_ptr<SymbolTable> st);
+    string checkHatta();
 };
 
 #endif
