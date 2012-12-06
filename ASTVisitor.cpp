@@ -621,6 +621,7 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 			_globalInlines.push_back(AssemCom("strb", strbArgs));				// strb rhs [wordloc]
 		} else {
 			// must be a global number
+			var->setVal(ExprGen::evaluateExpression(expr->getRoot(), st));
 			vector<string> strbArgs;
 			strbArgs.push_back(rhs);
 			strbArgs.push_back("[" + wordLoc + ", #0]");
