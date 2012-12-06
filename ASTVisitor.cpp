@@ -790,13 +790,18 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 	}
 	arr->setAssLoc(reg);
 
-	int len = ExprGen::evaluateExpression(length->getRoot(), st);
+	if (res->get<1>().size() < 1) {
+		// It's a variable, let's look at its location
+		func->increaseStackPointerByReg(resultReg);
+	} else {
+		int len = ExprGen::evaluateExpression(length->getRoot(), st);
 
-	if (type->getTypeName() == "Number") {
-		len *= 4;
+		if (type->getTypeName() == "Number") {
+			len *= 4;
+		}
+		func->increaseStackPointer(len);
 	}
 
-	func->increaseStackPointer(len);
 
 	//make it point somewhere down the stack
 	vector<string> sub;
@@ -817,7 +822,6 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 	std::vector<string> comm;
 	comm.push_back(name);
 	int len = ExprGen::evaluateExpression(length->getRoot(), st);
-	//assert(len == 0);
 	
 	if (type->getTypeName() == "Number") {
 		len *= 4;

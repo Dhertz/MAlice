@@ -6,6 +6,7 @@
 AssemFunc::AssemFunc(string name) {
 	_name = name;
 	_stackPointer = 0;
+	_pointerByReg = "";
 	initFreeRegs();
 }
 
@@ -36,6 +37,10 @@ void AssemFunc::increaseStackPointer(int i) {
 	_stackPointer += i;
 }
 
+void AssemFunc::increaseStackPointerByReg(string reg) {
+	_pointerByReg = reg;
+}
+
 int AssemFunc::getStackPointer() {
 	return _stackPointer;
 }
@@ -57,6 +62,22 @@ void AssemFunc::finalise() {
 	if (_stackPointer > 0) {
 		vector<string> spArgs(2, "sp");
 		spArgs.push_back("#" + boost::lexical_cast<string>(_stackPointer));
+		addFront("sub", spArgs);
+
+		vector<string> fpArgs;
+		fpArgs.push_back("fp");
+		fpArgs.push_back("sp");
+		fpArgs.push_back("#4");
+		addFront("add", fpArgs);
+
+		fpArgs.clear();
+		fpArgs.push_back("sp");
+		fpArgs.push_back("fp");
+		fpArgs.push_back("#4");
+		addBack("sub", fpArgs);
+	} else if (_pointerByReg != "") {
+		vector<string> spArgs(2, "sp");
+		spArgs.push_back(_pointerByReg);
 		addFront("sub", spArgs);
 
 		vector<string> fpArgs;

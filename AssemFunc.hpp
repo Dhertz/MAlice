@@ -8,6 +8,7 @@
 class AssemFunc {
 	list<AssemCom> _comms;
 	int _stackPointer;
+	string _pointerByReg;
 	vector<string> _freeRegs;
 	string _name;
 public:
@@ -18,6 +19,7 @@ public:
 	void addListBack(list<AssemCom> l);
 	void addListFront(list<AssemCom> l);
 	void increaseStackPointer(int i);
+	void increaseStackPointerByReg(string reg);
 	int getStackPointer();
 	string getName();
 	void finalise();
