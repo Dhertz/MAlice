@@ -721,11 +721,17 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     }
 }
 
-int evaluateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<SymbolTable> st) {
+int ExprGen::evaluateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<SymbolTable> st) {
 	string tok = Utils::createStringFromTree(root);
 
 	if (tok == "VAR") {
-		return 0;
+		string varName = Utils::createStringFromTree(Utils::childByNum(root, 0));
+	    boost::shared_ptr<Identifier> varIdent = st->lookupCurrLevelAndEnclosingLevels(varName);
+
+		if (varIdent->getBaseName() != "Type") {
+            boost::shared_ptr<Variable> var = boost::shared_polymorphic_downcast<Variable>(varIdent);
+            return 0;
+        }
 	} else if (tok == "EXPR") {
 		pANTLR3_BASE_TREE expr = Utils::childByNum(root, 0);
 		return evaluateExpression(expr, st);
