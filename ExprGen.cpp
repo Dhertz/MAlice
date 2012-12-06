@@ -14,9 +14,9 @@ void printVector(vector<string> vec) {
 }
 
 treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<SymbolTable> st, vector<string> freeRegs) {
-	Utils::printTree(root);
+	/* Utils::printTree(root);
 	printVector(freeRegs);
-	cout << endl << endl << endl;
+	cout << endl << endl << endl; */
 
 	string tok = Utils::createStringFromTree(root);
 	list<AssemCom> instrs;
@@ -139,8 +139,6 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
             boost::shared_ptr<Array> arr = boost::shared_polymorphic_downcast<Array>(varType);
 
 			// Array will definitely have already been allocated by now
-			// Do I need an error if this is "" just like I might have below?
-			// Or is that case impossible?
 			string loc = arr->getAssLoc();
 			treble_ptr_t ret(new treble_t(loc, instrs, freeRegs));
 			return ret;
@@ -154,7 +152,6 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 				if (freeRegs.empty()) {
 					cout << "TODO: this case (~169 in ExprGen)" << endl;
 
-            
 					// mov rx, charByte
 					vector<string> args;
 					AssemCom mov("!", args);
@@ -166,6 +163,8 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					string reg = freeRegs.front();
 					freeRegs.erase(freeRegs.begin());
 
+					var->setAssLoc(reg);
+
 					treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
 					return ret;
 				}
@@ -174,7 +173,6 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 				return ret;
 			}
         }
-        cout << "var case not returning" << endl;
     } else if (tok == "ARRMEMBER") {
         // Array member reference
 
@@ -387,7 +385,6 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 			freeRegs = rhsEval->get<2>();
 			instrs.splice(instrs.end(), rhsInstrs);
 
-
 			if (op == "||" || op == "|") {
 				if (!freeRegs.empty()) {
 			    	string reg = freeRegs.front();
@@ -521,7 +518,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 					// eor reg, reg, reg
 					// cmp lhsLoc, rhsLoc
-					// moveq reg, #0x7FFFFFFF
+					// moveq reg, #-1
 					vector<string> args;
     				args.push_back(reg);
     				args.push_back(reg);
@@ -537,7 +534,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
     				args.clear();
     				args.push_back(reg);
-    				args.push_back("#0x7FFFFFFF");
+    				args.push_back("#-1");
     				AssemCom moveq("moveq", args);
     				instrs.push_back(moveq);
 
@@ -553,13 +550,13 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 			    	string reg = freeRegs.front();
 					freeRegs.erase(freeRegs.begin());
 
-					// mov reg, #0x7FFFFFFF
+					// mov reg, #-1
 					// cmp lhsLoc, rhsLoc
 					// eoreq reg, reg, reg
 
 					vector<string> args;
     				args.push_back(reg);
-    				args.push_back("#0x7FFFFFFF");
+    				args.push_back("#-1");
     				AssemCom mov("mov", args);
     				instrs.push_back(mov);
 
@@ -590,7 +587,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 					// eor reg, reg, reg
 					// cmp lhsLoc, rhsLoc
-					// movgt reg, #0x7FFFFFFF
+					// movgt reg, #-1
 					vector<string> args;
     				args.push_back(reg);
     				args.push_back(reg);
@@ -606,7 +603,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
     				args.clear();
     				args.push_back(reg);
-    				args.push_back("#0x7FFFFFFF");
+    				args.push_back("#-1");
     				AssemCom movgt("movgt", args);
     				instrs.push_back(movgt);
 
@@ -624,7 +621,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 					// eor reg, reg, reg
 					// cmp lhsLoc, rhsLoc
-					// movlt reg, #0x7FFFFFFF
+					// movlt reg, #-1
 					vector<string> args;
     				args.push_back(reg);
     				args.push_back(reg);
@@ -640,7 +637,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
     				args.clear();
     				args.push_back(reg);
-    				args.push_back("#0x7FFFFFFF");
+    				args.push_back("#-1");
     				AssemCom movlt("movlt", args);
     				instrs.push_back(movlt);
 
@@ -658,7 +655,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 					// eor reg, reg, reg
 					// cmp lhsLoc, rhsLoc
-					// movge reg, #0x7FFFFFFF
+					// movge reg, #-1
 					vector<string> args;
     				args.push_back(reg);
     				args.push_back(reg);
@@ -674,7 +671,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
     				args.clear();
     				args.push_back(reg);
-    				args.push_back("#0x7FFFFFFF");
+    				args.push_back("#-1");
     				AssemCom movge("movge", args);
     				instrs.push_back(movge);
 
@@ -692,7 +689,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 					// eor reg, reg, reg
 					// cmp lhsLoc, rhsLoc
-					// movle reg, #0x7FFFFFFF
+					// movle reg, #-1
 					vector<string> args;
     				args.push_back(reg);
     				args.push_back(reg);
@@ -708,7 +705,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 					args.clear();
     				args.push_back(reg);
-    				args.push_back("#0x7FFFFFFF");
+    				args.push_back("#-1");
     				AssemCom movle("movle", args);
     				instrs.push_back(movle);
 
