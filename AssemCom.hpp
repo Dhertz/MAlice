@@ -11,7 +11,7 @@ class AssemCom {
 	int _arity;
 	vector<string> _args;
 public:
-	AssemCom(string name, int arity, vector<string> args);
+	AssemCom(string name, vector<string> args);
 	string getName();
 	int getArity();
 	vector<string> getArgs();

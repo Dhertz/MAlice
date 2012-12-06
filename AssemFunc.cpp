@@ -17,11 +17,11 @@ void AssemFunc::initFreeRegs() {
 }
 
 void AssemFunc::addFront(string name, vector<string> args) {
-	_comms.push_front(AssemCom(name, args.size(), args));
+	_comms.push_front(AssemCom(name, args));
 }
 
 void AssemFunc::addBack(string name, vector<string> args) {
-	_comms.push_back(AssemCom(name, args.size(), args));
+	_comms.push_back(AssemCom(name, args));
 }
 
 void AssemFunc::addListBack(list<AssemCom> l) {

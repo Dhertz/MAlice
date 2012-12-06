@@ -1,8 +1,8 @@
 #include "AssemCom.hpp"
 
-AssemCom::AssemCom(string name, int arity, vector<string> args) {
+AssemCom::AssemCom(string name, vector<string> args) {
 	_name = name;
-	_arity = arity;
+	_arity = args.size();
 	_args = args;
 }
 

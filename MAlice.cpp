@@ -78,7 +78,7 @@ void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
     	boost::shared_ptr<ASTVisitor> treeVisitor(new ASTVisitor(globalSt));
 	    semanticTree->getRoot()->accept(treeVisitor);
 
-	    list<AssemCom> program;
+	    list<AssemCom> program = treeVisitor->getStartDefs();
 
 	    vector<boost::shared_ptr<AssemFunc> > functions 
 	    	= treeVisitor->getFunctions();
