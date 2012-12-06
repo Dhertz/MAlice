@@ -200,10 +200,8 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 	string resultReg = res->get<0>();
 
 	Label strLbl;
-	if (resultReg[0] != '.') {
-		_endDefs.push_back(
-			AssemCom(strLbl.getLabel() + ":", std::vector<string>()));		// strLbl:
-	}
+	_endDefs.push_back(
+		AssemCom(strLbl.getLabel() + ":", std::vector<string>()));				// strLbl:
 
 	if (expr->getType()->getTypeName() == "Sentence") {
 		if (resultReg[0] != '.') {
@@ -212,24 +210,47 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 			_endDefs.push_back(AssemCom(".asciz", asciiArg));
 		}
 	} else {
-		vector<string> asciiArg;
-		asciiArg.push_back("\"%i\"");
-		_endDefs.push_back(AssemCom(".asciz", asciiArg));
+		if (expr->getType()->getTypeName() == "Number") {
+			vector<string> asciiArg;
+			asciiArg.push_back("\"%i\"");
+			_endDefs.push_back(AssemCom(".asciz", asciiArg));
+		} else {
+			vector<string> asciiArg;
+			asciiArg.push_back("\"%c\"");
+			_endDefs.push_back(AssemCom(".asciz", asciiArg));
+		}
 
-		func->addListBack(res->get<1>());										// expr instrs
+		if (resultReg[0] != '.') {
+			// local variable or expression
 
-		if (resultReg != "r1") {
+			func->addListBack(res->get<1>());									// expr instrs
+
+			if (resultReg != "r1") {
+				if (!func->regIsFree("r1")) {
+					vector<string> pushArg;
+					pushArg.push_back("{r1}");
+					func->addBack("push", pushArg);	
+				}																// push {r1}
+
+				vector<string> movArgs;
+				movArgs.push_back("r1");
+				movArgs.push_back(resultReg);
+				func->addBack("mov", movArgs);									// mov r1 resultReg
+			}
+		} else {
+			//global varaible
 			if (!func->regIsFree("r1")) {
 				vector<string> pushArg;
 				pushArg.push_back("{r1}");
 				func->addBack("push", pushArg);	
-			}																	// push {r1}
+			}
 
-			vector<string> movArgs;
-			movArgs.push_back("r1");
-			movArgs.push_back(resultReg);
-			func->addBack("mov", movArgs);										// mov r1 resultReg
+			vector<string> ldrArgs;
+			ldrArgs.push_back("r1");
+			ldrArgs.push_back(resultReg);
+			func->addBack("ldr", ldrArgs);										// mov ldr resultReg
 		}
+
 	}
 
 	if (!func->regIsFree("r0")) {
@@ -240,11 +261,7 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 
 	vector<string> ldrArgs;
 	ldrArgs.push_back("r0");
-	if (resultReg[0] != '.') {
-		ldrArgs.push_back("=" + strLbl.getLabel());								
-	} else {
-		ldrArgs.push_back("=" + resultReg);	
-	}
+	ldrArgs.push_back("=" + strLbl.getLabel());
 	func->addBack("ldr", ldrArgs);												// ldr r0 =strLbl
 
 	vector<string> printArg;
@@ -269,13 +286,29 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 void ASTVisitor::visitReturn(boost::shared_ptr<ExprAST> expr, 
 							   boost::shared_ptr<SymbolTable> st,
 							   boost::shared_ptr<AssemFunc> func) {
-	// I don't think I care about the expression, that can be handled in the 
-	// function call
+	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
+	  = ExprGen::generateExpression(expr->getRoot(), st, func->getFreeRegs());
+
+	string resultReg = res->get<0>();
+	func->addListBack(res->get<1>());
+	func->setFreeRegs(res->get<2>());
+
+	if (resultReg != "r0") {
+		if (!func->regIsFree("r0")) {
+			vector<string> pushArg;
+			pushArg.push_back("{r0}");
+			func->addBack("push", pushArg);	
+		}																		// push {r0}
+
+		vector<string> movArgs;
+		movArgs.push_back("r0");
+		movArgs.push_back(resultReg);
+		func->addBack("mov", movArgs);											// mov r0 resultReg
+	}
 
 	vector<string> retArg;
 	retArg.push_back("lr");
-
-	func->addBack("bx", retArg);													// bx lr
+	func->addBack("bx", retArg);												// bx lr
 }
 
 void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr, 
@@ -286,8 +319,6 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 
 	func->setFreeRegs(res->get<2>());
 	string resultReg = res->get<0>();
-
-	// non-sentence case atm
 
 	if (expr->getType()->getTypeName() == "Sentence"){
 		
@@ -319,7 +350,7 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 		func->addBack("str", strArgs);											// str resultReg [fp, #-sp]
 		Label strLbl;
 		_endDefs.push_back(
-			AssemCom(strLbl.getLabel() + ":" , std::vector<string>()));		// strLbl:
+			AssemCom(strLbl.getLabel() + ":" , std::vector<string>()));			// strLbl:
 		vector<string> asciiArg;
 
 		if (expr->getType()->getTypeName() == "Number") {	

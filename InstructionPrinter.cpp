@@ -19,7 +19,12 @@ void InstructionPrinter::printList(list<AssemCom> l, string filename) {
 			if (comm.getArity() > 0) {
 				file << "\t";
 			}
-			file << comm.getName() << "\t";
+
+			if (comm.getName().size() < 4) {
+				file << comm.getName() << "\t" << "\t";
+			} else {
+				file << comm.getName() << "\t";
+			}
 
 			vector<string> args = comm.getArgs();
 
