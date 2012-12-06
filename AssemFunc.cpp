@@ -5,7 +5,7 @@
 
 AssemFunc::AssemFunc(string name) {
 	_name = name;
-	stackPointer = 0;
+	_stackPointer = 0;
 	initFreeRegs();
 }
 
@@ -33,11 +33,11 @@ void AssemFunc::addListFront(list<AssemCom> l) {
 }
 
 void AssemFunc::increaseStackPointer(int i) {
-	stackPointer += i;
+	_stackPointer += i;
 }
 
 int AssemFunc::getStackPointer() {
-	return stackPointer;
+	return _stackPointer;
 }
 
 string AssemFunc::getName() {
@@ -54,9 +54,9 @@ void AssemFunc::finalise() {
 		addBack("mov", args);
 	}
 
-	if (stackPointer > 0) {
+	if (_stackPointer > 0) {
 		vector<string> spArgs(2, "sp");
-		spArgs.push_back("#" + boost::lexical_cast<string>(stackPointer));
+		spArgs.push_back("#" + boost::lexical_cast<string>(_stackPointer));
 		addFront("sub", spArgs);
 
 		vector<string> fpArgs;

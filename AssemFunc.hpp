@@ -7,7 +7,7 @@
 
 class AssemFunc {
 	list<AssemCom> _comms;
-	int stackPointer;
+	int _stackPointer;
 	vector<string> _freeRegs;
 	string _name;
 public:
