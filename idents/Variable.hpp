@@ -7,6 +7,7 @@ class Variable : public Identifier {
     boost::shared_ptr<Type> _type;
 	string _assLoc;
 	int _val;
+	bool _hasEvaluatedVal;
 public:
     Variable(boost::shared_ptr<Type> type);
     boost::shared_ptr<Type> getTypeName();
@@ -15,6 +16,7 @@ public:
 	void setAssLoc(string assLoc);
 	int getVal();
 	void setVal(int val);
+	bool hasEvaluatedVal();
 };
 
 #endif

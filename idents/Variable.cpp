@@ -3,6 +3,7 @@
 Variable::Variable(boost::shared_ptr<Type> type) {
     _type = type;
 	_assLoc = "";
+	_hasEvaluatedVal = false;
 }
 
 boost::shared_ptr<Type> Variable::getTypeName() {
@@ -26,5 +27,10 @@ int Variable::getVal() {
 }
 
 void Variable::setVal(int val) {
+	_hasEvaluatedVal = true;
 	_val = val;
+}
+
+bool Variable::hasEvaluatedVal() {
+	return _hasEvaluatedVal;
 }

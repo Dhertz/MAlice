@@ -39,3 +39,8 @@ void Utils::printSynErr(int lineNo, string err) {
     cerr << "Syntax error, line " << lineNo << ": " << err << endl;
     globalErrorCount++;
 }
+
+void Utils::printComErr(string err) {
+    cerr << "Compile error: " << err << endl << endl;
+    exit(1);
+}

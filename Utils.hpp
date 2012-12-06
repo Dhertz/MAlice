@@ -15,6 +15,7 @@ public:
     static string createStringFromTree(pANTLR3_BASE_TREE tree);
     static void printSemErr(int lineNo, string err);
     static void printSynErr(int lineNo, string err);
+    static void printComErr(string err);
 };
 
 #endif

@@ -723,7 +723,8 @@ int ExprGen::evaluateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<Symbol
 
 		if (varIdent->getBaseName() != "Type") {
             boost::shared_ptr<Variable> var = boost::shared_polymorphic_downcast<Variable>(varIdent);
-            return var->getVal();
+            if (var->hasEvaluatedVal())
+            	return var->getVal();
         }
 	} else if (tok == "EXPR") {
 		pANTLR3_BASE_TREE expr = Utils::childByNum(root, 0);
@@ -778,6 +779,5 @@ int ExprGen::evaluateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<Symbol
     	}
     }
 
-    cout << "Nope." << endl;
-    return -1;
+    Utils::printComErr("Could not evaluate array size.");
 }
