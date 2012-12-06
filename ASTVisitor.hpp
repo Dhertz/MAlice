@@ -99,6 +99,10 @@ public:
                          boost::shared_ptr<SymbolTable> st,
                          boost::shared_ptr<AssemFunc> func);
     
+    void visitArrayDec(string name, boost::shared_ptr<ExprAST> length, 
+								 boost::shared_ptr<Type> type, 
+							     boost::shared_ptr<SymbolTable> st);
+    
     vector<boost::shared_ptr<AssemFunc> > getFunctions();
     list<AssemCom>& getEndDefs();
     list<AssemCom> getStartDefs();
