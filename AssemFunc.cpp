@@ -28,12 +28,20 @@ void AssemFunc::addListBack(list<AssemCom> l) {
 	_comms.splice(_comms.end(), l);
 }
 
+void AssemFunc::addListFront(list<AssemCom> l) {
+	_comms.splice(_comms.begin(), l);
+}
+
 void AssemFunc::increaseStackPointer(int i) {
 	stackPointer += i;
 }
 
 int AssemFunc::getStackPointer() {
 	return stackPointer;
+}
+
+string AssemFunc::getName() {
+	return _name;
 }
 
 void AssemFunc::finalise() {

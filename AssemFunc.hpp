@@ -16,8 +16,10 @@ public:
 	void addFront(string name, vector<string> args);
 	void addBack(string name, vector<string> args);
 	void addListBack(list<AssemCom> l);
+	void addListFront(list<AssemCom> l);
 	void increaseStackPointer(int i);
-	int  getStackPointer();
+	int getStackPointer();
+	string getName();
 	void finalise();
 	list<AssemCom>& getComms();
 	void setFreeRegs(vector<string> v);

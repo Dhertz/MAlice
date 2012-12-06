@@ -19,6 +19,7 @@ class HeaderParamsAST;
 class ASTVisitor : public boost::enable_shared_from_this<ASTVisitor> {
 	vector<boost::shared_ptr<AssemFunc> > _functions;
 	list<AssemCom> _startDefs;
+	list<AssemCom> _globalInlines;
 	list<AssemCom> _endDefs;
 	boost::shared_ptr<SymbolTable> _globalSt;
 	void initFreeRegs();
@@ -81,6 +82,9 @@ public:
 					  boost::shared_ptr<SymbolTable> st,
 					  boost::shared_ptr<AssemFunc> func);
 
+	void visitVarAss(string varName, boost::shared_ptr<ExprAST> expr, 
+					  boost::shared_ptr<SymbolTable> st);
+
 	void visitFuncCall(string name, boost::shared_ptr<CallParamsAST> params, 
 						 boost::shared_ptr<SymbolTable> st,
 						 boost::shared_ptr<AssemFunc> func);
@@ -98,6 +102,7 @@ public:
     vector<boost::shared_ptr<AssemFunc> > getFunctions();
     list<AssemCom>& getEndDefs();
     list<AssemCom> getStartDefs();
+    list<AssemCom> getGlobalInlines();
 };
 
 #endif

@@ -563,11 +563,67 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 	
 }
 
+void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr, 
+							   boost::shared_ptr<SymbolTable> st) {
+	// Global inline assignments
+
+	string regs[] = {"r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9",
+					 "r10"};
+
+	vector<string> freeRegs =
+		vector<string>(regs, regs + sizeof(regs) / sizeof(string));
+
+	boost::shared_ptr<Identifier> varIdent 
+	  = st->lookupCurrLevelAndEnclosingLevels(varName);
+	boost::shared_ptr<Variable> var 
+	  = boost::shared_polymorphic_downcast<Variable>(varIdent);
+
+	string loc = var->getAssLoc();
+
+	vector<string> ldArgs;
+
+	ldArgs.push_back("r0");
+	ldArgs.push_back(loc);
+	_globalInlines.push_back(AssemCom("ldr", ldArgs));							// ldr wordLoc loc
+
+	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res 
+	  = ExprGen::generateExpression(expr->getRoot(), st, freeRegs);
+	if (var->getTypeName()->getTypeName() == "Sentence") {
+		vector<string> asciiArg;
+		asciiArg.push_back(res->get<0>());
+		Label strLbl;
+		_endDefs.push_back(
+			AssemCom(strLbl.getLabel() + ":", std::vector<string>()));
+		var->setAssLoc(strLbl.getLabel());
+		_endDefs.push_back(AssemCom(".asciz", asciiArg));
+	} else {
+		string rhs = res->get<0>();
+		_globalInlines.splice(_globalInlines.end(), res->get<1>());				// expr instrs
+
+		// global variable assignment
+		string wordLoc = "r0"; // fin since it's always going to be the first thing
+		
+
+		if (var->getTypeName()->getTypeName() == "Letter") {
+			vector<string> strbArgs;
+			strbArgs.push_back(rhs);
+			strbArgs.push_back("[" + wordLoc + ", #0]");
+			_globalInlines.push_back(AssemCom("strb", strbArgs));				// strb rhs [wordloc]
+		} else {
+			// must be a global number
+			vector<string> strbArgs;
+			strbArgs.push_back(rhs);
+			strbArgs.push_back("[" + wordLoc + ", #0]");
+			_globalInlines.push_back(AssemCom("str", strbArgs));				// str rhs [wordloc]
+		}
+	}
+
+}
+
 void ASTVisitor::visitFuncCall(string name,
 						    	 boost::shared_ptr<CallParamsAST> params, 
 							     boost::shared_ptr<SymbolTable> st,
 							     boost::shared_ptr<AssemFunc> func) {
-
 
 	vector<boost::shared_ptr< ExprAST> > exprs = params->getParamExprs();
 
@@ -737,6 +793,10 @@ vector<boost::shared_ptr<AssemFunc> > ASTVisitor::getFunctions() {
 
 list<AssemCom> ASTVisitor::getStartDefs() {
 	return _startDefs;
+}
+
+list<AssemCom> ASTVisitor::getGlobalInlines() {
+	return _globalInlines;
 }
 
 list<AssemCom>& ASTVisitor::getEndDefs() {

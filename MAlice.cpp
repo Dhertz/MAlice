@@ -74,6 +74,8 @@ void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
         return;
     }
 
+    semanticTree->print();
+
     if (boost::shared_ptr<SymbolTable> globalSt = top->getChildren()[0].lock()) {
     	boost::shared_ptr<ASTVisitor> treeVisitor(new ASTVisitor(globalSt));
 	    semanticTree->getRoot()->accept(treeVisitor);
@@ -84,6 +86,9 @@ void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
 	    	= treeVisitor->getFunctions();
 	    vector<boost::shared_ptr<AssemFunc> >::iterator i;
 	    for (i = functions.begin(); i != functions.end(); ++i) {
+	    	if ((*i)->getName() == "main") {
+	    		(*i)->addListFront(treeVisitor->getGlobalInlines());
+	    	}
 	    	(*i)->finalise();
 	    	program.splice(program.end(), (*i)->getComms());
 	    }
