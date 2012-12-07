@@ -192,7 +192,7 @@ void ASTVisitor::visitDec(boost::shared_ptr<ExprAST> expr,
 	vector<string> incArgs(2, resultReg);
 	incArgs.push_back("#1");
 
-	func->addBack("dec", incArgs);												// add resultReg resultReg #1
+	func->addBack("sub", incArgs);												// sub resultReg resultReg #1
 
 }
 
