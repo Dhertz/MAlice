@@ -305,7 +305,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 				args.clear();
 				args.push_back(reg);
 				args.push_back(argLoc);
-				args.push_back("#1");
+				args.push_back("#0xFFFFFFFF");
 				AssemCom eor("eor", args);
 				instrs.push_back(eor);
 
