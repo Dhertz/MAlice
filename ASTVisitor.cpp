@@ -784,9 +784,9 @@ void ASTVisitor::visitArrayAssign(string name,
 	//make size bigger for integers
 	if (arr->getTypeName() == "Number") {	
 		std::vector<string> mul;
+		mul.push_back(resultReg);												//mul resReg, 4, resReg
 		mul.push_back(resultReg);												
-		mul.push_back("4");														//mul resReg, 4, resReg
-		mul.push_back(resultReg);
+		mul.push_back("#4");		
 		func->addBack("mul", mul);		
 	}
 	
