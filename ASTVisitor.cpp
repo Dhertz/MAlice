@@ -468,6 +468,7 @@ void ASTVisitor::visitIf(boost::shared_ptr<ExprAST> cond,
 						   boost::shared_ptr<AssemFunc> func) {
 
 	Label elseLabel;
+	bool isStack = false;
 
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
 	  = ExprGen::generateExpression(cond->getRoot(), st, func->getFreeRegs(), func);
@@ -476,10 +477,35 @@ void ASTVisitor::visitIf(boost::shared_ptr<ExprAST> cond,
 	func->addListBack(res->get<1>());
 	func->setFreeRegs(res->get<2>());
 
+	if (resultReg[0] != 'r') {
+		// result is stored on the stack
+		isStack = true;
+
+		// push {r0}
+		vector<string> pushArgs;
+		pushArgs.push_back("{r0}");
+		func->addBack("push", pushArgs);
+
+		// ldr r0, resultReg
+		vector<string> ldrArgs;
+		ldrArgs.push_back("r0");
+		ldrArgs.push_back(resultReg);
+		func->addBack("ldr", ldrArgs);
+
+		resultReg = "r0";
+	}
+
 	vector<string> cmpArgs;
 	cmpArgs.push_back(resultReg);
 	cmpArgs.push_back("#0");
 	func->addBack("cmp", cmpArgs);												// cmp resultReg #0
+
+	if (isStack) {
+		// pop {r0}
+		vector<string> popArgs;
+		popArgs.push_back("{r0}");
+		func->addBack("pop", popArgs);
+	}
 
 	vector<string> bneArgs;
 	bneArgs.push_back(elseLabel.getLabel());
