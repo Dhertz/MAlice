@@ -13,6 +13,8 @@ void printVector(vector<string> vec) {
 	cout << endl;
 }
 
+string borrowRegister(vector<string> args);
+
 treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<SymbolTable> st, vector<string> freeRegs, boost::shared_ptr<AssemFunc> func) {
 	/* Utils::printTree(root);
 	printVector(freeRegs);
@@ -276,36 +278,57 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     		instrs.splice(instrs.end(), argInstrs);
 
     		if (op == "!") {
+    			vector<string> args;
+    			string reg, stackLoc, retLoc;
+
 			    if (!freeRegs.empty()) {
-			    	string reg = freeRegs.front();
+			    	reg = freeRegs.front();
 					freeRegs.erase(freeRegs.begin());
-
-					// eor reg, argLoc, #1
-					vector<string> args;
-					args.push_back(reg);
-					args.push_back(argLoc);
-					args.push_back("#1");
-					AssemCom eor("eor", args);
-					instrs.push_back(eor);
-
-					treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
-					return ret;
 				} else {
 					int currPtr = func->getStackPointer() + 4;
-					string stackLoc = "DWORD PTR [fp-" + boost::lexical_cast<string>(currPtr) + "]";
+					stackLoc = "[fp,#-" + boost::lexical_cast<string>(currPtr) + "]";
 					func->increaseStackPointer(4);
 
-					// eor stackLoc, argLoc, #1
-					vector<string> args;
-					args.push_back(stackLoc);
-					args.push_back(argLoc);
-					args.push_back("#1");
-					AssemCom eor("eor", args);
-					instrs.push_back(eor);
+					// borrow a regiser to replace stackLoc in any calculations
+					vector<string> argRegs;
+					argRegs.push_back(argLoc);
+					reg = borrowRegister(argRegs);
 
-					treble_ptr_t ret(new treble_t(stackLoc, instrs, freeRegs));
-					return ret;
+					// push {reg}
+					args.push_back("{" + reg + "}");
+					AssemCom push("push", args);
+					instrs.push_back(push);
 				}
+
+				// eor reg, argLoc, #1
+				args.clear();
+				args.push_back(reg);
+				args.push_back(argLoc);
+				args.push_back("#1");
+				AssemCom eor("eor", args);
+				instrs.push_back(eor);
+
+			    if (!freeRegs.empty()) {
+			    	retLoc = reg;
+				} else {
+					// str reg, [fp, #-4]
+					args.clear();
+					args.push_back(reg);
+					args.push_back(stackLoc);
+					AssemCom str("str", args);
+					instrs.push_back(str);
+
+					// pop {reg}
+					args.clear();
+					args.push_back("{" + reg + "}");
+					AssemCom pop("pop", args);
+					instrs.push_back(pop);
+
+					retLoc = stackLoc;
+				}
+
+				treble_ptr_t ret(new treble_t(retLoc, instrs, freeRegs));
+				return ret;
     		} else if (op == "~") {
 			    if (!freeRegs.empty()) {
 			    	string reg = freeRegs.front();
@@ -789,4 +812,19 @@ int ExprGen::evaluateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<Symbol
     }
 
     Utils::printComErr("Could not evaluate array size.");
+}
+
+// Returns a register that isn't in args, used in stack storage case
+string borrowRegister(vector<string> args) {
+	string regs[] = {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9",
+					 "r10"};
+	vector<string> allRegs =
+		vector<string>(regs, regs + sizeof(regs) / sizeof(string));
+
+	for (vector<string>::iterator it = allRegs.begin(); it != allRegs.end(); ++it) {
+		if (find(args.begin(), args.end(), *it) == args.end())
+			return *it;
+	}
+	// This won't ever be hit, as no case above uses so many arguments
+	return "";
 }
