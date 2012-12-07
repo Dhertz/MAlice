@@ -93,7 +93,8 @@ void ASTVisitor::visitFuncDec(string name, string returnType,
 
 	vector<int> callableKids;
 	i = 0;
-	vector<boost::shared_ptr<ASTNode> >::iterator it;							// function body
+	// function body
+	vector<boost::shared_ptr<ASTNode> >::iterator it;
 	for (it = children.begin(); it != children.end(); ++it) {
 		if ((*it)->getNodeName() == "FuncDec" 
 				|| (*it)->getNodeName() == "ProcDec") {
@@ -180,29 +181,16 @@ void ASTVisitor::visitInc(boost::shared_ptr<ExprAST> expr,
 		// it's on the stack
 		isStack = true;
 
-		// push {r0}
-		vector<string> pushArgs;
-		pushArgs.push_back("{r0}");
-		func->addBack("push", pushArgs);
-
-		// ldr r0, resultReg
-		vector<string> ldrArgs;
-		ldrArgs.push_back("r0");
-		ldrArgs.push_back(resultReg);
-		func->addBack("ldr", ldrArgs);
+		addCommand(func, "push", "{r0}");
+		addCommand(func, "ldr", "r0", resultReg);
 
 		resultReg = "r0";
 	}
 
-	vector<string> incArgs(2, resultReg);
-	incArgs.push_back("#1");
-	func->addBack("add", incArgs);												// add resultReg resultReg #1
+	addCommand(func, "add", resultReg, resultReg, "#1");
 
 	if (isStack) {
-		// pop {r0}
-		vector<string> popArgs;
-		popArgs.push_back("{r0}");
-		func->addBack("pop", popArgs);
+		addCommand(func, "pop", "{r0}");
 	}
 }
 
@@ -220,31 +208,15 @@ void ASTVisitor::visitDec(boost::shared_ptr<ExprAST> expr,
 	if (resultReg[0] != 'r') {
 		// it's on the stack
 		isStack = true;
-
-		// push {r0}
-		vector<string> pushArgs;
-		pushArgs.push_back("{r0}");
-		func->addBack("push", pushArgs);
-
-		// ldr r0, resultReg
-		vector<string> ldrArgs;
-		ldrArgs.push_back("r0");
-		ldrArgs.push_back(resultReg);
-		func->addBack("ldr", ldrArgs);
-
+		addCommand(func, "push", "{r0}");
+		addCommand(func, "ldr", "r0", resultReg);
 		resultReg = "r0";
 	}
 
-	vector<string> incArgs(2, resultReg);
-	incArgs.push_back("#1");
-
-	func->addBack("sub", incArgs);												// sub resultReg resultReg #1
+	addCommand(func, "sub", resultReg, resultReg, "#1");
 
 	if (isStack) {
-		// pop {r0}
-		vector<string> popArgs;
-		popArgs.push_back("{r0}");
-		func->addBack("pop", popArgs);
+		addCommand(func, "pop", "{r0}");
 	}
 }
 
@@ -269,16 +241,8 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 		ignoreRegs.push_back("r1");
 		tmpReg = Utils::borrowRegister(ignoreRegs);
 
-		// push {tmpReg}
-		vector<string> pushArgs;
-		pushArgs.push_back("{" + tmpReg + "}");
-		func->addBack("push", pushArgs);
-
-		// ldr tmpReg, resultReg
-		vector<string> ldrArgs;
-		ldrArgs.push_back(tmpReg);
-		ldrArgs.push_back(resultReg);
-		func->addBack("ldr", ldrArgs);
+		addCommand(func, "push", "{" + tmpReg + "}");
+		addCommand(func, "ldr", tmpReg, resultReg);
 
 		resultReg = tmpReg;
 	}
@@ -310,79 +274,50 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 
 		if (resultReg[0] != '.') {
 			// local variable or expression
-
 			func->addListBack(res->get<1>());									// expr instrs
 
 			if (resultReg != "r1") {
 				if (!func->regIsFree("r1")) {
-					vector<string> pushArg;
-					pushArg.push_back("{r1}");
-					func->addBack("push", pushArg);	
-				}																// push {r1}
+					addCommand(func, "push", "{r1}");
+				}
 
-				vector<string> movArgs;
-				movArgs.push_back("r1");
-				movArgs.push_back(resultReg);
-				func->addBack("mov", movArgs);									// mov r1 resultReg
+				addCommand(func, "mov", "r1", resultReg);
 			}
 		} else {
 			//global varaible
 			if (!func->regIsFree("r1")) {
-				vector<string> pushArg;
-				pushArg.push_back("{r1}");
-				func->addBack("push", pushArg);	
+				addCommand(func, "push", "{r1}");	
 			}
 
-			vector<string> ldrArgs;
-			ldrArgs.push_back("r1");
-			ldrArgs.push_back(resultReg);
-			func->addBack("ldr", ldrArgs);
-
-			vector<string> ldr1Args;
-			ldr1Args.push_back("r1");
-			ldr1Args.push_back("[r1]");
-			func->addBack("ldr", ldr1Args);										// mov ldr resultReg
+			addCommand(func, "ldr", "r1", resultReg);
+			addCommand(func, "ldr", "r1", "[r1]");
 		}
 
 	}
 
 	if (!func->regIsFree("r0") && resultReg[0] == '\"') {
-		vector<string> push0Arg;
-		push0Arg.push_back("{r0}");
-		func->addBack("push", push0Arg);										// push {r0}
+		addCommand(func, "push", "{r0}");
 	}
 
 	if ((expr->getType()->getTypeName() == "Sentence" && resultReg[0] == '\"') 
 		|| !(expr->getType()->getTypeName() == "Sentence")) {
-		vector<string> ldrArgs;
-		ldrArgs.push_back("r0");
-		ldrArgs.push_back("=" + strLbl.getLabel());
-		func->addBack("ldr", ldrArgs);											// ldr r0 =strLbl
+		addCommand(func, "ldr", "r0", "=" + strLbl.getLabel());
 	}
 
-	vector<string> printArg;
-	printArg.push_back("printf");
-	func->addBack("bl", printArg);												// bl printf
+	addCommand(func, "bl", "printf");
 
 	if (!func->regIsFree("r0") && resultReg[0] == '\"') {
-		vector<string> pop0Arg;
-		pop0Arg.push_back("{r0}");
-		func->addBack("pop", pop0Arg);											// pop {r0}
+		addCommand(func, "pop", "{r0}");
 	}
 	
 	if (!func->regIsFree("r1")) {
 		if (resultReg != "r1" && expr->getType()->getTypeName() != "Sentence") {
-			vector<string> pop1Arg;
-			pop1Arg.push_back("{r1}");
-			func->addBack("pop", pop1Arg);										// pop {r1}
+			addCommand(func, "pop", "{r1}");
 		}
 	}
 
 	if (isStack) {
-		// pop {tmpReg}
-		vector<string> popArgs;
-		popArgs.push_back("{" + tmpReg + "}");
-		func->addBack("pop", popArgs);
+		addCommand(func, "pop", "{" + tmpReg + "}");
 	}
 }
 
@@ -401,37 +336,19 @@ void ASTVisitor::visitReturn(boost::shared_ptr<ExprAST> expr,
 	if (resultReg[0] != 'r') {
 		// it's on the stack
 		isStack = true;
-
-		// push {r0}
-		vector<string> pushArgs;
-		pushArgs.push_back("{r0}");
-		func->addBack("push", pushArgs);
-
-		// ldr r0, resultReg
-		vector<string> ldrArgs;
-		ldrArgs.push_back("r0");
-		ldrArgs.push_back(resultReg);
-		func->addBack("ldr", ldrArgs);
-
+		addCommand(func, "push", "{r0}");
+		addCommand(func, "ldr", "r0", resultReg);
 		resultReg = "r0";
 	}
 
 	if (resultReg != "r0") {
-		vector<string> movArgs;
-		movArgs.push_back("r0");
-		movArgs.push_back(resultReg);
-		func->addBack("mov", movArgs);											// mov r0 resultReg
+		addCommand(func, "mov", "r0", resultReg);
 	}
 
-	vector<string> retArg;
-	retArg.push_back("lr");
-	func->addBack("bx", retArg);												// bx lr
+	addCommand(func, "bx", "lr");
 
 	if (isStack) {
-		// pop {r0}
-		vector<string> popArgs;
-		popArgs.push_back("{r0}");
-		func->addBack("pop", popArgs);
+		addCommand(func, "pop", "{r0}");
 	}
 }
 
@@ -455,16 +372,8 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 		ignoreRegs.push_back("r1");
 		tmpReg = Utils::borrowRegister(ignoreRegs);
 
-		// push {tmpReg}
-		vector<string> pushArgs;
-		pushArgs.push_back("{" + tmpReg + "}");
-		func->addBack("push", pushArgs);
-
-		// ldr tmpReg, resultReg
-		vector<string> ldrArgs;
-		ldrArgs.push_back(tmpReg);
-		ldrArgs.push_back(resultReg);
-		func->addBack("ldr", ldrArgs);
+		addCommand(func, "push", "{" + tmpReg + "}");
+		addCommand(func, "ldr", tmpReg, resultReg);
 
 		resultReg = tmpReg;
 	}
@@ -474,21 +383,9 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 		func->increaseStackPointer(260);
 		string sp = boost::lexical_cast<string>(func->getStackPointer());
 
-		vector<string> subr0Args;
-		subr0Args.push_back("r0");
-		subr0Args.push_back("fp");
-		subr0Args.push_back("#" + sp);
-		func->addBack("sub", subr0Args);										// sub r0, fp, #sp
-
-		vector<string> printArg;
-		printArg.push_back("__isoc99_scanf");
-		func->addBack("bl", printArg);											// bl __isoc99_scanf
-
-		vector<string> ldrArgs;
-		ldrArgs.push_back(resultReg);
-		ldrArgs.push_back("[fp, #-" + sp + "]");
-		func->addBack("ldr", ldrArgs);											//ldr resultReg, [fp, #-sp]
-
+		addCommand(func, "sub", "r0", "fp", "#"+sp);
+		addCommand(func, "bl", "__isoc99_scanf");
+		addCommand(func, "ldr", resultReg, "[fp, #-" + sp + "]");
 	} else {
 		func->increaseStackPointer(8);
 		string sp = boost::lexical_cast<string>(func->getStackPointer());
@@ -505,13 +402,8 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 			func->addListBack(tempList);
 		}
 
-		vector<string> strArgs;
-		strArgs.push_back(resultReg);
-		strArgs.push_back("[fp, #-" + sp + "]");
-		func->addBack("str", strArgs);											// str resultReg [fp, #-sp]
 		Label strLbl;
-		_endDefs.push_back(
-			AssemCom(strLbl.getLabel() + ":" , std::vector<string>()));			// strLbl:
+		addCommand(func, "str", resultReg, "[fp, #-" + sp + "]");
 		vector<string> asciiArg;
 
 		if (expr->getType()->getTypeName() == "Number") {	
@@ -522,40 +414,18 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 		
 		_endDefs.push_back(AssemCom(".asciz", asciiArg));
 
-		vector<string> ldr0Args;
-		ldr0Args.push_back("r0");
-		ldr0Args.push_back("=" + strLbl.getLabel());
-		func->addBack("ldr", ldr0Args);											// ldr r0 =strLbl
-
-		vector<string> sub1Args;
-		sub1Args.push_back("r1");
-		sub1Args.push_back("fp");
-		sub1Args.push_back("#" + sp);
-		func->addBack("sub", sub1Args);											// sub r1, fp, sp
-
-		vector<string> printArg;
-		printArg.push_back("__isoc99_scanf");
-		func->addBack("bl", printArg);											// bl __isoc99_scanf
-
-		vector<string> ldrArgs;
-		ldrArgs.push_back(resultReg);
-		ldrArgs.push_back("[fp, #-" + sp + "]");
-		func->addBack("ldr", ldrArgs);											// ldr resultReg [fp, #-sp]
+		addCommand(func, "ldr", "r0", "=" + strLbl.getLabel());
+		addCommand(func, "sub", "r1", "fp", "#" + sp);
+		addCommand(func, "bl", "__isoc99_scanf");
+		addCommand(func, "ldr", resultReg, "[fp, #-" + sp + "]");
 
 		if (temp != "") {
-			// move the result back to the label
-			vector<string> strArgs;
-			strArgs.push_back(resultReg);
-			strArgs.push_back(temp);
-			func->addBack("str", strArgs);										// str tmp resultReg
+			addCommand(func, "str", resultReg, temp);
 		}
 	}
 
 	if (isStack) {
-		// pop {tmpReg}
-		vector<string> popArgs;
-		popArgs.push_back("{" + tmpReg + "}");
-		func->addBack("pop", popArgs);
+		addCommand(func, "pop", "{" + tmpReg + "}");
 	}
 }
 
@@ -564,8 +434,7 @@ void ASTVisitor::visitWhile(boost::shared_ptr<ExprAST> cond,
 							  boost::shared_ptr<SymbolTable> st,
 							  boost::shared_ptr<AssemFunc> func) {
 	Label loopLabel;
-
-	func->addBack(loopLabel.getLabel() + ":", std::vector<string>());			// loop:
+	addLabel(func, loopLabel.getLabel());										// loop:
 
 	vector<boost::shared_ptr<ASTNode> >::iterator i;							// loop body
 	for (i = children.begin(); i != children.end(); ++i) {
@@ -582,35 +451,16 @@ void ASTVisitor::visitWhile(boost::shared_ptr<ExprAST> cond,
 	if (resultReg[0] != 'r') {
 		// result is stored on the stack
 		onStack = true;
-
-		// push {r0}
-		vector<string> pushArgs;
-		pushArgs.push_back("{r0}");
-		func->addBack("push", pushArgs);
-
-		// ldr r0, resultReg
-		vector<string> ldrArgs;
-		ldrArgs.push_back("r0");
-		ldrArgs.push_back(resultReg);
-		func->addBack("ldr", ldrArgs);
-
+		addCommand(func, "push", "{r0}");
+		addCommand(func, "ldr", "r0", resultReg);
 		resultReg = "r0";
 	}
 
-	vector<string> cmpArgs;
-	cmpArgs.push_back(resultReg);
-	cmpArgs.push_back("#0");
-	func->addBack("cmp", cmpArgs);												// cmp resultReg #0
-
-	vector<string> bneArgs;
-	bneArgs.push_back(loopLabel.getLabel());
-	func->addBack("beq", bneArgs);												// bne loop
+	addCommand(func, "cmp", resultReg, "#0");
+	addCommand(func, "beg", loopLabel.getLabel());
 
 	if (onStack) {
-		// pop {r0}
-		vector<string> popArgs;
-		popArgs.push_back("{r0}");
-		func->addBack("pop", popArgs);
+		addCommand(func, "pop", "{r0}");
 	}
 }
 
@@ -631,49 +481,28 @@ void ASTVisitor::visitChoice(boost::shared_ptr<ExprAST> cond,
 	if (resultReg[0] != 'r') {
 		// result is stored on the stack
 		isStack = true;
-
-		// push {r0}
-		vector<string> pushArgs;
-		pushArgs.push_back("{r0}");
-		func->addBack("push", pushArgs);
-
-		// ldr r0, resultReg
-		vector<string> ldrArgs;
-		ldrArgs.push_back("r0");
-		ldrArgs.push_back(resultReg);
-		func->addBack("ldr", ldrArgs);
-
+		addCommand(func, "push", "{r0}");
+		addCommand(func, "ldr", "r0", resultReg);
 		resultReg = "r0";
 	}
 
-	std::vector<string> cmpArgs;
-	cmpArgs.push_back(resultReg);
-	cmpArgs.push_back("#0");
-	func->addBack("cmp", cmpArgs);												// cmp resultReg #0
+	addCommand(func, "cmp", resultReg, "#0");
 
 	if (isStack) {
-		// pop {r0}
-		vector<string> popArgs;
-		popArgs.push_back("{r0}");
-		func->addBack("pop", popArgs);
+		addCommand(func, "pop", "{r0}");
 	}
 
-	std::vector<string> bneArgs;
-	bneArgs.push_back(elseLabel.getLabel());
-	func->addBack("beq", bneArgs);												// beq else
+	addCommand(func, "beg", elseLabel.getLabel());
 
 	trueBody->accept(shared_from_this(), func);									// if body
 
 	Label endLabel;
-	vector<string> bArgs;
-	bArgs.push_back(endLabel.getLabel());
-	func->addBack("b", bArgs);													// b end
-
-	func->addBack(elseLabel.getLabel() + ":", std::vector<string>());			// else:
+	addCommand(func, "b", endLabel.getLabel());
+	addLabel(func, elseLabel.getLabel());										// else:
 
 	falseBody->accept(shared_from_this(), func);								// else body
 
-	func->addBack(endLabel.getLabel() + ":", std::vector<string>());			// end:
+	addLabel(func, endLabel.getLabel());										// end:
 }
 
 void ASTVisitor::visitIf(boost::shared_ptr<ExprAST> cond,
@@ -695,54 +524,32 @@ void ASTVisitor::visitIf(boost::shared_ptr<ExprAST> cond,
 	if (resultReg[0] != 'r') {
 		// result is stored on the stack
 		isStack = true;
-
-		// push {r0}
-		vector<string> pushArgs;
-		pushArgs.push_back("{r0}");
-		func->addBack("push", pushArgs);
-
-		// ldr r0, resultReg
-		vector<string> ldrArgs;
-		ldrArgs.push_back("r0");
-		ldrArgs.push_back(resultReg);
-		func->addBack("ldr", ldrArgs);
-
+		addCommand(func, "push", "{r0}");
+		addCommand(func, "ldr", "r0", resultReg);
 		resultReg = "r0";
 	}
 
-	vector<string> cmpArgs;
-	cmpArgs.push_back(resultReg);
-	cmpArgs.push_back("#0");
-	func->addBack("cmp", cmpArgs);												// cmp resultReg #0
+	addCommand(func, "cmp", resultReg, "#0");
 
 	if (isStack) {
-		// pop {r0}
-		vector<string> popArgs;
-		popArgs.push_back("{r0}");
-		func->addBack("pop", popArgs);
+		addCommand(func, "pop", "{r0}");
 	}
 
-	vector<string> bneArgs;
-	bneArgs.push_back(elseLabel.getLabel());
-	func->addBack("beq", bneArgs);												// beq else
+	addCommand(func, "beq", elseLabel.getLabel());
 
-	trueBody->accept(shared_from_this(), func);										// if body
+	trueBody->accept(shared_from_this(), func);									// if body
 
 	if (children.size() == 1) {
-		func->addBack(elseLabel.getLabel() + ":", std::vector<string>());		// end:
+		addLabel(func, elseLabel.getLabel());									// end:
 
 	} else {
 		Label endLabel;
-
-		vector<string> bArgs;
-		bArgs.push_back(endLabel.getLabel());
-		func->addBack("b", bArgs);												// b end
-
-		func->addBack(elseLabel.getLabel() + ":", std::vector<string>());		// else:
+		addCommand(func, "b", endLabel.getLabel());
+		addLabel(func, elseLabel.getLabel());									// else:
 
 		(*(children.begin() + 1))->accept(shared_from_this(), func);	
 
-		func->addBack(endLabel.getLabel() + ":", std::vector<string>());		// end:
+		addLabel(func, endLabel.getLabel());									// end:
 	}
 }
 
@@ -781,26 +588,18 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 			// r0 might be pushed later, so let's not use that now
 			vector<string> ignoreRegs;
 			ignoreRegs.push_back("r0");
+
 			tmpReg = Utils::borrowRegister(ignoreRegs);
-
-			// push {tmpReg}
-			vector<string> pushArgs;
-			pushArgs.push_back("{" + tmpReg + "}");
-			func->addBack("push", pushArgs);
-
-			// ldr tmpReg, resultReg
-			vector<string> ldrArgs;
-			ldrArgs.push_back(tmpReg);
-			ldrArgs.push_back(rhs);
-			func->addBack("ldr", ldrArgs);
-
+			addCommand(func, "push", "{" + tmpReg + "}");
+			addCommand(func, "ldr", tmpReg, rhs);
 			rhs = tmpReg;
 		}
 
 		if (loc == "") {
 			if (func->getFreeRegs().empty()) {
 				func->increaseStackPointer(4);
-				string stackLoc = "[fp,#-" + boost::lexical_cast<string>(func->getStackPointer()) + "]";
+				string stackLoc = "[fp,#-" + 
+					boost::lexical_cast<string>(func->getStackPointer()) + "]";
 				var->setAssLoc(stackLoc);
 			} else {
 				var->setAssLoc(rhs);
@@ -815,55 +614,35 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 			if (func->getFreeRegs().empty()) {
 				onStack = true;
 				func->increaseStackPointer(4);
-				string stackLoc = "[fp,#-" + boost::lexical_cast<string>(func->getStackPointer()) + "]";
+				string stackLoc = "[fp,#-" + 
+					boost::lexical_cast<string>(func->getStackPointer()) + "]";
 				// don't need r0 later on so this is fine
 				wordLoc = "r0";
-
-				vector<string> args;
-				args.push_back("{" + wordLoc + "}");
-				func->addBack("push", args);									// push {wordLoc}
+				addCommand(func, "push", "{" + wordLoc + "}");
 			} else {
 				wordLoc = func->getFreeRegs().front();
 			}
 
-			ldArgs.push_back(wordLoc);
-			ldArgs.push_back(loc);
-			func->addBack("ldr", ldArgs);										// ldr wordLoc loc
+			addCommand(func, "ldr", wordLoc, loc);
 
 			if (var->getTypeName()->getTypeName() == "Letter") {
-				vector<string> strbArgs;
-				strbArgs.push_back(rhs);
-				strbArgs.push_back("[" + wordLoc + "]");
-				func->addBack("strb", strbArgs);								// strb rhs [wordloc]
+				addCommand(func, "strb", rhs, "[" + wordLoc + "]");
 			} else {
-				// must be a global number
-				vector<string> strbArgs;
-				strbArgs.push_back(rhs);
-				strbArgs.push_back("[" + wordLoc + "]");
-				func->addBack("str", strbArgs);									// str rhs [wordloc]
+				addCommand(func, "str", rhs, "[" + wordLoc + "]");
 			}
 
 			if (onStack) {
-				vector<string> args;
-				args.push_back("{" + wordLoc + "}");
-				func->addBack("pop", args);										// pop {wordloc}
+				addCommand(func, "pop", "{" + wordLoc + "}");
 			}
 
 			if (rhsOnStack) {
-				vector<string> args;
-				args.push_back("{" + tmpReg + "}");
-				func->addBack("pop", args);										// pop {tmpReg}
+				addCommand(func, "pop", "{" + tmpReg + "}");
 			}
 		} else {
-			vector<string> args;
-			args.push_back(var->getAssLoc());
-			args.push_back(rhs);
-			func->addBack("mov", args);											// mov var rhs
+			addCommand(func, "mov", var->getAssLoc(), rhs);
 
 			if (rhsOnStack) {
-				vector<string> args;
-				args.push_back("{" + tmpReg + "}");
-				func->addBack("pop", args);										// pop {tmpReg}
+				addCommand(func, "pop", "{" + tmpReg + "}");
 			}
 		}
 	}
@@ -886,9 +665,7 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 	  = boost::shared_polymorphic_downcast<Variable>(varIdent);
 
 	string loc = var->getAssLoc();
-
 	vector<string> ldArgs;
-
 	ldArgs.push_back("r0");
 	ldArgs.push_back(loc);
 	_globalInlines.push_back(AssemCom("ldr", ldArgs));							// ldr wordLoc loc
@@ -958,62 +735,35 @@ void ASTVisitor::visitFuncCall(string name,
 			_endDefs.push_back(AssemCom(".asciz", asciiArg));
 
 			//Parameter needs to be moved into correct register
-  			vector<string> args;
-			args.push_back("r" + boost::lexical_cast<string>(i));
-			args.push_back("=" + strLbl.getLabel());
-			func->addBack("ldr", args);
-
+			addCommand(func, "ldr", "r" + boost::lexical_cast<string>(i), 
+						 "=" + strLbl.getLabel());
 		} else if (i < 4) {
 	  		if (paramLoc != "r" + boost::lexical_cast<string>(i)) {
-	  			//Parameter needs to be moved into correct register
-	  			vector<string> args;
-				args.push_back("r" + boost::lexical_cast<string>(i));
-				args.push_back(paramLoc);
-				func->addBack("mov", args);
+	  			addCommand(func, "mov", "r" + boost::lexical_cast<string>(i),
+	  						 paramLoc);
 	  		}
 	  	} else {
 	  		// Push any other params
 			if (paramLoc[0] == 'r') {
-				vector<string> args;
-				args.push_back("{" + paramLoc + "}");
-				func->addBack("push", args);									// push {ri}
+				addCommand(func, "push", "{" + paramLoc + "}");
 			} else if (func->getFreeRegs().empty()) {
-				// Need to temporarily borrow a register
-				vector<string> args;
-				args.push_back("{r0}");
-				func->addBack("push", args);									// push {r0}
-
-				args.clear();
-				args.push_back("r0");
-				args.push_back(paramLoc);
-				// check ldr here - Owen
-				func->addBack("ldr", args);										// mov r0 ri
+				addCommand(func, "push", "{r0}");
+				addCommand(func, "ldr", "r0", paramLoc);// check ldr here - Owen
 
 				// WHy is this here? - Owen
-				//func->addBack("push");										// push {r0}
+				// addCommand(func, "push", "{r0}");
 
-				args.clear();
-				args.push_back("{r0}");
-				func->addBack("pop", args);										// pop {r0}
+				addCommand(func, "pop", "{r0}");
 			} else {
 				string reg = func->getFreeRegs().front();
-
-				vector<string> args;
-				args.push_back(reg);
-				args.push_back(paramLoc);
-				func->addBack("mov", args);										// mov reg paramLoc
-
-				args.clear();
-				args.push_back("{" + reg + "}");
-				func->addBack("push", args);									// push reg
+				addCommand(func, "mov", reg, paramLoc);
+				addCommand(func, "push", "{" + reg + "}");
 			}
 	  	}
 	  	i++;
 	}
 
-	vector<string> blArgs;
-	blArgs.push_back(name);
-	func->addBack("bl", blArgs);												// bl name
+	addCommand(func, "bl", name);
 }
 
 void ASTVisitor::visitArrayAssign(string name,
@@ -1034,28 +784,14 @@ void ASTVisitor::visitArrayAssign(string name,
 	if (resultReg[0] != 'r') {
 		// it's on the stack
 		resOnStack = true;
-
-		// push {r0}
-		vector<string> pushArgs;
-		pushArgs.push_back("{r0}");
-		func->addBack("push", pushArgs);
-
-		// ldr r0, resultReg
-		vector<string> ldrArgs;
-		ldrArgs.push_back("r0");
-		ldrArgs.push_back(resultReg);
-		func->addBack("ldr", ldrArgs);
-
+		addCommand(func, "push", "{r0}");
+		addCommand(func, "ldr", "r0", resultReg);
 		resultReg = "r0";
 	}
 
 	//make size bigger for integers
-	if (arr->getTypeName() == "Number") {	
-		std::vector<string> mul;
-		mul.push_back(resultReg);												//mul resReg, 4, resReg
-		mul.push_back(resultReg);												
-		mul.push_back("#4");		
-		func->addBack("mul", mul);		
+	if (arr->getTypeName() == "Number") {
+		addCommand(func, "mul", resultReg, resultReg, "#4");
 	}
 	
 	string reg = arr->getAssLoc();
@@ -1065,44 +801,24 @@ void ASTVisitor::visitArrayAssign(string name,
 	string valReg = val->get<0>();
 	func->addListBack(val->get<1>());
 
-
 	bool valOnStack = false;
 
 	if (valReg[0] != 'r') {
 		// it's on the stack
 		valOnStack = true;
-
-		// push {r1}
-		vector<string> pushArgs;
-		pushArgs.push_back("{r1}");
-		func->addBack("push", pushArgs);
-
-		// ldr r1, resultReg
-		vector<string> ldrArgs;
-		ldrArgs.push_back("r1");
-		ldrArgs.push_back(valReg);
-		func->addBack("ldr", ldrArgs);
-
+		addCommand(func, "push", "{r1}");
+		addCommand(func, "ldr", "r1", valReg);
 		valReg = "r1";
 	}
-		
-	std::vector<string> str;
-	str.push_back(valReg);
-	str.push_back("[" + resultReg + ", " + reg + "]");
-	func->addBack("str", str);													// str valReg [resultReg, reg]
+	
+	addCommand(func, "str", valReg, "[" + resultReg + ", " + reg + "]");
 
 	if (valOnStack) {
-		// pop {r1}
-		vector<string> popArgs;
-		popArgs.push_back("{r1}");
-		func->addBack("pop", popArgs);
+		addCommand(func, "pop", "{r1}");
 	}
 
 	if (resOnStack) {
-		// pop {r0}
-		vector<string> popArgs;
-		popArgs.push_back("{r0}");
-		func->addBack("pop", popArgs);
+		addCommand(func, "pop", "{r0}");
 	}
 
 }
@@ -1122,23 +838,15 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 
 	bool onStack = false;
 	
-	//make it bigger for integers
 	if (type->getTypeName() == "Number") {
-		std::vector<string> mul;
-		mul.push_back(resultReg);
-		mul.push_back("4");
-		mul.push_back(resultReg);
-		func->addBack("mul", mul);												//mul resReg, resReg, #4
+		//make it bigger for integers
+		addCommand(func, "mul", resultReg, resultReg, "#4");
 	}
 
 	string reg;
 	if (func->getFreeRegs().empty()) {
 		onStack = true;
-
-		vector<string> push;
-		push.push_back("{r0}");
-		func->addBack("push", push);											// push {r0}
-
+		addCommand(func, "push", "{r0}");
 		reg = "r0";
 	} else {
 		reg = func->getFreeRegs().front();
@@ -1151,11 +859,7 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 		func->increaseStackPointerByReg(resultReg);
 
 		// make it point resultReg down the stack
-		vector<string> sub;
-		sub.push_back(reg);
-		sub.push_back("fp");
-		sub.push_back(resultReg);
-		func->addBack("sub", sub);												// sub reg, fp, resultReg
+		addCommand(func, "sub", reg, "fp", resultReg);
 	} else {
 		int len = ExprGen::evaluateExpression(length->getRoot(), st);
 
@@ -1165,27 +869,17 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 		func->increaseStackPointer(len);
 
 		// make it point len down the stack
-		vector<string> sub;
-		sub.push_back(reg);
-		sub.push_back("fp");
-		sub.push_back(boost::lexical_cast<string>(len));
-		func->addBack("sub", sub);												// sub reg, fp, resultReg
+		addCommand(func, "sub", reg, "fp", boost::lexical_cast<string>(len));
 	}
 
 	if (onStack) {
 		func->increaseStackPointer(4);
 		string sp = boost::lexical_cast<string>(func->getStackPointer());
 
-		vector<string> str;
-		str.push_back(reg);
-		str.push_back("[fp, #-" + sp + "]");
-		func->addBack("str", str);
+		addCommand(func, "str", reg, "[fp, #-" + sp + "]");
+		addCommand(func, "pop", "{r0}");
 
 		arr->setAssLoc("[fp, #-" + sp + "]");
-
-		vector<string> pop;
-		pop.push_back("{r0}");
-		func->addBack("pop", pop);
 	}
 }
 
@@ -1217,6 +911,34 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 	_startDefs.push_back(AssemCom(".word", word));
 	arr->setAssLoc(l.getLabel());
 		
+}
+
+void ASTVisitor::addLabel(boost::shared_ptr<AssemFunc> f, string label) {
+	f->addBack(label + ":", std::vector<string>());
+}
+   
+void ASTVisitor::addCommand(boost::shared_ptr<AssemFunc> f, string comm, 
+							  string arg0) {
+	vector<string> args;
+	args.push_back(arg0);
+	f->addBack(comm, args);
+}
+
+void ASTVisitor::addCommand(boost::shared_ptr<AssemFunc> f, string comm, 
+							  string arg0, string arg1) {
+	vector<string> args;
+	args.push_back(arg0);
+	args.push_back(arg1);
+	f->addBack(comm, args);
+}
+    
+void ASTVisitor::addCommand(boost::shared_ptr<AssemFunc> f, string comm, 
+							  string arg0, string arg1, string arg2) {
+	vector<string> args;
+	args.push_back(arg0);
+	args.push_back(arg1);
+	args.push_back(arg2);
+	f->addBack(comm, args);
 }
 
 vector<boost::shared_ptr<AssemFunc> > ASTVisitor::getFunctions() {

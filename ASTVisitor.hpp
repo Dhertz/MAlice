@@ -103,6 +103,13 @@ public:
 								 boost::shared_ptr<Type> type, 
 							     boost::shared_ptr<SymbolTable> st);
     
+    void addLabel(boost::shared_ptr<AssemFunc> f, string comm);
+    void addCommand(boost::shared_ptr<AssemFunc> f, string comm, string arg0);
+    void addCommand(boost::shared_ptr<AssemFunc> f, string comm, string arg0, 
+    				  string arg1);
+    void addCommand(boost::shared_ptr<AssemFunc> f, string comm, string arg0, 
+    				  string arg1, string arg2);
+
     vector<boost::shared_ptr<AssemFunc> > getFunctions();
     list<AssemCom>& getEndDefs();
     list<AssemCom> getStartDefs();
