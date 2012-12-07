@@ -3,6 +3,9 @@
 
 #include <antlr3commontree.h>
 #include <string>
+#include "AssemCom.hpp"
+#include <vector>
+#include <list>
 
 using namespace std;
 
@@ -16,6 +19,9 @@ public:
     static void printSemErr(int lineNo, string err);
     static void printSynErr(int lineNo, string err);
     static void printComErr(string err);
+    static pair<string, vector<string> > tempForGlobal(string loc, 
+    	vector<string> freeRegs, list<AssemCom>& instrs);
+    static string borrowRegister(vector<string> args);
 };
 
 #endif

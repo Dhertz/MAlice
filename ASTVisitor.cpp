@@ -357,6 +357,18 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 		func->increaseStackPointer(8);
 		string sp = boost::lexical_cast<string>(func->getStackPointer());
 
+		string temp = "";
+		if (resultReg[0] == '.') {
+			// it's a global
+			temp = resultReg;
+			list<AssemCom> tempList;
+			pair<string, vector<string> > p
+			  = Utils::tempForGlobal(resultReg, func->getFreeRegs(), tempList);
+			resultReg = p.first;
+			func->setFreeRegs(p.second);
+			func->addListBack(tempList);
+		}
+
 		vector<string> strArgs;
 		strArgs.push_back(resultReg);
 		strArgs.push_back("[fp, #-" + sp + "]");
@@ -379,11 +391,10 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 		ldr0Args.push_back(strLbl.getLabel());
 		func->addBack("ldr", ldr0Args);											// ldr r0 strLbl
 
-		vector<string> sub1Args;
-		sub1Args.push_back("r0");
-		sub1Args.push_back("fp");
-		sub1Args.push_back("#" + sp);
-		func->addBack("sub", sub1Args);											// sub r1, fp, sp
+		vector<string> ldr1Args;
+		ldr1Args.push_back("r1");
+		ldr1Args.push_back("[fp, #-" + sp + "]");
+		func->addBack("ldr", ldr1Args);											// ldr r1 [fp, #-sp]
 
 		vector<string> printArg;
 		printArg.push_back("__isoc99_scanf");
@@ -393,6 +404,14 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 		ldrArgs.push_back(resultReg);
 		ldrArgs.push_back("[fp, #-" + sp + "]");
 		func->addBack("ldr", ldrArgs);											// ldr resultReg [fp, #-sp]
+
+		if (temp != "") {
+			// move the result back to the label
+			vector<string> strArgs;
+			strArgs.push_back(resultReg);
+			strArgs.push_back(temp);
+			func->addBack("str", strArgs);										// str tmp resultReg
+		}
 	}
 }
 

@@ -14,8 +14,6 @@ void printVector(vector<string> vec) {
 	cout << endl;
 }
 
-string borrowRegister(vector<string> args);
-
 treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<SymbolTable> st, vector<string> freeRegs, boost::shared_ptr<AssemFunc> func) {
 	/* Utils::printTree(root);
 	printVector(freeRegs);
@@ -293,7 +291,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					// borrow a regiser to replace stackLoc in any calculations
 					vector<string> argRegs;
 					argRegs.push_back(argLoc);
-					reg = borrowRegister(argRegs);
+					reg = Utils::borrowRegister(argRegs);
 
 					// push {reg}
 					args.push_back("{" + reg + "}");
@@ -305,7 +303,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 				args.clear();
 				args.push_back(reg);
 				args.push_back(argLoc);
-				string tempReg = borrowRegister(args);
+				string tempReg = Utils::borrowRegister(args);
 
 				// push {tempReg}
 				// mov tempReg, #0xFFFFFFFF
@@ -676,6 +674,26 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     				AssemCom eor("eor", args);
     				instrs.push_back(eor);
 
+    				string tmpl = "";
+    				if (lhsLoc[0] == '.') {
+    					// global var
+    					pair<string, vector<string> > p = 
+    						Utils::tempForGlobal(lhsLoc, freeRegs, instrs);
+    					tmpl = p.first;
+    					freeRegs = p.second;
+    					lhsLoc = tmpl;
+    				}
+
+    				string tmpr = "";
+    				if (rhsLoc[0] == '.') {
+    					// global var
+    					pair<string, vector<string> > p = 
+    						Utils::tempForGlobal(rhsLoc, freeRegs, instrs);
+    					tmpr = p.first;
+    					freeRegs = p.second;
+    					rhsLoc = tmpr;
+    				}
+
     				args.clear();
     				args.push_back(lhsLoc);
     				args.push_back(rhsLoc);
@@ -687,6 +705,14 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     				args.push_back("#0xFFFFFFFF");
     				AssemCom moveq("moveq", args);
     				instrs.push_back(moveq);
+
+    				if (tmpl != "") {
+    					freeRegs.push_back(tmpl);
+    				}
+
+    				if (tmpr != "") {
+    					freeRegs.push_back(tmpr);
+    				}
 
     				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
     				return ret;
@@ -710,6 +736,26 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     				AssemCom mov("mov", args);
     				instrs.push_back(mov);
 
+    				string tmpl = "";
+    				if (lhsLoc[0] == '.') {
+    					// global var
+    					pair<string, vector<string> > p = 
+    						Utils::tempForGlobal(lhsLoc, freeRegs, instrs);
+    					tmpl = p.first;
+    					freeRegs = p.second;
+    					lhsLoc = tmpl;
+    				}
+
+    				string tmpr = "";
+    				if (rhsLoc[0] == '.') {
+    					// global var
+    					pair<string, vector<string> > p = 
+    						Utils::tempForGlobal(rhsLoc, freeRegs, instrs);
+    					tmpr = p.first;
+    					freeRegs = p.second;
+    					rhsLoc = tmpr;
+    				}
+
     				args.clear();
     				args.push_back(lhsLoc);
     				args.push_back(rhsLoc);
@@ -722,6 +768,14 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     				args.push_back(reg);
     				AssemCom eoreq("eoreq", args);
     				instrs.push_back(eoreq);
+
+    				if (tmpl != "") {
+    					freeRegs.push_back(tmpl);
+    				}
+
+    				if (tmpr != "") {
+    					freeRegs.push_back(tmpr);
+    				}
 
     				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
     				return ret;
@@ -745,6 +799,26 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     				AssemCom eor("eor", args);
     				instrs.push_back(eor);
 
+    				string tmpl = "";
+    				if (lhsLoc[0] == '.') {
+    					// global var
+    					pair<string, vector<string> > p = 
+    						Utils::tempForGlobal(lhsLoc, freeRegs, instrs);
+    					tmpl = p.first;
+    					freeRegs = p.second;
+    					lhsLoc = tmpl;
+    				}
+
+    				string tmpr = "";
+    				if (rhsLoc[0] == '.') {
+    					// global var
+    					pair<string, vector<string> > p = 
+    						Utils::tempForGlobal(rhsLoc, freeRegs, instrs);
+    					tmpr = p.first;
+    					freeRegs = p.second;
+    					rhsLoc = tmpr;
+    				}
+
     				args.clear();
     				args.push_back(lhsLoc);
     				args.push_back(rhsLoc);
@@ -756,6 +830,14 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     				args.push_back("#0xFFFFFFFF");
     				AssemCom movgt("movgt", args);
     				instrs.push_back(movgt);
+
+    				if (tmpl != "") {
+    					freeRegs.push_back(tmpl);
+    				}
+
+    				if (tmpr != "") {
+    					freeRegs.push_back(tmpr);
+    				}
 
     				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
     				return ret;
@@ -779,6 +861,26 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     				AssemCom eor("eor", args);
     				instrs.push_back(eor);
 
+    				string tmpl = "";
+    				if (lhsLoc[0] == '.') {
+    					// global var
+    					pair<string, vector<string> > p = 
+    						Utils::tempForGlobal(lhsLoc, freeRegs, instrs);
+    					tmpl = p.first;
+    					freeRegs = p.second;
+    					lhsLoc = tmpl;
+    				}
+
+    				string tmpr = "";
+    				if (rhsLoc[0] == '.') {
+    					// global var
+    					pair<string, vector<string> > p = 
+    						Utils::tempForGlobal(rhsLoc, freeRegs, instrs);
+    					tmpr = p.first;
+    					freeRegs = p.second;
+    					rhsLoc = tmpr;
+    				}
+
     				args.clear();
     				args.push_back(lhsLoc);
     				args.push_back(rhsLoc);
@@ -790,6 +892,14 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     				args.push_back("#0xFFFFFFFF");
     				AssemCom movlt("movlt", args);
     				instrs.push_back(movlt);
+
+    				if (tmpl != "") {
+    					freeRegs.push_back(tmpl);
+    				}
+
+    				if (tmpr != "") {
+    					freeRegs.push_back(tmpr);
+    				}
 
     				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
     				return ret;
@@ -813,6 +923,26 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     				AssemCom eor("eor", args);
     				instrs.push_back(eor);
 
+    				string tmpl = "";
+    				if (lhsLoc[0] == '.') {
+    					// global var
+    					pair<string, vector<string> > p = 
+    						Utils::tempForGlobal(lhsLoc, freeRegs, instrs);
+    					tmpl = p.first;
+    					freeRegs = p.second;
+    					lhsLoc = tmpl;
+    				}
+
+    				string tmpr = "";
+    				if (rhsLoc[0] == '.') {
+    					// global var
+    					pair<string, vector<string> > p = 
+    						Utils::tempForGlobal(rhsLoc, freeRegs, instrs);
+    					tmpr = p.first;
+    					freeRegs = p.second;
+    					rhsLoc = tmpr;
+    				}
+
     				args.clear();
     				args.push_back(lhsLoc);
     				args.push_back(rhsLoc);
@@ -824,6 +954,14 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     				args.push_back("#0xFFFFFFFF");
     				AssemCom movge("movge", args);
     				instrs.push_back(movge);
+
+    				if (tmpl != "") {
+    					freeRegs.push_back(tmpl);
+    				}
+
+    				if (tmpr != "") {
+    					freeRegs.push_back(tmpr);
+    				}
 
     				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
     				return ret;
@@ -847,6 +985,26 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     				AssemCom eor("eor", args);
     				instrs.push_back(eor);
 
+    				string tmpl = "";
+    				if (lhsLoc[0] == '.') {
+    					// global var
+    					pair<string, vector<string> > p = 
+    						Utils::tempForGlobal(lhsLoc, freeRegs, instrs);
+    					tmpl = p.first;
+    					freeRegs = p.second;
+    					lhsLoc = tmpl;
+    				}
+
+    				string tmpr = "";
+    				if (rhsLoc[0] == '.') {
+    					// global var
+    					pair<string, vector<string> > p = 
+    						Utils::tempForGlobal(rhsLoc, freeRegs, instrs);
+    					tmpr = p.first;
+    					freeRegs = p.second;
+    					rhsLoc = tmpr;
+    				}
+
     				args.clear();
     				args.push_back(lhsLoc);
     				args.push_back(rhsLoc);
@@ -858,6 +1016,14 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     				args.push_back("#0xFFFFFFFF");
     				AssemCom movle("movle", args);
     				instrs.push_back(movle);
+
+    				if (tmpl != "") {
+    					freeRegs.push_back(tmpl);
+    				}
+
+    				if (tmpr != "") {
+    					freeRegs.push_back(tmpr);
+    				}
 
     				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
     				return ret;
@@ -937,19 +1103,4 @@ int ExprGen::evaluateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<Symbol
     }
 
     Utils::printComErr("Could not evaluate array size.");
-}
-
-// Returns a register that isn't in args, used in stack storage case
-string borrowRegister(vector<string> args) {
-	string regs[] = {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9",
-					 "r10"};
-	vector<string> allRegs =
-		vector<string>(regs, regs + sizeof(regs) / sizeof(string));
-
-	for (vector<string>::iterator it = allRegs.begin(); it != allRegs.end(); ++it) {
-		if (find(args.begin(), args.end(), *it) == args.end())
-			return *it;
-	}
-	// This won't ever be hit, as no case above uses so many arguments
-	return "";
 }
