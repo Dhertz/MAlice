@@ -458,7 +458,7 @@ void ASTVisitor::visitChoice(boost::shared_ptr<ExprAST> cond,
 
 	falseBody->accept(shared_from_this(), func);								// else body
 
-	func->addBack(elseLabel.getLabel() + ":", std::vector<string>());			// end:
+	func->addBack(endLabel.getLabel() + ":", std::vector<string>());			// end:
 }
 
 void ASTVisitor::visitIf(boost::shared_ptr<ExprAST> cond,
@@ -605,7 +605,6 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 
 void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr, 
 							   boost::shared_ptr<SymbolTable> st) {
-	cout << "hello" << endl;
 	// Global inline assignments
 
 	string regs[] = {"r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9",

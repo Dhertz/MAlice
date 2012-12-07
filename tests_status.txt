@@ -1,0 +1,31 @@
+Correct behaviour:
+- test01
+- test02
+- test07
+
+Incorrect behaviour:
+- test04
+- test10 (extra print)
+- fibonacciIterative
+- gcdIterative
+- gcdRecursive
+
+Seg faults:
+- test03
+- test08 (right at the end)
+
+Linking fails:
+- test05
+- test06
+- test09
+- test11
+- test12
+- test13
+- test14
+- test15
+- ackermann
+- binarySearch
+- bubbleSort
+- fibonacciRecursive
+- sieveOfEratosthenes
+- vectorFunctions

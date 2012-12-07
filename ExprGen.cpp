@@ -568,8 +568,8 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     				args.push_back(res);
     				args.push_back(res);
     				args.push_back(res);
-    				AssemCom xors("xor", args);
-    				instrs.push_back(xors);
+    				AssemCom eors("eor", args);
+    				instrs.push_back(eors);
 
     				Label l;
 					instrs.push_back(AssemCom(l.getLabel() + 
