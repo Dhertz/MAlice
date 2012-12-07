@@ -301,13 +301,38 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					instrs.push_back(push);
 				}
 
-				// eor reg, argLoc, #1
+				// borrow a register for #0xFFFFFFFF
 				args.clear();
 				args.push_back(reg);
 				args.push_back(argLoc);
+				string tempReg = borrowRegister(args);
+
+				// push {tempReg}
+				// mov tempReg, #0xFFFFFFFF
+				args.clear();
+				args.push_back("{" + tempReg + "}");
+				AssemCom push("push", args);
+				instrs.push_back(push);
+
+				args.clear();
+				args.push_back(tempReg);
 				args.push_back("#0xFFFFFFFF");
+				AssemCom mov("mov", args);
+				instrs.push_back(mov);
+
+				// eor reg, argLoc, tempReg
+				args.clear();
+				args.push_back(reg);
+				args.push_back(argLoc);
+				args.push_back(tempReg);
 				AssemCom eor("eor", args);
 				instrs.push_back(eor);
+
+				// pop {tempReg}
+				args.clear();
+				args.push_back("{" + tempReg + "}");
+				AssemCom popTemp("pop", args);
+				instrs.push_back(popTemp);
 
 			    if (!freeRegs.empty()) {
 			    	retLoc = reg;
