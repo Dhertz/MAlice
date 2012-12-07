@@ -579,8 +579,9 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 
 		if (loc == "") {
 			if (func->getFreeRegs().empty()) {
-				// TODO: memory allocation
-				loc = "TODO";
+				func->increaseStackPointer(4);
+				string stackLoc = "[fp,#-" + boost::lexical_cast<string>(func->getStackPointer()) + "]";
+				var->setAssLoc(stackLoc);
 			} else {
 				var->setAssLoc(rhs);
 				func->removeReg(var->getAssLoc());
@@ -589,10 +590,18 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 			// global variable assignment
 			string wordLoc;
 			vector<string> ldArgs;
+			bool onStack = false;
 
 			if (func->getFreeRegs().empty()) {
-				// out of registers
-				wordLoc = "TODO";
+				onStack = true;
+				func->increaseStackPointer(4);
+				string stackLoc = "[fp,#-" + boost::lexical_cast<string>(func->getStackPointer()) + "]";
+				// don't need r0 later on so this is fine
+				wordLoc = "r0";
+
+				vector<string> args;
+				args.push_back("{" + wordLoc + "}");
+				func->addBack("push", args);									// push {wordLoc}
 			} else {
 				wordLoc = func->getFreeRegs().front();
 			}
@@ -604,14 +613,20 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 			if (var->getTypeName()->getTypeName() == "Letter") {
 				vector<string> strbArgs;
 				strbArgs.push_back(rhs);
-				strbArgs.push_back("[" + wordLoc + ", #0]");
+				strbArgs.push_back("[" + wordLoc + "]");
 				func->addBack("strb", strbArgs);								// strb rhs [wordloc]
 			} else {
 				// must be a global number
 				vector<string> strbArgs;
 				strbArgs.push_back(rhs);
-				strbArgs.push_back("[" + wordLoc + ", #0]");
+				strbArgs.push_back("[" + wordLoc + "]");
 				func->addBack("str", strbArgs);									// str rhs [wordloc]
+			}
+
+			if (onStack) {
+				vector<string> args;
+				args.push_back("{" + wordLoc + "}");
+				func->addBack("pop", args);										// pop {wordloc}
 			}
 		} else {
 			vector<string> args;
@@ -815,6 +830,8 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
   			= ExprGen::generateExpression(length->getRoot(), st, func->getFreeRegs(), func);
 	string resultReg = res->get<0>();
 	func->addListBack(res->get<1>());
+
+	bool onStack = false;
 	
 	//make it bigger for integers
 	if (type->getTypeName() == "Number") {
@@ -822,22 +839,34 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 		mul.push_back(resultReg);
 		mul.push_back("4");
 		mul.push_back(resultReg);
-		func->addBack("mul", mul);											//mul resReg, 4, resReg
+		func->addBack("mul", mul);												//mul resReg, resReg, #4
 	}
 
-	string reg = func->getFreeRegs().front();
+	string reg;
 	if (func->getFreeRegs().empty()) {
-		// TODO: memory allocation
-		reg = "TODO";
+		onStack = true;
+
+		vector<string> push;
+		push.push_back("{r0}");
+		func->addBack("push", push);											// push {r0}
+
+		reg = "r0";
 	} else {
 		reg = func->getFreeRegs().front();
 		func->removeReg(reg);
+		arr->setAssLoc(reg);
 	}
-	arr->setAssLoc(reg);
 
 	if (res->get<1>().size() < 1) {
 		// It's a variable, let's look at its location
 		func->increaseStackPointerByReg(resultReg);
+
+		// make it point resultReg down the stack
+		vector<string> sub;
+		sub.push_back(reg);
+		sub.push_back("fp");
+		sub.push_back(resultReg);
+		func->addBack("sub", sub);												// sub reg, fp, resultReg
 	} else {
 		int len = ExprGen::evaluateExpression(length->getRoot(), st);
 
@@ -845,16 +874,30 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 			len *= 4;
 		}
 		func->increaseStackPointer(len);
+
+		// make it point len down the stack
+		vector<string> sub;
+		sub.push_back(reg);
+		sub.push_back("fp");
+		sub.push_back(boost::lexical_cast<string>(len));
+		func->addBack("sub", sub);												// sub reg, fp, resultReg
 	}
 
+	if (onStack) {
+		func->increaseStackPointer(4);
+		string sp = boost::lexical_cast<string>(func->getStackPointer());
 
-	//make it point somewhere down the stack
-	vector<string> sub;
-	sub.push_back(reg);
-	sub.push_back("fp");
-	sub.push_back(resultReg);
-	func->addBack("sub", sub);
+		vector<string> str;
+		str.push_back(reg);
+		str.push_back("[fp, #-" + sp + "]");
+		func->addBack("str", str);
 
+		arr->setAssLoc("[fp, #-" + sp + "]");
+
+		vector<string> pop;
+		pop.push_back("{r0}");
+		func->addBack("pop", pop);
+	}
 }
 
 void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length, 

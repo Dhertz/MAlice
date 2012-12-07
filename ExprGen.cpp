@@ -285,7 +285,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					freeRegs.erase(freeRegs.begin());
 				} else {
 					int currPtr = func->getStackPointer() + 4;
-					stackLoc = "[fp,#-" + boost::lexical_cast<string>(currPtr) + "]";
+					stackLoc = "[fp, #-" + boost::lexical_cast<string>(currPtr) + "]";
 					func->increaseStackPointer(4);
 
 					// borrow a regiser to replace stackLoc in any calculations
