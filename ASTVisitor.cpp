@@ -174,10 +174,36 @@ void ASTVisitor::visitInc(boost::shared_ptr<ExprAST> expr,
 	func->addListBack(res->get<1>());
 	func->setFreeRegs(res->get<2>());
 
+	bool isStack = false;
+
+	if (resultReg[0] != 'r') {
+		// it's on the stack
+		isStack = true;
+
+		// push {r0}
+		vector<string> pushArgs;
+		pushArgs.push_back("{r0}");
+		func->addBack("push", pushArgs);
+
+		// ldr r0, resultReg
+		vector<string> ldrArgs;
+		ldrArgs.push_back("r0");
+		ldrArgs.push_back(resultReg);
+		func->addBack("ldr", ldrArgs);
+
+		resultReg = "r0";
+	}
+
 	vector<string> incArgs(2, resultReg);
 	incArgs.push_back("#1");
-
 	func->addBack("add", incArgs);												// add resultReg resultReg #1
+
+	if (isStack) {
+		// pop {r0}
+		vector<string> popArgs;
+		popArgs.push_back("{r0}");
+		func->addBack("pop", popArgs);
+	}
 }
 
 void ASTVisitor::visitDec(boost::shared_ptr<ExprAST> expr,
@@ -189,11 +215,37 @@ void ASTVisitor::visitDec(boost::shared_ptr<ExprAST> expr,
 	func->addListBack(res->get<1>());
 	func->setFreeRegs(res->get<2>());
 
+	bool isStack = false;
+
+	if (resultReg[0] != 'r') {
+		// it's on the stack
+		isStack = true;
+
+		// push {r0}
+		vector<string> pushArgs;
+		pushArgs.push_back("{r0}");
+		func->addBack("push", pushArgs);
+
+		// ldr r0, resultReg
+		vector<string> ldrArgs;
+		ldrArgs.push_back("r0");
+		ldrArgs.push_back(resultReg);
+		func->addBack("ldr", ldrArgs);
+
+		resultReg = "r0";
+	}
+
 	vector<string> incArgs(2, resultReg);
 	incArgs.push_back("#1");
 
 	func->addBack("sub", incArgs);												// sub resultReg resultReg #1
 
+	if (isStack) {
+		// pop {r0}
+		vector<string> popArgs;
+		popArgs.push_back("{r0}");
+		func->addBack("pop", popArgs);
+	}
 }
 
 void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr, 
@@ -205,6 +257,31 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 
 	func->setFreeRegs(res->get<2>());
 	string resultReg = res->get<0>();
+
+	bool isStack = false;
+	string tmpReg;
+	if (resultReg[0] != 'r') {
+		// it's on the stack
+		isStack = true;
+
+		vector<string> ignoreRegs;
+		ignoreRegs.push_back("r0");
+		ignoreRegs.push_back("r1");
+		tmpReg = Utils::borrowRegister(ignoreRegs);
+
+		// push {tmpReg}
+		vector<string> pushArgs;
+		pushArgs.push_back("{" + tmpReg + "}");
+		func->addBack("push", pushArgs);
+
+		// ldr tmpReg, resultReg
+		vector<string> ldrArgs;
+		ldrArgs.push_back(tmpReg);
+		ldrArgs.push_back(resultReg);
+		func->addBack("ldr", ldrArgs);
+
+		resultReg = tmpReg;
+	}
 
 	Label strLbl;
 
@@ -300,6 +377,13 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 			func->addBack("pop", pop1Arg);										// pop {r1}
 		}
 	}
+
+	if (isStack) {
+		// pop {tmpReg}
+		vector<string> popArgs;
+		popArgs.push_back("{" + tmpReg + "}");
+		func->addBack("pop", popArgs);
+	}
 }
 
 void ASTVisitor::visitReturn(boost::shared_ptr<ExprAST> expr, 
@@ -312,6 +396,26 @@ void ASTVisitor::visitReturn(boost::shared_ptr<ExprAST> expr,
 	func->addListBack(res->get<1>());
 	func->setFreeRegs(res->get<2>());
 
+	bool isStack = false;
+
+	if (resultReg[0] != 'r') {
+		// it's on the stack
+		isStack = true;
+
+		// push {r0}
+		vector<string> pushArgs;
+		pushArgs.push_back("{r0}");
+		func->addBack("push", pushArgs);
+
+		// ldr r0, resultReg
+		vector<string> ldrArgs;
+		ldrArgs.push_back("r0");
+		ldrArgs.push_back(resultReg);
+		func->addBack("ldr", ldrArgs);
+
+		resultReg = "r0";
+	}
+
 	if (resultReg != "r0") {
 		vector<string> movArgs;
 		movArgs.push_back("r0");
@@ -322,6 +426,13 @@ void ASTVisitor::visitReturn(boost::shared_ptr<ExprAST> expr,
 	vector<string> retArg;
 	retArg.push_back("lr");
 	func->addBack("bx", retArg);												// bx lr
+
+	if (isStack) {
+		// pop {r0}
+		vector<string> popArgs;
+		popArgs.push_back("{r0}");
+		func->addBack("pop", popArgs);
+	}
 }
 
 void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr, 
@@ -332,6 +443,31 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 
 	func->setFreeRegs(res->get<2>());
 	string resultReg = res->get<0>();
+
+	bool isStack = false;
+	string tmpReg;
+	if (resultReg[0] != 'r') {
+		// it's on the stack
+		isStack = true;
+
+		vector<string> ignoreRegs;
+		ignoreRegs.push_back("r0");
+		ignoreRegs.push_back("r1");
+		tmpReg = Utils::borrowRegister(ignoreRegs);
+
+		// push {tmpReg}
+		vector<string> pushArgs;
+		pushArgs.push_back("{" + tmpReg + "}");
+		func->addBack("push", pushArgs);
+
+		// ldr tmpReg, resultReg
+		vector<string> ldrArgs;
+		ldrArgs.push_back(tmpReg);
+		ldrArgs.push_back(resultReg);
+		func->addBack("ldr", ldrArgs);
+
+		resultReg = tmpReg;
+	}
 
 	if (expr->getType()->getTypeName() == "Sentence"){
 		
@@ -414,6 +550,13 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 			func->addBack("str", strArgs);										// str tmp resultReg
 		}
 	}
+
+	if (isStack) {
+		// pop {tmpReg}
+		vector<string> popArgs;
+		popArgs.push_back("{" + tmpReg + "}");
+		func->addBack("pop", popArgs);
+	}
 }
 
 void ASTVisitor::visitWhile(boost::shared_ptr<ExprAST> cond, 
@@ -435,6 +578,25 @@ void ASTVisitor::visitWhile(boost::shared_ptr<ExprAST> cond,
 	func->setFreeRegs(res->get<2>());
 	func->addListBack(res->get<1>());											// expr instrs
 
+	bool onStack = false;
+	if (resultReg[0] != 'r') {
+		// result is stored on the stack
+		onStack = true;
+
+		// push {r0}
+		vector<string> pushArgs;
+		pushArgs.push_back("{r0}");
+		func->addBack("push", pushArgs);
+
+		// ldr r0, resultReg
+		vector<string> ldrArgs;
+		ldrArgs.push_back("r0");
+		ldrArgs.push_back(resultReg);
+		func->addBack("ldr", ldrArgs);
+
+		resultReg = "r0";
+	}
+
 	vector<string> cmpArgs;
 	cmpArgs.push_back(resultReg);
 	cmpArgs.push_back("#0");
@@ -443,6 +605,13 @@ void ASTVisitor::visitWhile(boost::shared_ptr<ExprAST> cond,
 	vector<string> bneArgs;
 	bneArgs.push_back(loopLabel.getLabel());
 	func->addBack("beq", bneArgs);												// bne loop
+
+	if (onStack) {
+		// pop {r0}
+		vector<string> popArgs;
+		popArgs.push_back("{r0}");
+		func->addBack("pop", popArgs);
+	}
 }
 
 void ASTVisitor::visitChoice(boost::shared_ptr<ExprAST> cond, 
@@ -451,6 +620,7 @@ void ASTVisitor::visitChoice(boost::shared_ptr<ExprAST> cond,
 							   boost::shared_ptr<SymbolTable> st,
 							   boost::shared_ptr<AssemFunc> func) {
 	Label elseLabel;
+	bool isStack = false;
 
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
 	  = ExprGen::generateExpression(cond->getRoot(), st, func->getFreeRegs(), func);
@@ -458,14 +628,39 @@ void ASTVisitor::visitChoice(boost::shared_ptr<ExprAST> cond,
 	func->addListBack(res->get<1>());
 	func->setFreeRegs(res->get<2>());
 
+	if (resultReg[0] != 'r') {
+		// result is stored on the stack
+		isStack = true;
+
+		// push {r0}
+		vector<string> pushArgs;
+		pushArgs.push_back("{r0}");
+		func->addBack("push", pushArgs);
+
+		// ldr r0, resultReg
+		vector<string> ldrArgs;
+		ldrArgs.push_back("r0");
+		ldrArgs.push_back(resultReg);
+		func->addBack("ldr", ldrArgs);
+
+		resultReg = "r0";
+	}
+
 	std::vector<string> cmpArgs;
 	cmpArgs.push_back(resultReg);
 	cmpArgs.push_back("#0");
 	func->addBack("cmp", cmpArgs);												// cmp resultReg #0
 
+	if (isStack) {
+		// pop {r0}
+		vector<string> popArgs;
+		popArgs.push_back("{r0}");
+		func->addBack("pop", popArgs);
+	}
+
 	std::vector<string> bneArgs;
 	bneArgs.push_back(elseLabel.getLabel());
-	func->addBack("beq", bneArgs);												// bne else
+	func->addBack("beq", bneArgs);												// beq else
 
 	trueBody->accept(shared_from_this(), func);									// if body
 
@@ -529,7 +724,7 @@ void ASTVisitor::visitIf(boost::shared_ptr<ExprAST> cond,
 
 	vector<string> bneArgs;
 	bneArgs.push_back(elseLabel.getLabel());
-	func->addBack("beq", bneArgs);												// bne else
+	func->addBack("beq", bneArgs);												// beq else
 
 	trueBody->accept(shared_from_this(), func);										// if body
 
@@ -576,6 +771,31 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 		string rhs = res->get<0>();
 		func->setFreeRegs(res->get<2>());
 		func->addListBack(res->get<1>());										// expr instrs
+
+		bool rhsOnStack = false;
+		string tmpReg;
+		if (rhs[0] != 'r') {
+			// it's on the stack
+			rhsOnStack = true;
+
+			// r0 might be pushed later, so let's not use that now
+			vector<string> ignoreRegs;
+			ignoreRegs.push_back("r0");
+			tmpReg = Utils::borrowRegister(ignoreRegs);
+
+			// push {tmpReg}
+			vector<string> pushArgs;
+			pushArgs.push_back("{" + tmpReg + "}");
+			func->addBack("push", pushArgs);
+
+			// ldr tmpReg, resultReg
+			vector<string> ldrArgs;
+			ldrArgs.push_back(tmpReg);
+			ldrArgs.push_back(rhs);
+			func->addBack("ldr", ldrArgs);
+
+			rhs = tmpReg;
+		}
 
 		if (loc == "") {
 			if (func->getFreeRegs().empty()) {
@@ -628,11 +848,23 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 				args.push_back("{" + wordLoc + "}");
 				func->addBack("pop", args);										// pop {wordloc}
 			}
+
+			if (rhsOnStack) {
+				vector<string> args;
+				args.push_back("{" + tmpReg + "}");
+				func->addBack("pop", args);										// pop {tmpReg}
+			}
 		} else {
 			vector<string> args;
 			args.push_back(var->getAssLoc());
 			args.push_back(rhs);
 			func->addBack("mov", args);											// mov var rhs
+
+			if (rhsOnStack) {
+				vector<string> args;
+				args.push_back("{" + tmpReg + "}");
+				func->addBack("pop", args);										// pop {tmpReg}
+			}
 		}
 	}
 	
@@ -676,20 +908,21 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 		_globalInlines.splice(_globalInlines.end(), res->get<1>());				// expr instrs
 
 		// global variable assignment
-		string wordLoc = "r0"; // fin since it's always going to be the first thing
+		// fine since it's always going to be the first thing
+		string wordLoc = "r0"; 
 		
 
 		if (var->getTypeName()->getTypeName() == "Letter") {
 			vector<string> strbArgs;
 			strbArgs.push_back(rhs);
-			strbArgs.push_back("[" + wordLoc + ", #0]");
+			strbArgs.push_back("[" + wordLoc + "]");
 			_globalInlines.push_back(AssemCom("strb", strbArgs));				// strb rhs [wordloc]
 		} else {
 			// must be a global number
 			var->setVal(ExprGen::evaluateExpression(expr->getRoot(), st));
 			vector<string> strbArgs;
 			strbArgs.push_back(rhs);
-			strbArgs.push_back("[" + wordLoc + ", #0]");
+			strbArgs.push_back("[" + wordLoc + "]");
 			_globalInlines.push_back(AssemCom("str", strbArgs));				// str rhs [wordloc]
 		}
 	}
@@ -753,7 +986,8 @@ void ASTVisitor::visitFuncCall(string name,
 				args.clear();
 				args.push_back("r0");
 				args.push_back(paramLoc);
-				func->addBack("mov", args);										// mov r0 ri
+				// check ldr here - Owen
+				func->addBack("ldr", args);										// mov r0 ri
 
 				// WHy is this here? - Owen
 				//func->addBack("push");										// push {r0}
@@ -788,13 +1022,32 @@ void ASTVisitor::visitArrayAssign(string name,
 							        boost::shared_ptr<SymbolTable> st,
 							        boost::shared_ptr<AssemFunc> func) {
 	boost::shared_ptr<Identifier> arrIdent = 
-										st->lookupCurrLevelAndEnclosingLevels(name);
+	  st->lookupCurrLevelAndEnclosingLevels(name);
 	boost::shared_ptr<Array> arr =  
-				boost::shared_polymorphic_downcast<Array>(arrIdent);
+	  boost::shared_polymorphic_downcast<Array>(arrIdent);
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > ind
-	  			= ExprGen::generateExpression(index->getRoot(), st, func->getFreeRegs(), func);
+	   = ExprGen::generateExpression(index->getRoot(), st, func->getFreeRegs(), func);
 	
 	string resultReg = ind->get<0>();
+	bool resOnStack = false;
+
+	if (resultReg[0] != 'r') {
+		// it's on the stack
+		resOnStack = true;
+
+		// push {r0}
+		vector<string> pushArgs;
+		pushArgs.push_back("{r0}");
+		func->addBack("push", pushArgs);
+
+		// ldr r0, resultReg
+		vector<string> ldrArgs;
+		ldrArgs.push_back("r0");
+		ldrArgs.push_back(resultReg);
+		func->addBack("ldr", ldrArgs);
+
+		resultReg = "r0";
+	}
 
 	//make size bigger for integers
 	if (arr->getTypeName() == "Number") {	
@@ -811,11 +1064,47 @@ void ASTVisitor::visitArrayAssign(string name,
 	  		= ExprGen::generateExpression(value->getRoot(), st, func->getFreeRegs(), func);
 	string valReg = val->get<0>();
 	func->addListBack(val->get<1>());
+
+
+	bool valOnStack = false;
+
+	if (valReg[0] != 'r') {
+		// it's on the stack
+		valOnStack = true;
+
+		// push {r1}
+		vector<string> pushArgs;
+		pushArgs.push_back("{r1}");
+		func->addBack("push", pushArgs);
+
+		// ldr r1, resultReg
+		vector<string> ldrArgs;
+		ldrArgs.push_back("r1");
+		ldrArgs.push_back(valReg);
+		func->addBack("ldr", ldrArgs);
+
+		valReg = "r1";
+	}
 		
 	std::vector<string> str;
 	str.push_back(valReg);
 	str.push_back("[" + resultReg + ", " + reg + "]");
 	func->addBack("str", str);													// str valReg [resultReg, reg]
+
+	if (valOnStack) {
+		// pop {r1}
+		vector<string> popArgs;
+		popArgs.push_back("{r1}");
+		func->addBack("pop", popArgs);
+	}
+
+	if (resOnStack) {
+		// pop {r0}
+		vector<string> popArgs;
+		popArgs.push_back("{r0}");
+		func->addBack("pop", popArgs);
+	}
+
 }
 
 void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length, 
