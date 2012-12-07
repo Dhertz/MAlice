@@ -1,5 +1,6 @@
 #include "ExprGen.hpp"
 #include "Utils.hpp"
+#include "Label.hpp"
 #include "idents/Array.hpp"
 #include "idents/Variable.hpp"
 #include <boost/lexical_cast.hpp>
@@ -531,11 +532,110 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					return ret;
 				}
 			} else if (op == "/") {
-				treble_ptr_t ret(new treble_t("TODO", instrs, freeRegs));
-				return ret;
+				if (!freeRegs.empty()) {
+			    	string res = freeRegs.front();
+					freeRegs.erase(freeRegs.begin());
+					if (!freeRegs.empty()) {
+						string reg = freeRegs.front();
+						freeRegs.erase(freeRegs.begin());
+
+					vector<string> args;
+    				args.push_back(res);
+    				args.push_back(res);
+    				args.push_back(res);
+    				AssemCom xors("xor", args);
+    				instrs.push_back(xors);
+
+    				Label l;
+					instrs.push_back(AssemCom(l.getLabel() + 
+											":", std::vector<string>()));
+
+    				args.clear();
+					args.push_back(reg);
+					args.push_back(lhsLoc);
+	    			AssemCom mov("mov", args);
+	    			instrs.push_back(mov);
+
+					args.clear();
+					args.push_back(reg);
+					args.push_back(reg);
+	    			args.push_back(rhsLoc);
+	    			AssemCom sub("sub", args);
+	    			instrs.push_back(sub);
+	    			
+	    			args.clear();
+	    			args.push_back(res);
+					args.push_back(res);
+	    			args.push_back("#1");
+	    			AssemCom add("add", args);
+	    			instrs.push_back(add);
+
+	    			args.clear();
+					args.push_back(reg);
+					args.push_back(rhsLoc);
+					AssemCom cmp("cmp", args);
+					instrs.push_back(cmp);
+
+					args.clear();
+					args.push_back(l.getLabel());
+					AssemCom blge("blge", args);
+					instrs.push_back(blge);
+
+					freeRegs.push_back(res);
+
+    				treble_ptr_t ret(new treble_t(res, instrs, freeRegs));
+    				return ret;
+					
+					} else {
+						cout << "TODO: this case (~560 in ExprGen)" << endl;
+						treble_ptr_t ret(new treble_t("TODO", instrs, freeRegs));
+						return ret;
+					}
+
+				} else {
+					cout << "TODO: this case (~567 in ExprGen)" << endl;
+					treble_ptr_t ret(new treble_t("TODO", instrs, freeRegs));
+					return ret;
+				}
 			} else if (op == "%") {
-				treble_ptr_t ret(new treble_t("TODO", instrs, freeRegs));
-				return ret;
+				if (!freeRegs.empty()) {
+					Label l;
+					instrs.push_back(AssemCom(l.getLabel() + 
+										":", std::vector<string>()));
+					string reg = freeRegs.front();
+					freeRegs.erase(freeRegs.begin());
+
+					vector<string> args;
+					args.push_back(reg);
+					args.push_back(lhsLoc);
+	    			AssemCom mov("mov", args);
+	    			instrs.push_back(mov);
+
+					args.clear();
+					args.push_back(reg);
+					args.push_back(reg);
+	    			args.push_back(rhsLoc);
+	    			AssemCom sub("sub", args);
+	    			instrs.push_back(sub);
+
+					args.clear();
+					args.push_back(reg);
+					args.push_back(rhsLoc);
+					AssemCom cmp("cmp", args);
+					instrs.push_back(cmp);
+
+					args.clear();
+					args.push_back(l.getLabel());
+					AssemCom blge("blge", args);
+					instrs.push_back(blge);
+
+					treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
+					return ret;
+				} else {
+					cout << "TODO: this case (~592 in ExprGen)" << endl;
+					treble_ptr_t ret(new treble_t("TODO", instrs, freeRegs));
+					return ret;
+				}
 			} else if (op == "==") {
 				if (!freeRegs.empty()) {
 			    	string reg = freeRegs.front();
