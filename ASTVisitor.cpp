@@ -391,10 +391,11 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 		ldr0Args.push_back(strLbl.getLabel());
 		func->addBack("ldr", ldr0Args);											// ldr r0 strLbl
 
-		vector<string> ldr1Args;
-		ldr1Args.push_back("r1");
-		ldr1Args.push_back("[fp, #-" + sp + "]");
-		func->addBack("ldr", ldr1Args);											// ldr r1 [fp, #-sp]
+		vector<string> sub1Args;
+		sub1Args.push_back("r1");
+		sub1Args.push_back("fp");
+		sub1Args.push_back("#" + sp);
+		func->addBack("sub", sub1Args);											// sub r1, fp, sp
 
 		vector<string> printArg;
 		printArg.push_back("__isoc99_scanf");
