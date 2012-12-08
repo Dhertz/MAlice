@@ -76,9 +76,24 @@ void AssemFunc::finalise() {
 		fpArgs.push_back("#4");
 		addBack("sub", fpArgs);
 	} else if (_pointerByReg != "") {
-		vector<string> spArgs(2, "sp");
-		spArgs.push_back(_pointerByReg);
-		addFront("sub", spArgs);
+
+		if (_pointerByReg[0] == '.') {
+			// size is in a label
+			string tempReg = _freeRegs.front();
+
+			vector<string> spArgs(2, "sp");
+			spArgs.push_back(tempReg);
+			addFront("sub", spArgs);
+
+			spArgs.clear();
+			spArgs.push_back(tempReg);
+			spArgs.push_back(_pointerByReg);
+			addFront("ldr", spArgs);
+		} else {
+			vector<string> spArgs(2, "sp");
+			spArgs.push_back(_pointerByReg);
+			addFront("sub", spArgs);
+		}
 
 		vector<string> fpArgs;
 		fpArgs.push_back("fp");

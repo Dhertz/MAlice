@@ -840,10 +840,17 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 	func->addListBack(res->get<1>());
 
 	bool onStack = false;
-	
+	string tempReg;
 	if (type->getTypeName() == "Number") {
-		//make it bigger for integers
-		addCommand(func, "mov", resultReg, resultReg, "LSL #2");
+		if (resultReg[0] == 'r') {
+			//make it bigger for integers
+			addCommand(func, "mov", resultReg, resultReg, "LSL #2");
+		} else {
+			tempReg = func->getFreeRegs().front();
+			addCommand(func, "ldr", tempReg, resultReg);
+			addCommand(func, "mov", tempReg, tempReg, "LSL #2");
+			addCommand(func, "str", tempReg, resultReg);
+		}
 	}
 
 	string reg;
@@ -858,11 +865,16 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 	}
 
 	if (res->get<1>().size() < 1) {
-		// It's a variable, let's look at its location
+		// length is not known, let's look at its location
 		func->increaseStackPointerByReg(resultReg);
-
-		// make it point resultReg down the stack
-		addCommand(func, "sub", reg, "fp", resultReg);
+		if (resultReg[0] == 'r') {
+			addCommand(func, "sub", reg, "fp", resultReg);
+		} else {
+			// length is stored in gloabl variable
+			tempReg = func->getFreeRegs().front();
+			addCommand(func, "ldr", tempReg, resultReg);
+			addCommand(func, "sub", reg, "fp", tempReg);
+		}
 	} else {
 		int len = ExprGen::evaluateExpression(length->getRoot(), st);
 

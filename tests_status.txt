@@ -8,9 +8,12 @@ Incorrect behaviour:
 - test09
 - test02
 - test10 (extra print)
+- test12 (hangs)
+- test13 (hangs)
+- test05 (hangs)
 - fibonacciIterative
-- gcdIterative
-- gcdRecursive
+- gcdIterative (hangs)
+- gcdRecursive (hangs)
 
 Seg faults:
 - test03
@@ -18,9 +21,6 @@ Seg faults:
 - test11
 
 Linking fails:
-- test05
-- test12
-- test13
 - test14
 - test15
 - ackermann
