@@ -1128,6 +1128,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 				freeRegs.push_back(reg);
 
+				cout << resOnStack << endl;
 				if (resOnStack) {
 					// str reg, [fp, #-4]
 					args.clear();
