@@ -665,11 +665,13 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 	boost::shared_ptr<Variable> var 
 	  = boost::shared_polymorphic_downcast<Variable>(varIdent);
 
-	string loc = var->getAssLoc();
-	vector<string> ldArgs;
-	ldArgs.push_back("r0");
-	ldArgs.push_back(loc);
-	_globalInlines.push_back(AssemCom("ldr", ldArgs));							// ldr wordLoc loc
+	if (var->getTypeName()->getTypeName() != "Sentence") {
+		string loc = var->getAssLoc();
+		vector<string> ldArgs;
+		ldArgs.push_back("r0");
+		ldArgs.push_back(loc);
+		_globalInlines.push_back(AssemCom("ldr", ldArgs));						// ldr wordLoc loc
+	}
 
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res 
 	  = ExprGen::generateExpression(expr->getRoot(), st, freeRegs, boost::shared_ptr<AssemFunc>());
@@ -870,7 +872,7 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 		func->increaseStackPointer(len);
 
 		// make it point len down the stack
-		addCommand(func, "sub", reg, "fp", boost::lexical_cast<string>(len));
+		addCommand(func, "sub", reg, "fp", "#" + boost::lexical_cast<string>(len));
 	}
 
 	if (onStack) {
