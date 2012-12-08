@@ -56,8 +56,8 @@ void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
 
     if (parser->pParser->rec->getNumberOfSyntaxErrors(parser->pParser->rec) > 0) {
         cerr << "Syntax errors found. Stopping." << endl;
-        return;
-    }
+        exit(1);
+        }
 
     if (doPrintTree)
         Utils::printTree(tree);
@@ -72,7 +72,7 @@ void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
     if (Utils::globalErrorCount > 0) {
         cerr << "Errors found. Stopping." << endl;
         Utils::globalErrorCount = 0;
-        return;
+        exit(1);
     }
 
     if (boost::shared_ptr<SymbolTable> globalSt = top->getChildren()[0].lock()) {

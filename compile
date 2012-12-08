@@ -1,0 +1,13 @@
+#!/usr/bin/perl
+
+foreach (@ARGV) {
+	*STDERR = *STDOUT;
+	print "./compile $_\n";
+    `./codegen $_`;
+	$_ =~ m/.*\/(\w*)\.alice/;
+	if(($? << 8) == 0) {
+		print "gcc -o $1 $_.s\n\n";
+		`gcc -o $1 $_.s`;
+		`rm $_.s`; 
+	}
+}

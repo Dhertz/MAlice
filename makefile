@@ -11,7 +11,7 @@ antlr:
 grammar:
 	java -jar antlr-3.2.jar MAlice.g
 
-compile: idents/Type.o idents/Callable.o idents/Number.o idents/Sentence.o \
+codegen: idents/Type.o idents/Callable.o idents/Number.o idents/Sentence.o \
 	     idents/Letter.o idents/Boolean.o idents/Variable.o idents/Array.o \
 	     idents/Param.o idents/Function.o idents/Proc.o \
 	     SymbolTable.o ast/AST.o ast/ASTNode.o ast/ExprAST.o ast/DecAST.o \
@@ -42,6 +42,6 @@ compile: idents/Type.o idents/Callable.o idents/Number.o idents/Sentence.o \
 	$(C) -c -o $*.o $<
 
 clean:
-	rm -rf compile *.o libantlr3c/*.o ast/*.o idents/*.o
+	rm -rf codegen *.o libantlr3c/*.o ast/*.o idents/*.o
 
 .phony: all clean antlr grammar
