@@ -290,7 +290,10 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 				addCommand(func, "push", "{r1}");	
 			}
 
-			addCommand(func, "ldr", "r1", resultReg);
+			if(resultReg[0] == '.') {
+				addCommand(func, "ldr", "r1", resultReg);
+			}
+
 			addCommand(func, "ldr", "r1", "[r1]");
 		}
 
