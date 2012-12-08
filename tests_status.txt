@@ -15,10 +15,10 @@ Incorrect behaviour:
 Seg faults:
 - test03
 - test08 (right at the end)
+- test11
 
 Linking fails:
 - test05
-- test11
 - test12
 - test13
 - test14

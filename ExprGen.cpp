@@ -376,6 +376,23 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     		freeRegs = argEval->get<2>();
     		instrs.splice(instrs.end(), argInstrs);
 
+			string argTempLoc;
+			bool argOnStack = false;
+			if (argLoc[0] != 'r') {
+				argOnStack = true;
+    			vector<string> args;
+				args.push_back("{r4}");
+				instrs.push_back(AssemCom("push", args));
+
+				args.clear();
+				args.push_back("r4");
+				args.push_back(argLoc);
+				instrs.push_back(AssemCom("ldr", args));
+
+				argTempLoc = argLoc;
+				argLoc = "r4";
+			}
+
     		if (op == "!") {
     			vector<string> args;
     			string reg, stackLoc, retLoc;
@@ -451,6 +468,14 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					retLoc = stackLoc;
 				}
 
+				if (argOnStack) {
+					vector<string> args;
+					args.push_back("{r4}");
+					instrs.push_back(AssemCom("pop", args));
+
+					argLoc = argTempLoc;
+				}
+
 				treble_ptr_t ret(new treble_t(retLoc, instrs, freeRegs));
 				return ret;
     		} else if (op == "~") {
@@ -500,6 +525,14 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					instrs.push_back(pop);
 
 					reg = stackLoc;
+				}
+
+				if (argOnStack) {
+					vector<string> args;
+					args.push_back("{r4}");
+					instrs.push_back(AssemCom("pop", args));
+
+					argLoc = argTempLoc;
 				}
 
 				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
@@ -575,6 +608,14 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					instrs.push_back(pop);
 
 					reg = stackLoc;
+				}
+
+				if (argOnStack) {
+					vector<string> args;
+					args.push_back("{r4}");
+					instrs.push_back(AssemCom("pop", args));
+
+					argLoc = argTempLoc;
 				}
 
     			treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
@@ -1128,7 +1169,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 				freeRegs.push_back(reg);
 
-				if (resOnStack) {
+				if (resOnStack && stackLocRes != "") {
 					// str reg, [fp, #-4]
 					args.clear();
 					args.push_back(res);
@@ -1145,7 +1186,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					res = stackLocRes;
 				}
 
-				if (regOnStack) {
+				if (regOnStack && stackLocReg != "") {
 					// pop {reg}
 					args.clear();
 					args.push_back("{" + reg + "}");
@@ -1223,7 +1264,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 				AssemCom blge("blge", args);
 				instrs.push_back(blge);
 
-				if (onStack) {
+				if (onStack && stackLoc != "") {
 					// str reg, [fp, #-4]
 					args.clear();
 					args.push_back(reg);
