@@ -231,6 +231,7 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 	string resultReg = res->get<0>();
 
 	bool isStack = false;
+	string global = resultReg;
 	string tmpReg;
 	if (resultReg[0] != 'r' && resultReg[0] != '\"') {
 		// it's on the stack
@@ -272,7 +273,7 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 			_endDefs.push_back(AssemCom(".asciz", asciiArg));
 		}
 
-		if (resultReg[0] != '.') {
+		if (resultReg[0] != '.' && global[0] != '.') {
 			// local variable or expression
 			func->addListBack(res->get<1>());									// expr instrs
 
