@@ -369,7 +369,7 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 
 	bool isStack = false;
 	string tmpReg;
-	if (resultReg[0] != 'r' && resultReg[0] != '\"') {
+	if (resultReg[0] == '[') {
 		// it's on the stack
 		isStack = true;
 
@@ -395,21 +395,8 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 	} else {
 		func->increaseStackPointer(8);
 		string sp = boost::lexical_cast<string>(func->getStackPointer());
-
-		string temp = "";
-		if (resultReg[0] == '.') {
-			// it's a global
-			temp = resultReg;
-			list<AssemCom> tempList;
-			pair<string, vector<string> > p
-			  = Utils::tempForGlobal(resultReg, func->getFreeRegs(), tempList);
-			resultReg = p.first;
-			func->setFreeRegs(p.second);
-			func->addListBack(tempList);
-		}
-
+		
 		Label strLbl;
-		addCommand(func, "str", resultReg, "[fp, #-" + sp + "]");
 		_endDefs.push_back(AssemCom(strLbl.getLabel() + ":", vector<string>()));
 		vector<string> asciiArg;
 
@@ -421,17 +408,16 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 		
 		_endDefs.push_back(AssemCom(".asciz", asciiArg));
 		if(resultReg[0] != '.') {
+			addCommand(func, "str", resultReg, "[fp, #-" + sp + "]");
 			addCommand(func, "ldr", "r0", "=" + strLbl.getLabel());
 			addCommand(func, "sub", "r1", "fp", "#" + sp);
 			addCommand(func, "bl", "__isoc99_scanf");
 			addCommand(func, "ldr", resultReg, "[fp, #-" + sp + "]");
-
-			if (temp != "") {
-				addCommand(func, "str", resultReg, temp);
-			}
+			cout << resultReg <<endl;
 		} else {
 			addCommand(func, "ldr", "r0", "=" + strLbl.getLabel());
 			addCommand(func, "ldr", "r1", resultReg);
+			cout << resultReg <<endl;
 			addCommand(func, "bl", "__isoc99_scanf");
 		}
 	}
