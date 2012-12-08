@@ -292,6 +292,8 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 
 			if(resultReg[0] == '.') {
 				addCommand(func, "ldr", "r1", resultReg);
+			} else {
+				addCommand(func, "mov", "r1", resultReg);
 			}
 
 			addCommand(func, "ldr", "r1", "[r1]");
