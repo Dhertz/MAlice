@@ -741,10 +741,18 @@ void ASTVisitor::visitFuncCall(string name,
 			addCommand(func, "ldr", "r" + boost::lexical_cast<string>(i), 
 						 "=" + strLbl.getLabel());
 		} else if (i < 4) {
-	  		if (paramLoc != "r" + boost::lexical_cast<string>(i)) {
-	  			addCommand(func, "mov", "r" + boost::lexical_cast<string>(i),
-	  						 paramLoc);
-	  		}
+			if (paramLoc[0] != 'r') {
+				string tempReg = Utils::borrowRegister(vector<string>());
+				addCommand(func, "ldr", tempReg, paramLoc);
+
+				paramLoc = tempReg;
+			}
+
+			if (paramLoc != "r" + boost::lexical_cast<string>(i)) {
+  				addCommand(func, "mov", 
+  								 "r" + boost::lexical_cast<string>(i),
+  						 		 paramLoc);
+  			}
 	  	} else {
 	  		// Push any other params
 			if (paramLoc[0] == 'r') {
@@ -816,7 +824,14 @@ void ASTVisitor::visitArrayAssign(string name,
 		addCommand(func, "ldr", "r1", valReg);
 		valReg = "r1";
 	}
-	
+
+	string tempArrReg = "";
+	if (reg[0] == '.') {
+		// array is global
+		tempArrReg = func->getFreeRegs().front();
+		addCommand(func, "ldr", tempArrReg, reg);
+		reg = tempArrReg;
+	}
 
 	addCommand(func, "str", valReg, "[" + reg + ", " + resultReg + "]");
 
@@ -827,7 +842,6 @@ void ASTVisitor::visitArrayAssign(string name,
 	if (resOnStack) {
 		addCommand(func, "pop", "{r0}");
 	}
-
 }
 
 void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length, 
