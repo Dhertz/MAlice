@@ -792,7 +792,7 @@ void ASTVisitor::visitArrayAssign(string name,
 
 	//make size bigger for integers
 	if (arr->getTypeName() == "Number") {
-		addCommand(func, "mul", resultReg, resultReg, "#4");
+		addCommand(func, "mov", resultReg, resultReg, "LSL #2");
 	}
 	
 	string reg = arr->getAssLoc();
@@ -841,7 +841,7 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 	
 	if (type->getTypeName() == "Number") {
 		//make it bigger for integers
-		addCommand(func, "mul", resultReg, resultReg, "#4");
+		addCommand(func, "mov", resultReg, resultReg, "LSL #2");
 	}
 
 	string reg;

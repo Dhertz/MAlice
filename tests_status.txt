@@ -5,6 +5,7 @@ Correct behaviour:
 - test06
 
 Incorrect behaviour:
+- test09
 - test02
 - test10 (extra print)
 - fibonacciIterative
@@ -14,7 +15,6 @@ Incorrect behaviour:
 Seg faults:
 - test03
 - test08 (right at the end)
-- test09
 
 Linking fails:
 - test05

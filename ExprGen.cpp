@@ -216,8 +216,8 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 			vector<string> args;
 			args.push_back(indexLoc);
 			args.push_back(indexLoc);
-			args.push_back("#4");
-			instrs.push_back(AssemCom("mul", args));
+			args.push_back("LSL #2");
+			instrs.push_back(AssemCom("mov", args));
 		}
 
 		if (loc[0] == 'r') {
@@ -1128,7 +1128,6 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 				freeRegs.push_back(reg);
 
-				cout << resOnStack << endl;
 				if (resOnStack) {
 					// str reg, [fp, #-4]
 					args.clear();
