@@ -355,7 +355,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     			args.clear();
     			args.push_back("r0");
     			args.push_back(stackLoc);
-    			instrs.push_back(AssemCom("ldr", args));
+    			instrs.push_back(AssemCom("str", args));
 
     			args.clear();
     			args.push_back("{r0}");
@@ -592,12 +592,47 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 			freeRegs = lhsEval->get<2>();
 			instrs.splice(instrs.end(), lhsInstrs);
 
+			vector<string> args;
+			string lhsTempLoc;
+			bool lhsOnStack = false;
+			if (lhsLoc[0] != 'r') {
+				lhsOnStack = true;
+				args.push_back("{r2}");
+				instrs.push_back(AssemCom("push", args));
+
+				args.clear();
+				args.push_back("r2");
+				args.push_back(lhsLoc);
+				instrs.push_back(AssemCom("ldr", args));
+
+				lhsTempLoc = lhsLoc;
+				lhsLoc = "r2";
+			}
+
 			pANTLR3_BASE_TREE rhs = Utils::childByNum(root, 1);
 			treble_ptr_t rhsEval = generateExpression(rhs, st, freeRegs, func);
 			string rhsLoc = rhsEval->get<0>();
 			list<AssemCom> rhsInstrs = rhsEval->get<1>();
 			freeRegs = rhsEval->get<2>();
 			instrs.splice(instrs.end(), rhsInstrs);
+
+			bool rhsOnStack = false;
+			string rhsTempLoc;
+			if (rhsLoc[0] != 'r') {
+				rhsOnStack = true;
+
+				args.clear();
+				args.push_back("{r3}");
+				instrs.push_back(AssemCom("push", args));
+
+				args.clear();
+				args.push_back("r3");
+				args.push_back(rhsLoc);
+				instrs.push_back(AssemCom("ldr", args));
+
+				rhsTempLoc = rhsLoc;
+				rhsLoc = "r3";
+			}
 
 			if (op == "||" || op == "|") {
 				vector<string> args;
@@ -648,6 +683,20 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					instrs.push_back(pop);
 
 					reg = stackLoc;
+				}
+
+				if (lhsOnStack) {
+					args.clear();
+					args.push_back("{r2}");
+					instrs.push_back(AssemCom("pop", args));
+					lhsLoc = lhsTempLoc;
+				}
+
+				if (rhsOnStack) {
+					args.clear();
+					args.push_back("{r3}");
+					instrs.push_back(AssemCom("pop", args));
+					rhsLoc = rhsTempLoc;
 				}
 
 				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
@@ -703,6 +752,20 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					reg = stackLoc;
 				}
 
+				if (lhsOnStack) {
+					args.clear();
+					args.push_back("{r2}");
+					instrs.push_back(AssemCom("pop", args));
+					lhsLoc = lhsTempLoc;
+				}
+
+				if (rhsOnStack) {
+					args.clear();
+					args.push_back("{r3}");
+					instrs.push_back(AssemCom("pop", args));
+					rhsLoc = rhsTempLoc;
+				}
+
 				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
 				return ret;
 			} else if (op == "^") {
@@ -754,6 +817,20 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					instrs.push_back(pop);
 
 					reg = stackLoc;
+				}
+
+				if (lhsOnStack) {
+					args.clear();
+					args.push_back("{r2}");
+					instrs.push_back(AssemCom("pop", args));
+					lhsLoc = lhsTempLoc;
+				}
+
+				if (rhsOnStack) {
+					args.clear();
+					args.push_back("{r3}");
+					instrs.push_back(AssemCom("pop", args));
+					rhsLoc = rhsTempLoc;
 				}
 
 				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
@@ -809,6 +886,20 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					reg = stackLoc;
 				}
 
+				if (lhsOnStack) {
+					args.clear();
+					args.push_back("{r2}");
+					instrs.push_back(AssemCom("pop", args));
+					lhsLoc = lhsTempLoc;
+				}
+
+				if (rhsOnStack) {
+					args.clear();
+					args.push_back("{r3}");
+					instrs.push_back(AssemCom("pop", args));
+					rhsLoc = rhsTempLoc;
+				}
+
 				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
 				return ret;
 			} else if (op == "-") {
@@ -862,6 +953,20 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					reg = stackLoc;
 				}
 
+				if (lhsOnStack) {
+					args.clear();
+					args.push_back("{r2}");
+					instrs.push_back(AssemCom("pop", args));
+					lhsLoc = lhsTempLoc;
+				}
+
+				if (rhsOnStack) {
+					args.clear();
+					args.push_back("{r3}");
+					instrs.push_back(AssemCom("pop", args));
+					rhsLoc = rhsTempLoc;
+				}
+
 				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
 				return ret;
 			} else if (op == "*") {
@@ -913,6 +1018,20 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					instrs.push_back(pop);
 
 					reg = stackLoc;
+				}
+
+				if (lhsOnStack) {
+					args.clear();
+					args.push_back("{r2}");
+					instrs.push_back(AssemCom("pop", args));
+					lhsLoc = lhsTempLoc;
+				}
+
+				if (rhsOnStack) {
+					args.clear();
+					args.push_back("{r3}");
+					instrs.push_back(AssemCom("pop", args));
+					rhsLoc = rhsTempLoc;
 				}
 
 				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
@@ -1034,6 +1153,20 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					instrs.push_back(pop);
 				}
 
+				if (lhsOnStack) {
+					args.clear();
+					args.push_back("{r2}");
+					instrs.push_back(AssemCom("pop", args));
+					lhsLoc = lhsTempLoc;
+				}
+
+				if (rhsOnStack) {
+					args.clear();
+					args.push_back("{r3}");
+					instrs.push_back(AssemCom("pop", args));
+					rhsLoc = rhsTempLoc;
+				}
+
 				treble_ptr_t ret(new treble_t(res, instrs, freeRegs));
 				return ret;
 			} else if (op == "%") {
@@ -1105,6 +1238,20 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					instrs.push_back(pop);
 
 					reg = stackLoc;
+				}
+
+				if (lhsOnStack) {
+					args.clear();
+					args.push_back("{r2}");
+					instrs.push_back(AssemCom("pop", args));
+					lhsLoc = lhsTempLoc;
+				}
+
+				if (rhsOnStack) {
+					args.clear();
+					args.push_back("{r3}");
+					instrs.push_back(AssemCom("pop", args));
+					rhsLoc = rhsTempLoc;
 				}
 
 				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
@@ -1200,6 +1347,20 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					instrs.push_back(pop);
 
 					reg = stackLoc;
+				}
+
+				if (lhsOnStack) {
+					args.clear();
+					args.push_back("{r2}");
+					instrs.push_back(AssemCom("pop", args));
+					lhsLoc = lhsTempLoc;
+				}
+
+				if (rhsOnStack) {
+					args.clear();
+					args.push_back("{r3}");
+					instrs.push_back(AssemCom("pop", args));
+					rhsLoc = rhsTempLoc;
 				}
 
 				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
@@ -1298,6 +1459,20 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					reg = stackLoc;
 				}
 
+				if (lhsOnStack) {
+					args.clear();
+					args.push_back("{r2}");
+					instrs.push_back(AssemCom("pop", args));
+					lhsLoc = lhsTempLoc;
+				}
+
+				if (rhsOnStack) {
+					args.clear();
+					args.push_back("{r3}");
+					instrs.push_back(AssemCom("pop", args));
+					rhsLoc = rhsTempLoc;
+				}
+
 				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
 				return ret;
 			} else if (op == ">") {
@@ -1391,6 +1566,20 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					instrs.push_back(pop);
 
 					reg = stackLoc;
+				}
+
+				if (lhsOnStack) {
+					args.clear();
+					args.push_back("{r2}");
+					instrs.push_back(AssemCom("pop", args));
+					lhsLoc = lhsTempLoc;
+				}
+
+				if (rhsOnStack) {
+					args.clear();
+					args.push_back("{r3}");
+					instrs.push_back(AssemCom("pop", args));
+					rhsLoc = rhsTempLoc;
 				}
 
 				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
@@ -1488,6 +1677,20 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					reg = stackLoc;
 				}
 
+				if (lhsOnStack) {
+					args.clear();
+					args.push_back("{r2}");
+					instrs.push_back(AssemCom("pop", args));
+					lhsLoc = lhsTempLoc;
+				}
+
+				if (rhsOnStack) {
+					args.clear();
+					args.push_back("{r3}");
+					instrs.push_back(AssemCom("pop", args));
+					rhsLoc = rhsTempLoc;
+				}
+
 				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
 				return ret;
 			} else if (op == ">=") {
@@ -1583,6 +1786,20 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					reg = stackLoc;
 				}
 
+				if (lhsOnStack) {
+					args.clear();
+					args.push_back("{r2}");
+					instrs.push_back(AssemCom("pop", args));
+					lhsLoc = lhsTempLoc;
+				}
+
+				if (rhsOnStack) {
+					args.clear();
+					args.push_back("{r3}");
+					instrs.push_back(AssemCom("pop", args));
+					rhsLoc = rhsTempLoc;
+				}
+
 				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
 				return ret;
 			} else if (op == "<=") {
@@ -1676,6 +1893,20 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					instrs.push_back(pop);
 
 					reg = stackLoc;
+				}
+
+				if (lhsOnStack) {
+					args.clear();
+					args.push_back("{r2}");
+					instrs.push_back(AssemCom("pop", args));
+					lhsLoc = lhsTempLoc;
+				}
+
+				if (rhsOnStack) {
+					args.clear();
+					args.push_back("{r3}");
+					instrs.push_back(AssemCom("pop", args));
+					rhsLoc = rhsTempLoc;
 				}
 
 				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
