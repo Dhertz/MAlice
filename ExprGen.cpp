@@ -1630,18 +1630,18 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					reg = stackLoc;
 				}
 
-				if (lhsOnStack) {
+			    if (rhsOnStack) {
+                    args.clear();
+                    args.push_back("{r3}");
+                    instrs.push_back(AssemCom("pop", args));
+                    rhsLoc = rhsTempLoc;
+                }	
+                
+                if (lhsOnStack) {
 					args.clear();
 					args.push_back("{r2}");
 					instrs.push_back(AssemCom("pop", args));
 					lhsLoc = lhsTempLoc;
-				}
-
-				if (rhsOnStack) {
-					args.clear();
-					args.push_back("{r3}");
-					instrs.push_back(AssemCom("pop", args));
-					rhsLoc = rhsTempLoc;
 				}
 
 				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
