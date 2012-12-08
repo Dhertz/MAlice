@@ -19,9 +19,9 @@ Seg faults:
 - test03
 - test08 (right at the end)
 - test11
+- test14
 
 Linking fails:
-- test14
 - test15
 - ackermann
 - binarySearch

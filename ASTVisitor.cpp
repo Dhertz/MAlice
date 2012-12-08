@@ -782,6 +782,8 @@ void ASTVisitor::visitArrayAssign(string name,
 	   = ExprGen::generateExpression(index->getRoot(), st, func->getFreeRegs(), func);
 	
 	string resultReg = ind->get<0>();
+	func->addListBack(ind->get<1>());
+	func->setFreeRegs(ind->get<2>());
 	bool resOnStack = false;
 
 	if (resultReg[0] != 'r') {
@@ -793,7 +795,7 @@ void ASTVisitor::visitArrayAssign(string name,
 	}
 
 	//make size bigger for integers
-	if (arr->getTypeName() == "Number") {
+	if (arr->getElemType()->getTypeName() == "Number") {
 		addCommand(func, "mov", resultReg, resultReg, "LSL #2");
 	}
 	
@@ -803,6 +805,7 @@ void ASTVisitor::visitArrayAssign(string name,
 	  		= ExprGen::generateExpression(value->getRoot(), st, func->getFreeRegs(), func);
 	string valReg = val->get<0>();
 	func->addListBack(val->get<1>());
+	func->setFreeRegs(val->get<2>());
 
 	bool valOnStack = false;
 
@@ -814,7 +817,8 @@ void ASTVisitor::visitArrayAssign(string name,
 		valReg = "r1";
 	}
 	
-	addCommand(func, "str", valReg, "[" + resultReg + ", " + reg + "]");
+
+	addCommand(func, "str", valReg, "[" + reg + ", " + resultReg + "]");
 
 	if (valOnStack) {
 		addCommand(func, "pop", "{r1}");
