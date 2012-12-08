@@ -339,12 +339,22 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     	    	string reg = freeRegs.front();
     			freeRegs.erase(freeRegs.begin());
 
-    			// mov rx, #n
-    			vector<string> args;
-    			args.push_back(reg);
-    			args.push_back("#" + n);
-    			AssemCom mov("mov", args);
-    			instrs.push_back(mov);
+    			if (atoi(n.c_str()) > 255) {
+    				// To large a value to use mov, use ldr instead
+    				// ldr rx, =#n
+    				vector<string> args;
+	    			args.push_back(reg);
+	    			args.push_back("#=" + n);
+	    			AssemCom mov("ldr", args);
+	    			instrs.push_back(mov);
+    			} else {
+	    			// mov rx, #n
+	    			vector<string> args;
+	    			args.push_back(reg);
+	    			args.push_back("#" + n);
+	    			AssemCom mov("mov", args);
+	    			instrs.push_back(mov);
+    			}
 
     			treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
     			return ret;
