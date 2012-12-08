@@ -1,11 +1,11 @@
 Correct behaviour:
 - test01
-- test02
 - test07
 - test04
 - test06
 
 Incorrect behaviour:
+- test02
 - test10 (extra print)
 - fibonacciIterative
 - gcdIterative

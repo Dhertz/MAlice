@@ -404,6 +404,7 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 
 		Label strLbl;
 		addCommand(func, "str", resultReg, "[fp, #-" + sp + "]");
+		_endDefs.push_back(AssemCom(strLbl.getLabel() + ":", vector<string>()));
 		vector<string> asciiArg;
 
 		if (expr->getType()->getTypeName() == "Number") {	
