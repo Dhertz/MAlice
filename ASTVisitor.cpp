@@ -232,7 +232,7 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 
 	bool isStack = false;
 	string tmpReg;
-	if (resultReg[0] != 'r') {
+	if (resultReg[0] != 'r' && resultReg[0] != '\"') {
 		// it's on the stack
 		isStack = true;
 
@@ -363,7 +363,7 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 
 	bool isStack = false;
 	string tmpReg;
-	if (resultReg[0] != 'r') {
+	if (resultReg[0] != 'r' && resultReg[0] != '\"') {
 		// it's on the stack
 		isStack = true;
 
