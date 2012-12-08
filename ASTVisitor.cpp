@@ -413,11 +413,9 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 			addCommand(func, "sub", "r1", "fp", "#" + sp);
 			addCommand(func, "bl", "__isoc99_scanf");
 			addCommand(func, "ldr", resultReg, "[fp, #-" + sp + "]");
-			cout << resultReg <<endl;
 		} else {
 			addCommand(func, "ldr", "r0", "=" + strLbl.getLabel());
 			addCommand(func, "ldr", "r1", resultReg);
-			cout << resultReg <<endl;
 			addCommand(func, "bl", "__isoc99_scanf");
 		}
 	}
