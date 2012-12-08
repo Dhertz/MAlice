@@ -52,7 +52,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					args.push_back(tempReg);
 					args.push_back(paramLoc);
 					instrs.push_back(AssemCom("ldr", args));
-
+					
 					paramLoc = tempReg;
 				}
 
@@ -669,6 +669,13 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 				args.push_back(lhsLoc);
 				instrs.push_back(AssemCom("ldr", args));
 
+				if(lhsLoc[0] == '.') {
+						args.clear();
+						args.push_back(tempReg);
+						args.push_back("[" + tempReg + "]");
+						instrs.push_back(AssemCom("ldr", args));
+				}
+
 				lhsTempLoc = lhsLoc;
 				lhsLoc = tempReg;
 			}
@@ -694,6 +701,13 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 				args.push_back(tempReg);
 				args.push_back(rhsLoc);
 				instrs.push_back(AssemCom("ldr", args));
+
+				if(rhsLoc[0] == '.') {
+						args.clear();
+						args.push_back(tempReg);
+						args.push_back("[" + tempReg + "]");
+						instrs.push_back(AssemCom("ldr", args));
+				}
 
 				rhsTempLoc = rhsLoc;
 				rhsLoc = tempReg;
