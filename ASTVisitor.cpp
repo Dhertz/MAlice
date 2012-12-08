@@ -458,7 +458,7 @@ void ASTVisitor::visitWhile(boost::shared_ptr<ExprAST> cond,
 	}
 
 	addCommand(func, "cmp", resultReg, "#0");
-	addCommand(func, "beg", loopLabel.getLabel());
+	addCommand(func, "beq", loopLabel.getLabel());
 
 	if (onStack) {
 		addCommand(func, "pop", "{r0}");
@@ -493,7 +493,7 @@ void ASTVisitor::visitChoice(boost::shared_ptr<ExprAST> cond,
 		addCommand(func, "pop", "{r0}");
 	}
 
-	addCommand(func, "beg", elseLabel.getLabel());
+	addCommand(func, "beq", elseLabel.getLabel());
 
 	trueBody->accept(shared_from_this(), func);									// if body
 
