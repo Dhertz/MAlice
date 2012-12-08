@@ -45,6 +45,17 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 			instrs.splice(instrs.end(), paramInstrs);
 
 			if (0 <= i && i < 4) {
+				if (paramLoc[0] != 'r') {
+					string tempReg = Utils::borrowRegister(vector<string>());
+
+					vector<string> args;
+					args.push_back(tempReg);
+					args.push_back(paramLoc);
+					instrs.push_back(AssemCom("ldr", args));
+
+					paramLoc = tempReg;
+				}
+
 				// First four arguments go in r0-r3 respectively
 				if (paramLoc != "r" + boost::lexical_cast<string>(i)) {
 					// Argument isn't already in the right place
