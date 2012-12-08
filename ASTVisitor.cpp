@@ -420,14 +420,19 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 		}
 		
 		_endDefs.push_back(AssemCom(".asciz", asciiArg));
+		if(resultReg[0] != '.') {
+			addCommand(func, "ldr", "r0", "=" + strLbl.getLabel());
+			addCommand(func, "sub", "r1", "fp", "#" + sp);
+			addCommand(func, "bl", "__isoc99_scanf");
+			addCommand(func, "ldr", resultReg, "[fp, #-" + sp + "]");
 
-		addCommand(func, "ldr", "r0", "=" + strLbl.getLabel());
-		addCommand(func, "sub", "r1", "fp", "#" + sp);
-		addCommand(func, "bl", "__isoc99_scanf");
-		addCommand(func, "ldr", resultReg, "[fp, #-" + sp + "]");
-
-		if (temp != "") {
-			addCommand(func, "str", resultReg, temp);
+			if (temp != "") {
+				addCommand(func, "str", resultReg, temp);
+			}
+		} else {
+			addCommand(func, "ldr", "r0", "=" + strLbl.getLabel());
+			addCommand(func, "ldr", "r1", resultReg);
+			addCommand(func, "bl", "__isoc99_scanf");
 		}
 	}
 
