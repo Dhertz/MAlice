@@ -7,7 +7,7 @@ foreach (@ARGV) {
 	$_ =~ m/.*\/(\w*)\.alice/;
 	if(($? << 8) == 0) {
 		print "gcc -o $1 $_.s\n\n";
-		`gcc -o $1 $_.s`;
+		`gcc -g -o $1 $_.s`;
 		`rm $_.s`; 
 	}
 }
