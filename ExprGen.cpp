@@ -344,7 +344,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     				// ldr rx, =#n
     				vector<string> args;
 	    			args.push_back(reg);
-	    			args.push_back("=#" + n);
+	    			args.push_back("=" + n);
 	    			AssemCom mov("ldr", args);
 	    			instrs.push_back(mov);
     			} else {
