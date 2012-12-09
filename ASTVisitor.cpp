@@ -301,20 +301,21 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 
 	}
 
-	if (!func->regIsFree("r0") && resultReg[0] == '\"') {
+	/*if (!func->regIsFree("r0") && resultReg[0] == '\"') {
 		addCommand(func, "push", "{r0}");
-	}
+	}*/
 
 	if ((expr->getType()->getTypeName() == "Sentence" && resultReg[0] == '\"') 
 		|| !(expr->getType()->getTypeName() == "Sentence")) {
+		addCommand(func, "push", "{r0}");
 		addCommand(func, "ldr", "r0", "=" + strLbl.getLabel());
 	}
 
 	addCommand(func, "bl", "printf");
 
-	if (!func->regIsFree("r0") && resultReg[0] == '\"') {
+	/*if (!func->regIsFree("r0") && resultReg[0] == '\"') {
 		addCommand(func, "pop", "{r0}");
-	}
+	} */
 	
 	if (!func->regIsFree("r1")) {
 		if (resultReg != "r1" && expr->getType()->getTypeName() != "Sentence") {
@@ -324,6 +325,11 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 
 	if (isStack) {
 		addCommand(func, "pop", "{" + tmpReg + "}");
+	}
+
+	if ((expr->getType()->getTypeName() == "Sentence" && resultReg[0] == '\"') 
+		|| !(expr->getType()->getTypeName() == "Sentence")) {
+		addCommand(func, "pop", "{r0}");
 	}
 }
 
