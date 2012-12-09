@@ -1229,7 +1229,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 				args.clear();
 				args.push_back(l.getLabel());
-				AssemCom blge("blge", args);
+				AssemCom blge("bge", args);
 				instrs.push_back(blge);
 
 				freeRegs.push_back(reg);
