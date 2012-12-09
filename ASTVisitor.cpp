@@ -710,12 +710,9 @@ void ASTVisitor::visitFuncCall(string name,
 							     boost::shared_ptr<AssemFunc> func) {
 
 	vector<boost::shared_ptr< ExprAST> > exprs = params->getParamExprs();
-
+  			
 	int maxpush = min(func->getFreeRegs().front()[1] - 48, 3);
-	for (int j = 1; j < maxpush; ++j) {
-		addCommand(func, "push", "{r" + boost::lexical_cast<string>(j) + "}");
-	}
-
+	
 	vector<boost::shared_ptr< ExprAST> >::iterator it;
 	int i = 0;
 	for (it = exprs.begin(); it != exprs.end(); ++it) {
@@ -752,6 +749,10 @@ void ASTVisitor::visitFuncCall(string name,
   								 "r" + boost::lexical_cast<string>(i),
   						 		 paramLoc);
   			}
+
+			for (int j = 1; j < maxpush; ++j) {
+				addCommand(func, "push", "{r" + boost::lexical_cast<string>(j) + "}");
+			}
 	  	} else {
 	  		// Push any other params
 			if (paramLoc[0] == 'r') {

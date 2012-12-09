@@ -30,15 +30,10 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 		//   the label matches the one made in the function declaration), and
 		//   I know my result will be in r0 by convention
 
-    	int maxpush = min(freeRegs.front()[1] - 48, 3);
-    	for (int i = 1; i < maxpush; ++i) {
-			vector<string> args;
-			args.push_back("{r" + boost::lexical_cast<string>(i) + "}");
-			instrs.push_back(AssemCom("push", args));
-    	}
-
         string funcName = Utils::createStringFromTree(Utils::childByNum(root, 0));
         pANTLR3_BASE_TREE cplTree = Utils::childByNum(root, 1);
+
+		int maxpush = min(freeRegs.front()[1] - 48, 3);
 
 		for (int i = 0; i < cplTree->getChildCount(cplTree); ++i) {
 			pANTLR3_BASE_TREE cp = Utils::childByNum(cplTree, i);
@@ -75,6 +70,12 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					AssemCom mov("mov", args);
 					instrs.push_back(mov);
 				}
+
+		    	for (int i = 1; i < maxpush; ++i) {
+					vector<string> args;
+					args.push_back("{r" + boost::lexical_cast<string>(i) + "}");
+					instrs.push_back(AssemCom("push", args));
+		    	}
 			} else {
 				// Push any other params
 				if (paramLoc[0] == 'r') {
