@@ -4,13 +4,13 @@ Correct behaviour:
 - test04
 - test06
 - test02
+- test09
+- test10
+- test05
 
 Incorrect behaviour:
-- test09
-- test10 (extra print)
 - test12 (hangs)
 - test13 (hangs)
-- test05 (hangs)
 - fibonacciIterative (wrong nubmer printed)
 - gcdIterative (hangs)
 - gcdRecursive (hangs)
@@ -19,7 +19,7 @@ Incorrect behaviour:
 
 Seg faults:
 - test03
-- test08 (right at the end)
+- test08 (right at the end, doesn't show in gdb)
 - test11
 - test14
 - fibonacciRecursive
@@ -27,6 +27,3 @@ Seg faults:
 - vectorFunctions
 - ackermann
 - bubbleSort
-
-Linking fails:
-- none!
