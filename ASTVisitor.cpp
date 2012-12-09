@@ -711,9 +711,13 @@ void ASTVisitor::visitFuncCall(string name,
 
 	vector<boost::shared_ptr< ExprAST> > exprs = params->getParamExprs();
 
+	int maxpush = min(func->getFreeRegs().front()[1] - 48, 3);
+	for (int j = 1; j < maxpush; ++j) {
+		addCommand(func, "push", "{r" + boost::lexical_cast<string>(j) + "}");
+	}
+
 	vector<boost::shared_ptr< ExprAST> >::iterator it;
 	int i = 0;
-
 	for (it = exprs.begin(); it != exprs.end(); ++it) {
 		pANTLR3_BASE_TREE cp = (*it)->getRoot();
 
@@ -770,6 +774,10 @@ void ASTVisitor::visitFuncCall(string name,
 	}
 
 	addCommand(func, "bl", name);
+
+	for (int j = maxpush - 1; j >= 1; --j) {
+		addCommand(func, "pop", "{r" + boost::lexical_cast<string>(i) + "}");
+	}
 }
 
 void ASTVisitor::visitArrayAssign(string name,

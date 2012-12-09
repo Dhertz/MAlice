@@ -4,6 +4,7 @@
 #include "idents/Array.hpp"
 #include "idents/Variable.hpp"
 #include <boost/lexical_cast.hpp>
+#include <algorithm>
 
 typedef boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > treble_ptr_t;
 typedef boost::tuple< string, list<AssemCom>, vector<string> > treble_t;
@@ -29,6 +30,13 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 		//   the label matches the one made in the function declaration), and
 		//   I know my result will be in r0 by convention
 
+    	int maxpush = min(freeRegs.front()[1] - 48, 3);
+    	for (int i = 1; i < maxpush; ++i) {
+			vector<string> args;
+			args.push_back("{r" + boost::lexical_cast<string>(i) + "}");
+			instrs.push_back(AssemCom("push", args));
+    	}
+
         string funcName = Utils::createStringFromTree(Utils::childByNum(root, 0));
         pANTLR3_BASE_TREE cplTree = Utils::childByNum(root, 1);
 
@@ -45,6 +53,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 			instrs.splice(instrs.end(), paramInstrs);
 
 			if (0 <= i && i < 4) {
+
 				if (paramLoc[0] != 'r') {
 					string tempReg = Utils::borrowRegister(vector<string>());
 
@@ -129,6 +138,12 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 		args.push_back(funcName);
 		AssemCom bl("bl", args);
 		instrs.push_back(bl);
+
+		for (int j = maxpush - 1; j >= 1; --j) {
+			args.clear();
+			args.push_back("{r" + boost::lexical_cast<string>(j) + "}");
+			instrs.push_back(AssemCom("pop", args));
+		}
 
 		treble_ptr_t ret(new treble_t("r0", instrs, freeRegs)); 
 		return ret;
@@ -2062,3 +2077,5 @@ int ExprGen::evaluateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<Symbol
 
     Utils::printComErr("Could not evaluate array size.");
 }
+
+

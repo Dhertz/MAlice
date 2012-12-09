@@ -3,10 +3,10 @@ Correct behaviour:
 - test07
 - test04
 - test06
+- test02
 
 Incorrect behaviour:
 - test09
-- test02
 - test10 (extra print)
 - test12 (hangs)
 - test13 (hangs)
@@ -25,7 +25,8 @@ Seg faults:
 - fibonacciRecursive
 - sieveOfEratosthenes
 - vectorFunctions
-
-Linking fails:
 - ackermann
 - bubbleSort
+
+Linking fails:
+- none!
