@@ -33,7 +33,10 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
         string funcName = Utils::createStringFromTree(Utils::childByNum(root, 0));
         pANTLR3_BASE_TREE cplTree = Utils::childByNum(root, 1);
 
-		int maxpush = min(freeRegs.front()[1] - 48, 3);
+        int maxpush = 10; //not sure what to put here! - D
+        if(!freeRegs.empty()) {
+			maxpush = min(freeRegs.front()[1] - 48, 3);
+		}
 
 		for (int i = 0; i < cplTree->getChildCount(cplTree); ++i) {
 			pANTLR3_BASE_TREE cp = Utils::childByNum(cplTree, i);
@@ -680,6 +683,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					tempReg = freeRegs.front();
 					freeRegs.erase(freeRegs.begin());
 				} else {
+					//not sure what to put here! - D
 					tempReg = "r7";
 				}
 				
@@ -718,6 +722,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					tempReg = freeRegs.front();
 					freeRegs.erase(freeRegs.begin());
 				} else {
+					//not sure what to put here! -D
 					tempReg = "r8";
 				}
 				args.clear();
@@ -1197,15 +1202,15 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 				AssemCom eors("eor", args);
 				instrs.push_back(eors);
 
-				Label l;
-				instrs.push_back(AssemCom(l.getLabel() + 
-										":", std::vector<string>()));
-
 				args.clear();
 				args.push_back(reg);
 				args.push_back(lhsLoc);
     			AssemCom mov("mov", args);
     			instrs.push_back(mov);
+
+				Label l;
+				instrs.push_back(AssemCom(l.getLabel() + 
+										":", std::vector<string>()));
 
 				args.clear();
 				args.push_back(reg);
@@ -1301,15 +1306,15 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					instrs.push_back(push);
 				}
 
-				Label l;
-				instrs.push_back(AssemCom(l.getLabel() + 
-									":", std::vector<string>()));
-
 				args.clear();
 				args.push_back(reg);
 				args.push_back(lhsLoc);
     			AssemCom mov("mov", args);
     			instrs.push_back(mov);
+
+				Label l;
+				instrs.push_back(AssemCom(l.getLabel() + 
+									":", std::vector<string>()));
 
 				args.clear();
 				args.push_back(reg);
