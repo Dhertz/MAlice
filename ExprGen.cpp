@@ -675,29 +675,31 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 			bool lhsOnStack = false;
 			if (lhsLoc[0] != 'r') {
 				lhsOnStack = true;
+				string tempReg;
 				if(!freeRegs.empty()) {
-					string tempReg = freeRegs.front();								//what if this is empty?!
+					tempReg = freeRegs.front();
 					freeRegs.erase(freeRegs.begin());
-					args.push_back("{" + tempReg + "}");
-					instrs.push_back(AssemCom("push", args));
-
-					args.clear();
-					args.push_back(tempReg);
-					args.push_back(lhsLoc);
-					instrs.push_back(AssemCom("ldr", args));
-
-					if(lhsLoc[0] == '.') {
-							args.clear();
-							args.push_back(tempReg);
-							args.push_back("[" + tempReg + "]");
-							instrs.push_back(AssemCom("ldr", args));
-					}
-
-					lhsTempLoc = lhsLoc;
-					lhsLoc = tempReg;
 				} else {
-					cout << "Please fix this. line 683 exprgen" << endl;
+					tempReg = "r7";
 				}
+				
+				args.push_back("{" + tempReg + "}");
+				instrs.push_back(AssemCom("push", args));
+
+				args.clear();
+				args.push_back(tempReg);
+				args.push_back(lhsLoc);
+				instrs.push_back(AssemCom("ldr", args));
+
+				if(lhsLoc[0] == '.') {
+						args.clear();
+						args.push_back(tempReg);
+						args.push_back("[" + tempReg + "]");
+						instrs.push_back(AssemCom("ldr", args));
+				}
+
+				lhsTempLoc = lhsLoc;
+				lhsLoc = tempReg;
 			}
 
 			pANTLR3_BASE_TREE rhs = Utils::childByNum(root, 1);
@@ -711,30 +713,31 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 			string rhsTempLoc;
 			if (rhsLoc[0] != 'r') {
 				rhsOnStack = true;
+				string tempReg;
 				if(!freeRegs.empty()) {
-					string tempReg = freeRegs.front();
+					tempReg = freeRegs.front();
 					freeRegs.erase(freeRegs.begin());
-					args.clear();
-					args.push_back("{" + tempReg + "}");
-					instrs.push_back(AssemCom("push", args));
-
-					args.clear();
-					args.push_back(tempReg);
-					args.push_back(rhsLoc);
-					instrs.push_back(AssemCom("ldr", args));
-
-					if(rhsLoc[0] == '.') {
-							args.clear();
-							args.push_back(tempReg);
-							args.push_back("[" + tempReg + "]");
-							instrs.push_back(AssemCom("ldr", args));
-					}
-
-					rhsTempLoc = rhsLoc;
-					rhsLoc = tempReg;
 				} else {
-					cout << "Please fix this. line 683 exprgen" << endl;
+					tempReg = "r8";
 				}
+				args.clear();
+				args.push_back("{" + tempReg + "}");
+				instrs.push_back(AssemCom("push", args));
+
+				args.clear();
+				args.push_back(tempReg);
+				args.push_back(rhsLoc);
+				instrs.push_back(AssemCom("ldr", args));
+
+				if(rhsLoc[0] == '.') {
+						args.clear();
+						args.push_back(tempReg);
+						args.push_back("[" + tempReg + "]");
+						instrs.push_back(AssemCom("ldr", args));
+				}
+
+				rhsTempLoc = rhsLoc;
+				rhsLoc = tempReg;
 			}
 
 			if (op == "||" || op == "|") {
