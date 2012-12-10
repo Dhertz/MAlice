@@ -717,7 +717,10 @@ void ASTVisitor::visitFuncCall(string name,
 
 	vector<boost::shared_ptr< ExprAST> > exprs = params->getParamExprs();
   			
-	int maxpush = min(func->getFreeRegs().front()[1] - 48, 3);
+  	int maxpush = 3;
+	if (!func->getFreeRegs().empty()) {
+		maxpush = min(func->getFreeRegs().front()[1] - 48, 3);
+	}
 	
 	vector<boost::shared_ptr< ExprAST> >::iterator it;
 	int i = 0;

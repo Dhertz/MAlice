@@ -33,7 +33,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
         string funcName = Utils::createStringFromTree(Utils::childByNum(root, 0));
         pANTLR3_BASE_TREE cplTree = Utils::childByNum(root, 1);
 
-        int maxpush = 10; //not sure what to put here! - D
+        int maxpush = 3;
         if(!freeRegs.empty()) {
 			maxpush = min(freeRegs.front()[1] - 48, 3);
 		}
