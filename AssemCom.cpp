@@ -21,5 +21,5 @@ vector<string>& AssemCom::getArgs() {
 
 bool operator== (AssemCom& com1, AssemCom& com2) {
 	return (com1.getName() == com2.getName() && 
-			com1.getArgs()[0] == com2.getArgs()[0]);
+			com1.getArgs() == com2.getArgs());
 }

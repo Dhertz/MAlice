@@ -55,10 +55,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 				if (paramLoc[0] != 'r') {
 					string tempReg = Utils::borrowRegister(vector<string>());
 
-					vector<string> args;
-					args.push_back(tempReg);
-					args.push_back(paramLoc);
-					instrs.push_back(AssemCom("ldr", args));
+					addCommand(instrs, "ldr", tempReg, paramLoc);
 					
 					paramLoc = tempReg;
 				}
@@ -67,17 +64,13 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 				if (paramLoc != "r" + boost::lexical_cast<string>(i)) {
 					// Argument isn't already in the right place
 					// mov r{i}, paramLoc
-					vector<string> args;
-					args.push_back("r" + boost::lexical_cast<string>(i));
-					args.push_back(paramLoc);
-					AssemCom mov("mov", args);
-					instrs.push_back(mov);
+					addCommand(instrs, "mov", 
+								"r" + boost::lexical_cast<string>(i), paramLoc);
 				}
 
 		    	for (int i = 1; i < maxpush; ++i) {
-					vector<string> args;
-					args.push_back("{r" + boost::lexical_cast<string>(i) + "}");
-					instrs.push_back(AssemCom("push", args));
+		    		addCommand(instrs, "push", 
+		    					"{r" + boost::lexical_cast<string>(i) + "}");
 		    	}
 			} else {
 				// Push any other params
@@ -85,10 +78,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					// paramLoc is already a register, so I can just push it
 					// push paramloc
 
-					vector<string> args;
-					args.push_back("{" + paramLoc + "}");
-					AssemCom push("push", args);
-					instrs.push_back(push);
+					addCommand(instrs, "push", "{" + paramLoc + "}");
 				} else if (freeRegs.empty()) {
 					// Need to temporarily borrow a register (I've chosen r0)
 					// push {r0}
@@ -96,24 +86,12 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					// push {r0}
 					// pop {r0}
 
-					vector<string> args;
-					args.push_back("{r0}");
-					AssemCom push("push", args);
-					instrs.push_back(push);
+					// This doesn't look right to me - Owen
 
-					args.clear();
-					args.push_back("r0");
-					args.push_back(paramLoc);
-					AssemCom mov("mov", args);
-					instrs.push_back(mov);
-
-					// Re-use the push instruction from above
-					instrs.push_back(push);
-
-					args.clear();
-					args.push_back("{r0}");
-					AssemCom pop("pop", args);
-					instrs.push_back(pop);
+					addCommand(instrs, "push", "{r0}");
+					addCommand(instrs, "mov", "r0", paramLoc);
+					addCommand(instrs, "push", "{r0}");
+					addCommand(instrs, "pop", "{r0}");
 				} else {
 					// Use first free register to save need for extra push/pop
 					// Don't need to update freeRegs though, because I don't
@@ -123,30 +101,18 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 					string reg = freeRegs.front();
 
-					vector<string> args;
-					args.push_back(reg);
-					args.push_back(paramLoc);
-					AssemCom mov("mov", args);
-					instrs.push_back(mov);
-
-					args.clear();
-					args.push_back("{" + reg + "}");
-					AssemCom push("push", args);
-					instrs.push_back(push);
+					addCommand(instrs, "mov", reg, paramLoc);
+					addCommand(instrs, "push", "{" + reg + "}");
 				}
 			}
 		}
 
 		// bl funcName
-		vector<string> args;
-		args.push_back(funcName);
-		AssemCom bl("bl", args);
-		instrs.push_back(bl);
+		addCommand(instrs, "bl", funcName);
 
 		for (int j = maxpush - 1; j >= 1; --j) {
-			args.clear();
-			args.push_back("{r" + boost::lexical_cast<string>(j) + "}");
-			instrs.push_back(AssemCom("pop", args));
+			addCommand(instrs, "pop", 
+						"{r" + boost::lexical_cast<string>(j) + "}");
 		}
 
 		treble_ptr_t ret(new treble_t("r0", instrs, freeRegs)); 
@@ -224,14 +190,8 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 		if (indexLoc[0] != 'r') {
 			// result is stored on the stack
 			onStack = true;
-			vector<string> args;
-			args.push_back("{r0}");
-			instrs.push_back(AssemCom("push", args));
-
-			args.clear();
-			args.push_back("r0");
-			args.push_back(indexLoc);
-			instrs.push_back(AssemCom("ldr", args));
+			addCommand(instrs, "push", "{r0}");
+			addCommand(instrs, "ldr", "r0", indexLoc);
 
 			indexLoc = "r0";
 		}
@@ -243,21 +203,13 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 		string elemType = arr->getElemType()->getTypeName();
 
 		if (elemType == "Number") {
-			vector<string> args;
-			args.push_back(indexLoc);
-			args.push_back(indexLoc);
-			args.push_back("LSL #2");
-			instrs.push_back(AssemCom("mov", args));
+			addCommand(instrs, "mov", indexLoc, indexLoc, "LSL #2");
 		}
 
 		if (loc[0] == 'r') {
 			// array location in register
 			// add location reg to index reg
-			vector<string> args;
-			args.push_back(indexLoc);
-			args.push_back(indexLoc);
-			args.push_back(loc);
-			instrs.push_back(AssemCom("add", args));
+			addCommand(instrs, "add", indexLoc, indexLoc, loc);
 		} else {
 			// array location in label
 			// load label in temp reg then add to indexLoc
@@ -266,16 +218,8 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 			argRegs.push_back(indexLoc);
 			string reg = Utils::borrowRegister(argRegs);
 
-			vector<string> args;
-			args.push_back(reg);
-			args.push_back(loc);
-			instrs.push_back(AssemCom("ldr", args));
-
-			args.clear();
-			args.push_back(indexLoc);
-			args.push_back(indexLoc);
-			args.push_back(reg);
-			instrs.push_back(AssemCom("add", args));
+			addCommand(instrs, "ldr", reg, loc);
+			addCommand(instrs, "add", indexLoc, indexLoc, reg);
 		}
 
 		if (onStack) {
@@ -283,18 +227,11 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 			func->increaseStackPointer(4);
 			string sp = boost::lexical_cast<string>(func->getStackPointer());
 
-			// str reg, [fp, #-4]
-			vector<string> args;
-			args.push_back(indexLoc);
-			args.push_back("[fp, #-" + sp + "]");
-			AssemCom str("str", args);
-			instrs.push_back(str);
+			// str reg, [fp, #-sp]
+			addCommand(instrs, "str", indexLoc, "[fp, #-" + sp + "]");
 
 			// pop {reg}
-			args.clear();
-			args.push_back("{" + indexLoc + "}");
-			AssemCom pop("pop", args);
-			instrs.push_back(pop);
+			addCommand(instrs, "pop", "{" + indexLoc + "}");
 
 			indexLoc = "[fp, #-" + sp + "]";
 		}
@@ -303,11 +240,11 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 		return ret;
     } else if (tok == "'") {
         // Char of form 'x'
-		// Put it in a register if possible, otherwise somehow allocate memory
+		// Put it in a register if possible, otherwise save onto stack
 
 		string let = Utils::createStringFromTree(Utils::childByNum(root, 0));
 		char letChar = let[0];
-		int charByte = letChar; // TODO: check this is right
+		int charByte = letChar;
 
 		if (!freeRegs.empty()) {
 			// We have a free register, put the char in there
@@ -315,11 +252,8 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 			freeRegs.erase(freeRegs.begin());
 
 			// mov rx, charByte
-			vector<string> args;
-			args.push_back(reg);
-			args.push_back("#" + boost::lexical_cast<string>(charByte));
-			AssemCom mov("mov", args);
-			instrs.push_back(mov);
+			addCommand(instrs, "mov", reg, 
+						"#" + boost::lexical_cast<string>(charByte));
 
 			treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
 			return ret;
@@ -328,10 +262,8 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 			string stackLoc = "[fp, #-" + 
 				boost::lexical_cast<string>(func->getStackPointer()) + "]";
 
-			vector<string> args;
-			args.push_back(stackLoc);
-			args.push_back("#" + boost::lexical_cast<string>(charByte));
-			instrs.push_back(AssemCom("ldr", args));
+			addCommand(instrs, "ldr", stackLoc, 
+						"#" + boost::lexical_cast<string>(charByte));
 
 			treble_ptr_t ret(new treble_t(stackLoc, instrs, freeRegs));
 			return ret;
@@ -361,18 +293,10 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     			if (atoi(n.c_str()) > 255) {
     				// To large a value to use mov, use ldr instead
     				// ldr rx, =#n
-    				vector<string> args;
-	    			args.push_back(reg);
-	    			args.push_back("=" + n);
-	    			AssemCom mov("ldr", args);
-	    			instrs.push_back(mov);
+    				addCommand(instrs, "ldr", reg, "=" + n);
     			} else {
 	    			// mov rx, #n
-	    			vector<string> args;
-	    			args.push_back(reg);
-	    			args.push_back("#" + n);
-	    			AssemCom mov("mov", args);
-	    			instrs.push_back(mov);
+	    			addCommand(instrs, "mov", reg, "#" + n);
     			}
 
     			treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
@@ -382,24 +306,11 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     	    	string stackLoc = "[fp, #-" + 
 						boost::lexical_cast<string>(func->getStackPointer()) + 
 						"]";
-
-    	    	vector<string> args;
-    			args.push_back("{r0}");
-    			instrs.push_back(AssemCom("push", args));
-
-    			args.clear();
-    			args.push_back("r0");
-    			args.push_back("#" + n);
-    			instrs.push_back(AssemCom("mov", args));
-
-    			args.clear();
-    			args.push_back("r0");
-    			args.push_back(stackLoc);
-    			instrs.push_back(AssemCom("str", args));
-
-    			args.clear();
-    			args.push_back("{r0}");
-    			instrs.push_back(AssemCom("pop", args));
+				
+				addCommand(instrs, "push", "{r0}");
+				addCommand(instrs, "mov", "r0", "#" + n);
+				addCommand(instrs, "str", "r0", stackLoc);
+				addCommand(instrs, "pop", "{r0}");
 
     			treble_ptr_t ret(new treble_t(stackLoc, instrs, freeRegs));
     			return ret;
@@ -420,14 +331,8 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 			bool argOnStack = false;
 			if (argLoc[0] != 'r') {
 				argOnStack = true;
-    			vector<string> args;
-				args.push_back("{r4}");
-				instrs.push_back(AssemCom("push", args));
-
-				args.clear();
-				args.push_back("r4");
-				args.push_back(argLoc);
-				instrs.push_back(AssemCom("ldr", args));
+				addCommand(instrs, "push", "{r4}");
+				addCommand(instrs, "ldr", "r4", argLoc);
 
 				argTempLoc = argLoc;
 				argLoc = "r4";
@@ -451,9 +356,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					reg = Utils::borrowRegister(argRegs);
 
 					// push {reg}
-					args.push_back("{" + reg + "}");
-					AssemCom push("push", args);
-					instrs.push_back(push);
+					addCommand(instrs, "push", "{" + reg + "}");
 				}
 
 				// borrow a register for #0xFFFFFFFF
@@ -464,55 +367,28 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 				// push {tempReg}
 				// mov tempReg, #0xFFFFFFFF
-				args.clear();
-				args.push_back("{" + tempReg + "}");
-				AssemCom push("push", args);
-				instrs.push_back(push);
-
-				args.clear();
-				args.push_back(tempReg);
-				args.push_back("#0xFFFFFFFF");
-				AssemCom mov("mov", args);
-				instrs.push_back(mov);
+				addCommand(instrs, "push", "{" + tempReg + "}");
+				addCommand(instrs, "mov", tempReg, "#0xFFFFFFFF");
 
 				// eor reg, argLoc, tempReg
-				args.clear();
-				args.push_back(reg);
-				args.push_back(argLoc);
-				args.push_back(tempReg);
-				AssemCom eor("eor", args);
-				instrs.push_back(eor);
+				addCommand(instrs, "eor", argLoc, tempReg);
 
 				// pop {tempReg}
-				args.clear();
-				args.push_back("{" + tempReg + "}");
-				AssemCom popTemp("pop", args);
-				instrs.push_back(popTemp);
+				addCommand(instrs, "pop", "{" + tempReg + "}");
 
 			    if (!freeRegs.empty()) {
 			    	retLoc = reg;
 				} else {
 					// str reg, [fp, #-4]
-					args.clear();
-					args.push_back(reg);
-					args.push_back(stackLoc);
-					AssemCom str("str", args);
-					instrs.push_back(str);
+					addCommand(instrs, "str", reg, stackLoc);
 
 					// pop {reg}
-					args.clear();
-					args.push_back("{" + reg + "}");
-					AssemCom pop("pop", args);
-					instrs.push_back(pop);
-
+					addCommand(instrs, "pop", "{" + reg + "}");
 					retLoc = stackLoc;
 				}
 
 				if (argOnStack) {
-					vector<string> args;
-					args.push_back("{r4}");
-					instrs.push_back(AssemCom("pop", args));
-
+					addCommand(instrs, "pop", "{r4}");
 					argLoc = argTempLoc;
 				}
 
@@ -538,40 +414,23 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					reg = Utils::borrowRegister(argRegs);
 
 					// push {reg}
-					args.push_back("{" + reg + "}");
-					AssemCom push("push", args);
-					instrs.push_back(push);
+					addCommand(instrs, "push", "{" + reg + "}");
 				}
 
 				// mvn reg, argLoc
-				args.clear();
-				args.push_back(reg);
-				args.push_back(argLoc);
-				AssemCom mvn("mvn", args);
-				instrs.push_back(mvn);
+				addCommand(instrs, "mvn", reg, argLoc);
 
 				if (onStack) {
 					// str reg, [fp, #-4]
-					args.clear();
-					args.push_back(reg);
-					args.push_back(stackLoc);
-					AssemCom str("str", args);
-					instrs.push_back(str);
+					addCommand(instrs, "str", reg, stackLoc);
 
 					// pop {reg}
-					args.clear();
-					args.push_back("{" + reg + "}");
-					AssemCom pop("pop", args);
-					instrs.push_back(pop);
-
+					addCommand(instrs, "pop", "{" + reg + "}");
 					reg = stackLoc;
 				}
 
 				if (argOnStack) {
-					vector<string> args;
-					args.push_back("{r4}");
-					instrs.push_back(AssemCom("pop", args));
-
+					addCommand(instrs, "pop", "{r4}");
 					argLoc = argTempLoc;
 				}
 
@@ -608,53 +467,27 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					reg = Utils::borrowRegister(argRegs);
 
 					// push {reg}
-					args.push_back("{" + reg + "}");
-					AssemCom push("push", args);
-					instrs.push_back(push);
+					addCommand(instrs, "push", "{" + reg + "}");
 				}
 
-				args.clear();
-				args.push_back(reg);
-				args.push_back(argLoc);
-				AssemCom mov("mov", args);
-				instrs.push_back(mov);
-
-				args.clear();
-				args.push_back(reg);
-				args.push_back("#0");
-				AssemCom cmp("cmp", args);
-				instrs.push_back(cmp);
+				addCommand(instrs, "mov", reg, argLoc);
+				addCommand(instrs, "cmp", reg, "#0");
 
 				string negInstr = (op == "+") ? "neglt" : "neggt";
 
-				args.clear();
-				args.push_back(reg);
-				args.push_back(reg);
-				AssemCom neg(negInstr, args);
-				instrs.push_back(neg);
+				addCommand(instrs, negInstr, reg, reg);
 
 				if (onStack) {
 					// str reg, [fp, #-4]
-					args.clear();
-					args.push_back(reg);
-					args.push_back(stackLoc);
-					AssemCom str("str", args);
-					instrs.push_back(str);
+					addCommand(instrs, "str", reg, stackLoc);
 
 					// pop {reg}
-					args.clear();
-					args.push_back("{" + reg + "}");
-					AssemCom pop("pop", args);
-					instrs.push_back(pop);
-
+					addCommand(instrs, "pop", "{" + reg + "}");
 					reg = stackLoc;
 				}
 
 				if (argOnStack) {
-					vector<string> args;
-					args.push_back("{r4}");
-					instrs.push_back(AssemCom("pop", args));
-
+					addCommand(instrs, "pop", "{r4}");
 					argLoc = argTempLoc;
 				}
 
@@ -683,23 +516,14 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					tempReg = freeRegs.front();
 					freeRegs.erase(freeRegs.begin());
 				} else {
-					//not sure what to put here! - D
 					tempReg = "r7";
 				}
 				
-				args.push_back("{" + tempReg + "}");
-				instrs.push_back(AssemCom("push", args));
-
-				args.clear();
-				args.push_back(tempReg);
-				args.push_back(lhsLoc);
-				instrs.push_back(AssemCom("ldr", args));
+				addCommand(instrs, "push", "{" + tempReg + "}");
+				addCommand(instrs, "ldr", tempReg, lhsLoc);
 
 				if(lhsLoc[0] == '.') {
-						args.clear();
-						args.push_back(tempReg);
-						args.push_back("[" + tempReg + "]");
-						instrs.push_back(AssemCom("ldr", args));
+					addCommand(instrs, "ldr", tempReg, "[" + tempReg + "]");
 				}
 
 				lhsTempLoc = lhsLoc;
@@ -722,23 +546,14 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					tempReg = freeRegs.front();
 					freeRegs.erase(freeRegs.begin());
 				} else {
-					//not sure what to put here! -D
 					tempReg = "r8";
 				}
-				args.clear();
-				args.push_back("{" + tempReg + "}");
-				instrs.push_back(AssemCom("push", args));
 
-				args.clear();
-				args.push_back(tempReg);
-				args.push_back(rhsLoc);
-				instrs.push_back(AssemCom("ldr", args));
+				addCommand(instrs, "push", "{" + tempReg + "}");
+				addCommand(instrs, "ldr", tempReg, rhsLoc);
 
 				if(rhsLoc[0] == '.') {
-						args.clear();
-						args.push_back(tempReg);
-						args.push_back("[" + tempReg + "]");
-						instrs.push_back(AssemCom("ldr", args));
+					addCommand(instrs, "ldr", tempReg, "[" + tempReg + "]");
 				}
 
 				rhsTempLoc = rhsLoc;
@@ -766,47 +581,28 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					reg = Utils::borrowRegister(argRegs);
 
 					// push {reg}
-					args.push_back("{" + reg + "}");
-					AssemCom push("push", args);
-					instrs.push_back(push);
+					addCommand(instrs, "push", "{" + reg + "}");
 				}
 
 				// orr reg, lhsLoc, rhsLoc
-				args.clear();
-				args.push_back(reg);
-				args.push_back(lhsLoc);
-				args.push_back(rhsLoc);
-				AssemCom orr("orr", args);
-				instrs.push_back(orr);
+				addCommand(instrs, "orr", reg, lhsLoc, rhsLoc);
 
 				if (onStack) {
 					// str reg, [fp, #-4]
-					args.clear();
-					args.push_back(reg);
-					args.push_back(stackLoc);
-					AssemCom str("str", args);
-					instrs.push_back(str);
+					addCommand(instrs, "str", reg, stackLoc);
 
 					// pop {reg}
-					args.clear();
-					args.push_back("{" + reg + "}");
-					AssemCom pop("pop", args);
-					instrs.push_back(pop);
-
+					addCommand(instrs, "pop", "{" + reg + "}");
 					reg = stackLoc;
 				}
 
 				if (rhsOnStack) {
-					args.clear();
-					args.push_back("{" + rhsLoc + "}");
-					instrs.push_back(AssemCom("pop", args));
+					addCommand(instrs, "pop", "{" + rhsLoc + "}");
 					rhsLoc = rhsTempLoc;
 				}
 
 				if (lhsOnStack) {
-					args.clear();
-					args.push_back("{" + lhsLoc + "}");
-					instrs.push_back(AssemCom("pop", args));
+					addCommand(instrs, "pop", "{" + lhsLoc + "}");
 					lhsLoc = lhsTempLoc;
 				}
 
@@ -833,47 +629,28 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					reg = Utils::borrowRegister(argRegs);
 
 					// push {reg}
-					args.push_back("{" + reg + "}");
-					AssemCom push("push", args);
-					instrs.push_back(push);
+					addCommand(instrs, "push", "{" + reg + "}");
 				}
 
 				// and reg, lhsLoc, rhsLoc
-				args.clear();
-				args.push_back(reg);
-				args.push_back(lhsLoc);
-				args.push_back(rhsLoc);
-				AssemCom andInstr("and", args);
-				instrs.push_back(andInstr);
+				addCommand(instrs, "and", reg, lhsLoc, rhsLoc);
 
 				if (onStack) {
 					// str reg, [fp, #-4]
-					args.clear();
-					args.push_back(reg);
-					args.push_back(stackLoc);
-					AssemCom str("str", args);
-					instrs.push_back(str);
+					addCommand(instrs, "str", reg, stackLoc);
 
 					// pop {reg}
-					args.clear();
-					args.push_back("{" + reg + "}");
-					AssemCom pop("pop", args);
-					instrs.push_back(pop);
-
+					addCommand(instrs, "pop", "{" + reg + "}");
 					reg = stackLoc;
 				}
 
 				if (rhsOnStack) {
-					args.clear();
-					args.push_back("{" + rhsLoc + "}");
-					instrs.push_back(AssemCom("pop", args));
+					addCommand(instrs, "pop", "{" + rhsLoc + "}");
 					rhsLoc = rhsTempLoc;
 				}
 
 				if (lhsOnStack) {
-					args.clear();
-					args.push_back("{" + lhsLoc + "}");
-					instrs.push_back(AssemCom("pop", args));
+					addCommand(instrs, "pop", "{" + lhsLoc + "}");
 					lhsLoc = lhsTempLoc;
 				}
 
@@ -900,47 +677,28 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					reg = Utils::borrowRegister(argRegs);
 
 					// push {reg}
-					args.push_back("{" + reg + "}");
-					AssemCom push("push", args);
-					instrs.push_back(push);
+					addCommand(instrs, "push", "{" + reg + "}");
 				}
 
 				// eor reg, lhsLoc, rhsLoc
-				args.clear();
-				args.push_back(reg);
-				args.push_back(lhsLoc);
-				args.push_back(rhsLoc);
-				AssemCom eor("eor", args);
-				instrs.push_back(eor);
+				addCommand(instrs, "eor", reg, lhsLoc, rhsLoc);
 
 				if (onStack) {
 					// str reg, [fp, #-4]
-					args.clear();
-					args.push_back(reg);
-					args.push_back(stackLoc);
-					AssemCom str("str", args);
-					instrs.push_back(str);
+					addCommand(instrs, "str", reg, stackLoc);
 
 					// pop {reg}
-					args.clear();
-					args.push_back("{" + reg + "}");
-					AssemCom pop("pop", args);
-					instrs.push_back(pop);
-
+					addCommand(instrs, "pop", "{" + reg + "}");
 					reg = stackLoc;
 				}
 
 				if (rhsOnStack) {
-					args.clear();
-					args.push_back("{" + rhsLoc + "}");
-					instrs.push_back(AssemCom("pop", args));
+					addCommand(instrs, "pop", "{" + rhsLoc + "}");
 					rhsLoc = rhsTempLoc;
 				}
 
 				if (lhsOnStack) {
-					args.clear();
-					args.push_back("{" + lhsLoc + "}");
-					instrs.push_back(AssemCom("pop", args));
+					addCommand(instrs, "pop", "{" + lhsLoc + "}");
 					lhsLoc = lhsTempLoc;
 				}
 
@@ -967,47 +725,28 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					reg = Utils::borrowRegister(argRegs);
 
 					// push {reg}
-					args.push_back("{" + reg + "}");
-					AssemCom push("push", args);
-					instrs.push_back(push);
+					addCommand(instrs, "push", "{" + reg + "}");
 				}
 
 				// add reg, lhsLoc, rhsLoc
-				args.clear();
-				args.push_back(reg);
-				args.push_back(lhsLoc);
-				args.push_back(rhsLoc);
-				AssemCom add("add", args);
-				instrs.push_back(add);
+				addCommand(instrs, "add", reg, lhsLoc, rhsLoc);
 
 				if (onStack) {
 					// str reg, [fp, #-4]
-					args.clear();
-					args.push_back(reg);
-					args.push_back(stackLoc);
-					AssemCom str("str", args);
-					instrs.push_back(str);
+					addCommand(instrs, "str", reg, stackLoc);
 
 					// pop {reg}
-					args.clear();
-					args.push_back("{" + reg + "}");
-					AssemCom pop("pop", args);
-					instrs.push_back(pop);
-
+					addCommand(instrs, "pop", "{" + reg + "}");
 					reg = stackLoc;
 				}
 
 				if (rhsOnStack) {
-					args.clear();
-					args.push_back("{" + rhsLoc + "}");
-					instrs.push_back(AssemCom("pop", args));
+					addCommand(instrs, "pop", "{" + rhsLoc + "}");
 					rhsLoc = rhsTempLoc;
 				}
 
 				if (lhsOnStack) {
-					args.clear();
-					args.push_back("{" + lhsLoc + "}");
-					instrs.push_back(AssemCom("pop", args));
+					addCommand(instrs, "pop", "{" + lhsLoc + "}");
 					lhsLoc = lhsTempLoc;
 				}
 
@@ -1034,47 +773,29 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					reg = Utils::borrowRegister(argRegs);
 
 					// push {reg}
-					args.push_back("{" + reg + "}");
-					AssemCom push("push", args);
-					instrs.push_back(push);
+					addCommand(instrs, "push", "{" + reg + "}");
+
 				}
 
 				// sub reg, lhsLoc, rhsLoc
-				args.clear();
-				args.push_back(reg);
-				args.push_back(lhsLoc);
-				args.push_back(rhsLoc);
-				AssemCom sub("sub", args);
-				instrs.push_back(sub);
+				addCommand(instrs, "sub", reg, lhsLoc, rhsLoc);
 
 				if (onStack) {
 					// str reg, [fp, #-4]
-					args.clear();
-					args.push_back(reg);
-					args.push_back(stackLoc);
-					AssemCom str("str", args);
-					instrs.push_back(str);
+					addCommand(instrs, "str", reg, stackLoc);
 
 					// pop {reg}
-					args.clear();
-					args.push_back("{" + reg + "}");
-					AssemCom pop("pop", args);
-					instrs.push_back(pop);
-
+					addCommand(instrs, "pop", "{" + reg + "}");
 					reg = stackLoc;
 				}
 
 				if (rhsOnStack) {
-					args.clear();
-					args.push_back("{" + rhsLoc + "}");
-					instrs.push_back(AssemCom("pop", args));
+					addCommand(instrs, "pop", "{" + rhsLoc + "}");
 					rhsLoc = rhsTempLoc;
 				}
 
 				if (lhsOnStack) {
-					args.clear();
-					args.push_back("{" + lhsLoc + "}");
-					instrs.push_back(AssemCom("pop", args));
+					addCommand(instrs, "pop", "{" + lhsLoc + "}");
 					lhsLoc = lhsTempLoc;
 				}
 
@@ -1101,47 +822,29 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					reg = Utils::borrowRegister(argRegs);
 
 					// push {reg}
-					args.push_back("{" + reg + "}");
-					AssemCom push("push", args);
-					instrs.push_back(push);
+					addCommand(instrs, "push", "{" + reg + "}");
+
 				}
 
 				// mul reg, lhsLoc, rhsLoc
-				args.clear();
-				args.push_back(reg);
-				args.push_back(lhsLoc);
-				args.push_back(rhsLoc);
-				AssemCom mul("mul", args);
-				instrs.push_back(mul);
+				addCommand(instrs, "mul", reg, lhsLoc, rhsLoc);
 
 				if (onStack) {
 					// str reg, [fp, #-4]
-					args.clear();
-					args.push_back(reg);
-					args.push_back(stackLoc);
-					AssemCom str("str", args);
-					instrs.push_back(str);
+					addCommand(instrs, "str", reg, stackLoc);
 
 					// pop {reg}
-					args.clear();
-					args.push_back("{" + reg + "}");
-					AssemCom pop("pop", args);
-					instrs.push_back(pop);
-
+					addCommand(instrs, "pop", "{" + reg + "}");
 					reg = stackLoc;
 				}
 
 				if (rhsOnStack) {
-					args.clear();
-					args.push_back("{" + rhsLoc + "}");
-					instrs.push_back(AssemCom("pop", args));
+					addCommand(instrs, "pop", "{" + rhsLoc + "}");
 					rhsLoc = rhsTempLoc;
 				}
 
 				if (lhsOnStack) {
-					args.clear();
-					args.push_back("{" + lhsLoc + "}");
-					instrs.push_back(AssemCom("pop", args));
+					addCommand(instrs, "pop", "{" + lhsLoc + "}");
 					lhsLoc = lhsTempLoc;
 				}
 
@@ -1171,9 +874,8 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 						reg = Utils::borrowRegister(argRegs);
 
 						// push {reg}
-						args.push_back("{" + reg + "}");
-						AssemCom push("push", args);
-						instrs.push_back(push);
+						addCommand(instrs, "push", "{" + reg + "}");
+;
 					}
 
 				} else {
@@ -1195,86 +897,41 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					instrs.push_back(push);
 				}
 
-				args.clear();
-				args.push_back(res);
-				args.push_back(res);
-				args.push_back(res);
-				AssemCom eors("eor", args);
-				instrs.push_back(eors);
-
-				args.clear();
-				args.push_back(reg);
-				args.push_back(lhsLoc);
-    			AssemCom mov("mov", args);
-    			instrs.push_back(mov);
+				addCommand(instrs, "eor", res, res, res);
+				addCommand(instrs, "mov", reg, lhsLoc);
 
 				Label l;
 				instrs.push_back(AssemCom(l.getLabel() + 
 										":", std::vector<string>()));
 
-				args.clear();
-				args.push_back(reg);
-				args.push_back(reg);
-    			args.push_back(rhsLoc);
-    			AssemCom sub("sub", args);
-    			instrs.push_back(sub);
-    			
-    			args.clear();
-    			args.push_back(res);
-				args.push_back(res);
-    			args.push_back("#1");
-    			AssemCom add("add", args);
-    			instrs.push_back(add);
-
-    			args.clear();
-				args.push_back(reg);
-				args.push_back(rhsLoc);
-				AssemCom cmp("cmp", args);
-				instrs.push_back(cmp);
-
-				args.clear();
-				args.push_back(l.getLabel());
-				AssemCom blge("bge", args);
-				instrs.push_back(blge);
+				addCommand(instrs, "sub", reg, reg, rhsLoc);
+				addCommand(instrs, "add", res, res, "#1");
+				addCommand(instrs, "cmp", reg, rhsLoc);
+				addCommand(instrs, "bge", l.getLabel());
 
 				freeRegs.push_back(reg);
 
 				if (resOnStack && stackLocRes != "") {
 					// str reg, [fp, #-4]
-					args.clear();
-					args.push_back(res);
-					args.push_back(stackLocRes);
-					AssemCom str("str", args);
-					instrs.push_back(str);
+					addCommand(instrs, "str", res, stackLocRes);
 
 					// pop {reg}
-					args.clear();
-					args.push_back("{" + res + "}");
-					AssemCom pop("pop", args);
-					instrs.push_back(pop);
-
+					addCommand(instrs, "pop", "{" + res + "}");
 					res = stackLocRes;
 				}
 
 				if (regOnStack && stackLocReg != "") {
 					// pop {reg}
-					args.clear();
-					args.push_back("{" + reg + "}");
-					AssemCom pop("pop", args);
-					instrs.push_back(pop);
+					addCommand(instrs, "pop", "{" + reg + "}");
 				}
 
 				if (rhsOnStack) {
-					args.clear();
-					args.push_back("{" + rhsLoc + "}");
-					instrs.push_back(AssemCom("pop", args));
+					addCommand(instrs, "pop", "{" + rhsLoc + "}");
 					rhsLoc = rhsTempLoc;
 				}
 
 				if (lhsOnStack) {
-					args.clear();
-					args.push_back("{" + lhsLoc + "}");
-					instrs.push_back(AssemCom("pop", args));
+					addCommand(instrs, "pop", "{" + lhsLoc + "}");
 					lhsLoc = lhsTempLoc;
 				}
 
@@ -1301,67 +958,36 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					reg = Utils::borrowRegister(argRegs);
 
 					// push {reg}
-					args.push_back("{" + reg + "}");
-					AssemCom push("push", args);
-					instrs.push_back(push);
+					addCommand(instrs, "push", "{" + reg + "}");
+
 				}
 
-				args.clear();
-				args.push_back(reg);
-				args.push_back(lhsLoc);
-    			AssemCom mov("mov", args);
-    			instrs.push_back(mov);
+				addCommand(instrs, "mov", reg, lhsLoc);
 
 				Label l;
 				instrs.push_back(AssemCom(l.getLabel() + 
 									":", std::vector<string>()));
 
-				args.clear();
-				args.push_back(reg);
-				args.push_back(reg);
-    			args.push_back(rhsLoc);
-    			AssemCom sub("sub", args);
-    			instrs.push_back(sub);
-
-				args.clear();
-				args.push_back(reg);
-				args.push_back(rhsLoc);
-				AssemCom cmp("cmp", args);
-				instrs.push_back(cmp);
-
-				args.clear();
-				args.push_back(l.getLabel());
-				AssemCom blge("bge", args);
-				instrs.push_back(blge);
+				addCommand(instrs, "sub", reg, reg, rhsLoc);
+				addCommand(instrs, "cmp", reg, rhsLoc);
+				addCommand(instrs, "bge", l.getLabel());
 
 				if (onStack && stackLoc != "") {
 					// str reg, [fp, #-4]
-					args.clear();
-					args.push_back(reg);
-					args.push_back(stackLoc);
-					AssemCom str("str", args);
-					instrs.push_back(str);
+					addCommand(instrs, "str", reg, stackLoc);
 
 					// pop {reg}
-					args.clear();
-					args.push_back("{" + reg + "}");
-					AssemCom pop("pop", args);
-					instrs.push_back(pop);
-
+					addCommand(instrs, "pop", "{" + reg + "}");
 					reg = stackLoc;
 				}
 
 				if (rhsOnStack) {
-					args.clear();
-					args.push_back("{" + rhsLoc + "}");
-					instrs.push_back(AssemCom("pop", args));
+					addCommand(instrs, "pop", "{" + rhsLoc + "}");
 					rhsLoc = rhsTempLoc;
 				}
 
 				if (lhsOnStack) {
-					args.clear();
-					args.push_back("{" + lhsLoc + "}");
-					instrs.push_back(AssemCom("pop", args));
+					addCommand(instrs, "pop", "{" + lhsLoc + "}");
 					lhsLoc = lhsTempLoc;
 				}
 
@@ -1388,20 +1014,14 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					reg = Utils::borrowRegister(argRegs);
 
 					// push {reg}
-					args.push_back("{" + reg + "}");
-					AssemCom push("push", args);
-					instrs.push_back(push);
+					addCommand(instrs, "push", "{" + reg + "}");
+
 				}
 
 				// eor reg, reg, reg
 				// cmp lhsLoc, rhsLoc
 				// moveq reg, #0xFFFFFFFF
-				args.clear();
-				args.push_back(reg);
-				args.push_back(reg);
-				args.push_back(reg);
-				AssemCom eor("eor", args);
-				instrs.push_back(eor);
+				addCommand(instrs, "eor", reg, reg, reg);
 
 				string tmpl = "";
 				if (lhsLoc[0] == '.') {
@@ -1423,17 +1043,8 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					rhsLoc = tmpr;
 				}
 
-				args.clear();
-				args.push_back(lhsLoc);
-				args.push_back(rhsLoc);
-				AssemCom cmp("cmp", args);
-				instrs.push_back(cmp);
-
-				args.clear();
-				args.push_back(reg);
-				args.push_back("#0xFFFFFFFF");
-				AssemCom moveq("moveq", args);
-				instrs.push_back(moveq);
+				addCommand(instrs, "cmp", lhsLoc, rhsLoc);
+				addCommand(instrs, "moveq", reg, "#0xFFFFFFFF");
 
 				if (tmpl != "") {
 					freeRegs.push_back(tmpl);
@@ -1445,32 +1056,20 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 				if (onStack) {
 					// str reg, [fp, #-4]
-					args.clear();
-					args.push_back(reg);
-					args.push_back(stackLoc);
-					AssemCom str("str", args);
-					instrs.push_back(str);
+					addCommand(instrs, "str", reg, stackLoc);
 
 					// pop {reg}
-					args.clear();
-					args.push_back("{" + reg + "}");
-					AssemCom pop("pop", args);
-					instrs.push_back(pop);
-
+					addCommand(instrs, "pop", "{" + reg + "}");
 					reg = stackLoc;
 				}
 
 				if (rhsOnStack) {
-					args.clear();
-					args.push_back("{" + rhsLoc + "}");
-					instrs.push_back(AssemCom("pop", args));
+					addCommand(instrs, "pop", "{" + rhsLoc + "}");
 					rhsLoc = rhsTempLoc;
 				}
 
 				if (lhsOnStack) {
-					args.clear();
-					args.push_back("{" + lhsLoc + "}");
-					instrs.push_back(AssemCom("pop", args));
+					addCommand(instrs, "pop", "{" + lhsLoc + "}");
 					lhsLoc = lhsTempLoc;
 				}
 
@@ -1497,20 +1096,14 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					reg = Utils::borrowRegister(argRegs);
 
 					// push {reg}
-					args.push_back("{" + reg + "}");
-					AssemCom push("push", args);
-					instrs.push_back(push);
+					addCommand(instrs, "push", "{" + reg + "}");
+
 				}
 
 				// mov reg, #0xFFFFFFFF
 				// cmp lhsLoc, rhsLoc
 				// eoreq reg, reg, reg
-
-				args.clear();
-				args.push_back(reg);
-				args.push_back("#0xFFFFFFFF");
-				AssemCom mov("mov", args);
-				instrs.push_back(mov);
+				addCommand(instrs, "mov", reg, "#0xFFFFFFFF");
 
 				string tmpl = "";
 				if (lhsLoc[0] == '.') {
@@ -1532,18 +1125,8 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					rhsLoc = tmpr;
 				}
 
-				args.clear();
-				args.push_back(lhsLoc);
-				args.push_back(rhsLoc);
-				AssemCom cmp("cmp", args);
-				instrs.push_back(cmp);
-
-				args.clear();
-				args.push_back(reg);
-				args.push_back(reg);
-				args.push_back(reg);
-				AssemCom eoreq("eoreq", args);
-				instrs.push_back(eoreq);
+				addCommand(instrs, "cmp", lhsLoc, rhsLoc);
+				addCommand(instrs, "eoreq", reg, reg, reg);
 
 				if (tmpl != "") {
 					freeRegs.push_back(tmpl);
@@ -1555,32 +1138,20 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 				if (onStack) {
 					// str reg, [fp, #-4]
-					args.clear();
-					args.push_back(reg);
-					args.push_back(stackLoc);
-					AssemCom str("str", args);
-					instrs.push_back(str);
+					addCommand(instrs, "str", reg, stackLoc);
 
 					// pop {reg}
-					args.clear();
-					args.push_back("{" + reg + "}");
-					AssemCom pop("pop", args);
-					instrs.push_back(pop);
-
+					addCommand(instrs, "pop", "{" + reg + "}");
 					reg = stackLoc;
 				}
 
 				if (rhsOnStack) {
-					args.clear();
-					args.push_back("{" + rhsLoc + "}");
-					instrs.push_back(AssemCom("pop", args));
+					addCommand(instrs, "pop", "{" + rhsLoc + "}");
 					rhsLoc = rhsTempLoc;
 				}
 
 				if (lhsOnStack) {
-					args.clear();
-					args.push_back("{" + lhsLoc + "}");
-					instrs.push_back(AssemCom("pop", args));
+					addCommand(instrs, "pop", "{" + lhsLoc + "}");
 					lhsLoc = lhsTempLoc;
 				}
 
@@ -1607,20 +1178,14 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					reg = Utils::borrowRegister(argRegs);
 
 					// push {reg}
-					args.push_back("{" + reg + "}");
-					AssemCom push("push", args);
-					instrs.push_back(push);
+					addCommand(instrs, "push", "{" + reg + "}");
+
 				}
 
 				// eor reg, reg, reg
 				// cmp lhsLoc, rhsLoc
 				// movgt reg, #0xFFFFFFFF
-				args.clear();
-				args.push_back(reg);
-				args.push_back(reg);
-				args.push_back(reg);
-				AssemCom eor("eor", args);
-				instrs.push_back(eor);
+				addCommand(instrs, "eor", reg, reg, reg);
 
 				string tmpl = "";
 				if (lhsLoc[0] == '.') {
@@ -1642,17 +1207,8 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					rhsLoc = tmpr;
 				}
 
-				args.clear();
-				args.push_back(lhsLoc);
-				args.push_back(rhsLoc);
-				AssemCom cmp("cmp", args);
-				instrs.push_back(cmp);
-
-				args.clear();
-				args.push_back(reg);
-				args.push_back("#0xFFFFFFFF");
-				AssemCom movgt("movgt", args);
-				instrs.push_back(movgt);
+				addCommand(instrs, "cmp", lhsLoc, rhsLoc);
+				addCommand(instrs, "movgt", reg, "#0xFFFFFFFF");
 
 				if (tmpl != "") {
 					freeRegs.push_back(tmpl);
@@ -1664,32 +1220,20 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 				if (onStack) {
 					// str reg, [fp, #-4]
-					args.clear();
-					args.push_back(reg);
-					args.push_back(stackLoc);
-					AssemCom str("str", args);
-					instrs.push_back(str);
+					addCommand(instrs, "str", reg, stackLoc);
 
 					// pop {reg}
-					args.clear();
-					args.push_back("{" + reg + "}");
-					AssemCom pop("pop", args);
-					instrs.push_back(pop);
-
+					addCommand(instrs, "pop", "{" + reg + "}");
 					reg = stackLoc;
 				}
 
 				if (rhsOnStack) {
-					args.clear();
-					args.push_back("{" + rhsLoc + "}");
-					instrs.push_back(AssemCom("pop", args));
+					addCommand(instrs, "pop", "{" + rhsLoc + "}");
 					rhsLoc = rhsTempLoc;
 				}
 
 				if (lhsOnStack) {
-					args.clear();
-					args.push_back("{" + lhsLoc + "}");
-					instrs.push_back(AssemCom("pop", args));
+					addCommand(instrs, "pop", "{" + lhsLoc + "}");
 					lhsLoc = lhsTempLoc;
 				}
 
@@ -1716,20 +1260,13 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					reg = Utils::borrowRegister(argRegs);
 
 					// push {reg}
-					args.push_back("{" + reg + "}");
-					AssemCom push("push", args);
-					instrs.push_back(push);
+					addCommand(instrs, "push", "{" + reg + "}");
 				}
 
 				// eor reg, reg, reg
 				// cmp lhsLoc, rhsLoc
 				// movlt reg, #0xFFFFFFFF
-				args.clear();
-				args.push_back(reg);
-				args.push_back(reg);
-				args.push_back(reg);
-				AssemCom eor("eor", args);
-				instrs.push_back(eor);
+				addCommand(instrs, "eor", reg, reg, reg);
 
 				string tmpl = "";
 				if (lhsLoc[0] == '.') {
@@ -1751,17 +1288,8 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					rhsLoc = tmpr;
 				}
 
-				args.clear();
-				args.push_back(lhsLoc);
-				args.push_back(rhsLoc);
-				AssemCom cmp("cmp", args);
-				instrs.push_back(cmp);
-
-				args.clear();
-				args.push_back(reg);
-				args.push_back("#0xFFFFFFFF");
-				AssemCom movlt("movlt", args);
-				instrs.push_back(movlt);
+				addCommand(instrs, "cmp", lhsLoc, rhsLoc);
+				addCommand(instrs, "movlt", reg, "#0xFFFFFFFF");
 
 				if (tmpl != "") {
 					freeRegs.push_back(tmpl);
@@ -1773,32 +1301,20 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 				if (onStack) {
 					// str reg, [fp, #-4]
-					args.clear();
-					args.push_back(reg);
-					args.push_back(stackLoc);
-					AssemCom str("str", args);
-					instrs.push_back(str);
+					addCommand(instrs, "str", reg, stackLoc);
 
 					// pop {reg}
-					args.clear();
-					args.push_back("{" + reg + "}");
-					AssemCom pop("pop", args);
-					instrs.push_back(pop);
-
+					addCommand(instrs, "pop", "{" + reg + "}");
 					reg = stackLoc;
 				}
 
 				if (rhsOnStack) {
-					args.clear();
-					args.push_back("{" + rhsLoc + "}");
-					instrs.push_back(AssemCom("pop", args));
+					addCommand(instrs, "pop", "{" + rhsLoc + "}");
 					rhsLoc = rhsTempLoc;
 				}
 
 				if (lhsOnStack) {
-					args.clear();
-					args.push_back("{" + lhsLoc + "}");
-					instrs.push_back(AssemCom("pop", args));
+					addCommand(instrs, "pop", "{" + lhsLoc + "}");
 					lhsLoc = lhsTempLoc;
 				}
 
@@ -1825,20 +1341,13 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					reg = Utils::borrowRegister(argRegs);
 
 					// push {reg}
-					args.push_back("{" + reg + "}");
-					AssemCom push("push", args);
-					instrs.push_back(push);
+					addCommand(instrs, "push", "{" + reg + "}");
 				}
 
 				// eor reg, reg, reg
 				// cmp lhsLoc, rhsLoc
 				// movge reg, #0xFFFFFFFF
-				args.clear();
-				args.push_back(reg);
-				args.push_back(reg);
-				args.push_back(reg);
-				AssemCom eor("eor", args);
-				instrs.push_back(eor);
+				addCommand(instrs, "eor", reg, reg, reg);
 
 				string tmpl = "";
 				if (lhsLoc[0] == '.') {
@@ -1860,17 +1369,8 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					rhsLoc = tmpr;
 				}
 
-				args.clear();
-				args.push_back(lhsLoc);
-				args.push_back(rhsLoc);
-				AssemCom cmp("cmp", args);
-				instrs.push_back(cmp);
-
-				args.clear();
-				args.push_back(reg);
-				args.push_back("#0xFFFFFFFF");
-				AssemCom movge("movge", args);
-				instrs.push_back(movge);
+				addCommand(instrs, "cmp", lhsLoc, rhsLoc);
+				addCommand(instrs, "movge", reg, "#0xFFFFFFFF");
 
 				if (tmpl != "") {
 					freeRegs.push_back(tmpl);
@@ -1882,32 +1382,20 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 				if (onStack) {
 					// str reg, [fp, #-4]
-					args.clear();
-					args.push_back(reg);
-					args.push_back(stackLoc);
-					AssemCom str("str", args);
-					instrs.push_back(str);
+					addCommand(instrs, "str", reg, stackLoc);
 
 					// pop {reg}
-					args.clear();
-					args.push_back("{" + reg + "}");
-					AssemCom pop("pop", args);
-					instrs.push_back(pop);
-
+					addCommand(instrs, "pop", "{" + reg + "}");
 					reg = stackLoc;
 				}
 
 				if (rhsOnStack) {
-					args.clear();
-					args.push_back("{" + rhsLoc + "}");
-					instrs.push_back(AssemCom("pop", args));
+					addCommand(instrs, "pop", "{" + rhsLoc + "}");
 					rhsLoc = rhsTempLoc;
 				}
 
 				if (lhsOnStack) {
-					args.clear();
-					args.push_back("{" + lhsLoc + "}");
-					instrs.push_back(AssemCom("pop", args));
+					addCommand(instrs, "pop", "{" + lhsLoc + "}");
 					lhsLoc = lhsTempLoc;
 				}
 
@@ -1934,20 +1422,13 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					reg = Utils::borrowRegister(argRegs);
 
 					// push {reg}
-					args.push_back("{" + reg + "}");
-					AssemCom push("push", args);
-					instrs.push_back(push);
+					addCommand(instrs, "push", "{" + reg + "}");
 				}
 
 				// eor reg, reg, reg
 				// cmp lhsLoc, rhsLoc
 				// movle reg, #0xFFFFFFFF
-				args.clear();
-				args.push_back(reg);
-				args.push_back(reg);
-				args.push_back(reg);
-				AssemCom eor("eor", args);
-				instrs.push_back(eor);
+				addCommand(instrs, "eor", reg, reg, reg);
 
 				string tmpl = "";
 				if (lhsLoc[0] == '.') {
@@ -1969,17 +1450,8 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					rhsLoc = tmpr;
 				}
 
-				args.clear();
-				args.push_back(lhsLoc);
-				args.push_back(rhsLoc);
-				AssemCom cmp("cmp", args);
-				instrs.push_back(cmp);
-
-				args.clear();
-				args.push_back(reg);
-				args.push_back("#0xFFFFFFFF");
-				AssemCom movle("movle", args);
-				instrs.push_back(movle);
+				addCommand(instrs, "cmp", lhsLoc, rhsLoc);
+				addCommand(instrs, "movle", reg, "#0xFFFFFFFF");
 
 				if (tmpl != "") {
 					freeRegs.push_back(tmpl);
@@ -1991,32 +1463,20 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 				if (onStack) {
 					// str reg, [fp, #-4]
-					args.clear();
-					args.push_back(reg);
-					args.push_back(stackLoc);
-					AssemCom str("str", args);
-					instrs.push_back(str);
+					addCommand(instrs, "str", reg, stackLoc);
 
 					// pop {reg}
-					args.clear();
-					args.push_back("{" + reg + "}");
-					AssemCom pop("pop", args);
-					instrs.push_back(pop);
-
+					addCommand(instrs, "pop", "{" + reg + "}");
 					reg = stackLoc;
 				}
 
 				if (rhsOnStack) {
-					args.clear();
-					args.push_back("{" + rhsLoc + "}");
-					instrs.push_back(AssemCom("pop", args));
+					addCommand(instrs, "pop", "{" + rhsLoc + "}");
 					rhsLoc = rhsTempLoc;
 				}
 
 				if (lhsOnStack) {
-					args.clear();
-					args.push_back("{" + lhsLoc + "}");
-					instrs.push_back(AssemCom("pop", args));
+					addCommand(instrs, "pop", "{" + lhsLoc + "}");
 					lhsLoc = lhsTempLoc;
 				}
 
@@ -2095,4 +1555,25 @@ int ExprGen::evaluateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<Symbol
     Utils::printComErr("Could not evaluate array size.");
 }
 
+void ExprGen::addCommand(list<AssemCom>& instrs, string name, string arg0) {
+	vector<string> args;
+	args.push_back(arg0);
+	instrs.push_back(AssemCom(name, args));
+}
 
+void ExprGen::addCommand(list<AssemCom>& instrs, string name, string arg0, 
+							string arg1) {
+	vector<string> args;
+	args.push_back(arg0);
+	args.push_back(arg1);
+	instrs.push_back(AssemCom(name, args));
+}
+
+void ExprGen::addCommand(list<AssemCom>& instrs, string name, string arg0, 
+							string arg1, string arg2) {
+	vector<string> args;
+	args.push_back(arg0);
+	args.push_back(arg1);
+	args.push_back(arg2);
+	instrs.push_back(AssemCom(name, args));
+}

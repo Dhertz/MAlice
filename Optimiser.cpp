@@ -57,6 +57,7 @@ list<AssemCom>& Optimiser::removeDuplicateLabels() {
 			map<string, AssemCom>::iterator lblIt = labels.begin();
 			for (; lblIt != labels.end(); ++lblIt) {
 				if (lblIt->second == *it) {
+					// This command has already been seen
 					commSeenBefore = true;
 					previousLabel = atoi(lblIt->first.substr(2).c_str());
 					break;
@@ -66,7 +67,8 @@ list<AssemCom>& Optimiser::removeDuplicateLabels() {
 			if (commSeenBefore) {
 				--it;
 				int length = it->getName().size() - 3;
-				cout << it->getName().substr(2, length) << " - " << previousLabel << endl;
+				// mark this label as a duplciate for later and remove the
+				// duplicate instructions
 				_duplicateLabels.insert(
 					pair<int, int>(atoi(it->getName().substr(2).c_str()), previousLabel));
 				it = _visitor->getEndDefs().erase(it);
