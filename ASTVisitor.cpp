@@ -471,40 +471,43 @@ void ASTVisitor::visitChoice(boost::shared_ptr<ExprAST> cond,
 				   			   boost::shared_ptr<IfBodyAST> falseBody, 
 							   boost::shared_ptr<SymbolTable> st,
 							   boost::shared_ptr<AssemFunc> func) {
-	Label elseLabel;
-	bool isStack = false;
 
-	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
-	  = ExprGen::generateExpression(cond->getRoot(), st, func->getFreeRegs(), func);
-	string resultReg = res->get<0>();
-	func->addListBack(res->get<1>());
-	func->setFreeRegs(res->get<2>());
+	if (!trueBody->isEmpty() || !falseBody->isEmpty()) {
+		Label elseLabel;
+		bool isStack = false;
 
-	if (resultReg[0] != 'r') {
-		// result is stored on the stack
-		isStack = true;
-		addCommand(func, "push", "{r0}");
-		addCommand(func, "ldr", "r0", resultReg);
-		resultReg = "r0";
+		boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
+		  = ExprGen::generateExpression(cond->getRoot(), st, func->getFreeRegs(), func);
+		string resultReg = res->get<0>();
+		func->addListBack(res->get<1>());
+		func->setFreeRegs(res->get<2>());
+
+		if (resultReg[0] != 'r') {
+			// result is stored on the stack
+			isStack = true;
+			addCommand(func, "push", "{r0}");
+			addCommand(func, "ldr", "r0", resultReg);
+			resultReg = "r0";
+		}
+
+		addCommand(func, "cmp", resultReg, "#0");
+
+		if (isStack) {
+			addCommand(func, "pop", "{r0}");
+		}
+
+		addCommand(func, "beq", elseLabel.getLabel());
+
+		trueBody->accept(shared_from_this(), func);								// if body
+
+		Label endLabel;
+		addCommand(func, "b", endLabel.getLabel());
+		addLabel(func, elseLabel.getLabel());									// else:
+
+		falseBody->accept(shared_from_this(), func);							// else body
+
+		addLabel(func, endLabel.getLabel());									// end:
 	}
-
-	addCommand(func, "cmp", resultReg, "#0");
-
-	if (isStack) {
-		addCommand(func, "pop", "{r0}");
-	}
-
-	addCommand(func, "beq", elseLabel.getLabel());
-
-	trueBody->accept(shared_from_this(), func);									// if body
-
-	Label endLabel;
-	addCommand(func, "b", endLabel.getLabel());
-	addLabel(func, elseLabel.getLabel());										// else:
-
-	falseBody->accept(shared_from_this(), func);								// else body
-
-	addLabel(func, endLabel.getLabel());										// end:
 }
 
 void ASTVisitor::visitIf(boost::shared_ptr<ExprAST> cond,
