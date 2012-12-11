@@ -15,10 +15,15 @@ void printVector(vector<string> vec) {
 	cout << endl;
 }
 
-treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<SymbolTable> st, vector<string> freeRegs, boost::shared_ptr<AssemFunc> func) {
-	/* Utils::printTree(root);
-	printVector(freeRegs);
-	cout << endl << endl << endl; */
+/*
+	Generate the intructions required to create an expression
+	Returns the register containing the final result, the list of instructions
+		generated and the updated list of free registers
+*/
+treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, 
+											boost::shared_ptr<SymbolTable> st, 
+											vector<string> freeRegs, 
+											boost::shared_ptr<AssemFunc> func) {
 
 	string tok = Utils::createStringFromTree(root);
 	list<AssemCom> instrs;
@@ -122,11 +127,10 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
         // Also allowed to be an array, so that function calls with array
         //   arguments are allowed
 
-		// I think that I can just look up my ST until I find the Identifier,
+		// I can just look up my ST until I find the Identifier,
 		//   which will now have a string field of its assembly location
 		// If this is set, I return it
 		// If not, I allocate a register if possible, or memory space otherwise
-		// Or perhaps it's an error if it's unallocated by this stage, see below
 
 		string varName = Utils::createStringFromTree(Utils::childByNum(root, 0));
 	    boost::shared_ptr<Identifier> varIdent = st->lookupCurrLevelAndEnclosingLevels(varName);
@@ -135,7 +139,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
             boost::shared_ptr<Type> varType = boost::shared_polymorphic_downcast<Type>(varIdent);
             boost::shared_ptr<Array> arr = boost::shared_polymorphic_downcast<Array>(varType);
 
-			// Array will definitely have already been allocated by now
+			// Array will definitely have been allocated by now
 			string loc = arr->getAssLoc();
 			treble_ptr_t ret(new treble_t(loc, instrs, freeRegs));
 			return ret;
@@ -280,7 +284,6 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 		return generateExpression(expr, st, freeRegs, func);
     } else {
     	int children = root->getChildCount(root);
-    	assert (0 <= children && children < 3);
 
     	if (children == 0) {
     	    // Number base case
@@ -500,11 +503,45 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 		    string op = Utils::createStringFromTree(root);
 
 		    pANTLR3_BASE_TREE lhs = Utils::childByNum(root, 0);
-			treble_ptr_t lhsEval = generateExpression(lhs, st, freeRegs, func);
-			string lhsLoc = lhsEval->get<0>();
-			list<AssemCom> lhsInstrs = lhsEval->get<1>();
-			freeRegs = lhsEval->get<2>();
-			instrs.splice(instrs.end(), lhsInstrs);
+			pANTLR3_BASE_TREE rhs = Utils::childByNum(root, 1);
+
+			int lhsW = calculateWeight(lhs, freeRegs, st);
+			int rhsW = calculateWeight(rhs, freeRegs, st);
+
+			cout << lhsW << endl;
+			cout << rhsW << endl;
+
+			treble_ptr_t lhsEval, rhsEval;
+			string lhsLoc, rhsLoc;
+			if (lhsW < rhsW) {
+				// Calculate lhs first sicne it uses fewer registers
+				lhsEval = generateExpression(lhs, st, freeRegs, func);
+				lhsLoc = lhsEval->get<0>();
+				list<AssemCom> lhsInstrs = lhsEval->get<1>();
+				freeRegs = lhsEval->get<2>();
+				instrs.splice(instrs.end(), lhsInstrs);
+
+				rhsEval = 
+					generateExpression(rhs, st, freeRegs, func);
+				rhsLoc = rhsEval->get<0>();
+				list<AssemCom> rhsInstrs = rhsEval->get<1>();
+				freeRegs = rhsEval->get<2>();
+				instrs.splice(instrs.end(), rhsInstrs);
+			} else {
+				// Calculate rhs first
+				rhsEval = generateExpression(rhs, st, freeRegs, func);
+				rhsLoc = rhsEval->get<0>();
+				list<AssemCom> rhsInstrs = rhsEval->get<1>();
+				freeRegs = rhsEval->get<2>();
+				instrs.splice(instrs.end(), rhsInstrs);
+
+				lhsEval = 
+					generateExpression(lhs, st, freeRegs, func);
+				lhsLoc = lhsEval->get<0>();
+				list<AssemCom> lhsInstrs = lhsEval->get<1>();
+				freeRegs = lhsEval->get<2>();
+				instrs.splice(instrs.end(), lhsInstrs);
+			}
 
 			vector<string> args;
 			string lhsTempLoc;
@@ -529,13 +566,6 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 				lhsTempLoc = lhsLoc;
 				lhsLoc = tempReg;
 			}
-
-			pANTLR3_BASE_TREE rhs = Utils::childByNum(root, 1);
-			treble_ptr_t rhsEval = generateExpression(rhs, st, freeRegs, func);
-			string rhsLoc = rhsEval->get<0>();
-			list<AssemCom> rhsInstrs = rhsEval->get<1>();
-			freeRegs = rhsEval->get<2>();
-			instrs.splice(instrs.end(), rhsInstrs);
 
 			bool rhsOnStack = false;
 			string rhsTempLoc;
@@ -844,6 +874,10 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
     }
 }
 
+/*
+	Calculate the value of a constant expression, can be used for allocating
+		space for arrays etc
+*/
 int ExprGen::evaluateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<SymbolTable> st) {
 	string tok = Utils::createStringFromTree(root);
 
@@ -909,7 +943,91 @@ int ExprGen::evaluateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<Symbol
     	}
     }
 
-    Utils::printComErr("Could not evaluate array size.");
+    Utils::printComErr("Could not evaluate expression at compile time.");
+}
+
+/*
+	Returns the weight (in registers) of an expression tree, which can be used
+		to allocate registers more efficiently in expression instruction
+		generation
+*/
+int ExprGen::calculateWeight(pANTLR3_BASE_TREE tree, vector<string> freeRegs,
+								boost::shared_ptr<SymbolTable> st) {
+	string tok = Utils::createStringFromTree(tree);
+
+	if (tok == "FUNC") {
+		// Inline function call. We will need params.size() registers here
+		pANTLR3_BASE_TREE cplTree = Utils::childByNum(tree, 1);
+		return cplTree->getChildCount(cplTree);
+	} else if (tok == "VAR") {
+		// Variable. If it has already been assigned then we don't need any 
+		// registers, otherwise we need one
+		string varName = 
+			Utils::createStringFromTree(Utils::childByNum(tree, 0));
+	    boost::shared_ptr<Identifier> varIdent = 
+	    	st->lookupCurrLevelAndEnclosingLevels(varName);
+
+		if (varIdent->getBaseName() == "Type") {
+			return 0;
+		} else {
+			boost::shared_ptr<Variable> var = 
+				boost::shared_polymorphic_downcast<Variable>(varIdent);
+			string loc = var->getAssLoc();
+
+			if (loc == "" && !freeRegs.empty()) {
+				return 1;
+			} else {
+				return 0;
+			}
+		}
+	} else if (tok == "ARRMEMBER") {
+		// Array member. If it's going on the stack then return 0, otherwise it
+		// needs one register
+		if (!freeRegs.empty()) {
+			return 1;
+		} else {
+			return 0;
+		}
+	} else if (tok == "'") {
+		// It's a character, same rules as ARRMEMBER
+		if (!freeRegs.empty()) {
+			return 1;
+		} else {
+			return 0;
+		}
+	} else if (tok == "STR") {
+		// We never use registers for strings
+		return 0;
+	} else if (tok == "EXPR") {
+		// There's a sub-expression, recurse
+		return calculateWeight(Utils::childByNum(tree, 0), freeRegs, st);
+	} else {
+		if (!freeRegs.empty()) {
+			int children = tree->getChildCount(tree);
+			switch(children) {
+				case 0:
+					// Number base case, same as char case
+					return 1;
+
+				case 1:
+					// Unary operator
+					freeRegs.erase(freeRegs.begin());
+					return 1 + 
+					  calculateWeight(Utils::childByNum(tree, 0), freeRegs, st);
+
+				case 2:
+					// Binary operator
+					freeRegs.erase(freeRegs.begin());
+					pANTLR3_BASE_TREE lhs = Utils::childByNum(tree, 0);
+					pANTLR3_BASE_TREE rhs = Utils::childByNum(tree, 1);
+
+					int wLeft = calculateWeight(lhs, freeRegs, st);
+					int wRight = calculateWeight(rhs, freeRegs, st);
+
+					return 1 + wLeft + wRight;
+			}
+		}
+	}
 }
 
 void ExprGen::addCommand(list<AssemCom>& instrs, string name, string arg0) {
