@@ -14,7 +14,8 @@ public:
 	AssemCom(string name, vector<string> args);
 	string getName();
 	int getArity();
-	vector<string> getArgs();
+	vector<string>& getArgs();
+	friend bool operator== (AssemCom& com1, AssemCom& com2);
 };
 
 #endif

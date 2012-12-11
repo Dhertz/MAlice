@@ -68,6 +68,8 @@ void ASTVisitor::visitFuncDec(string name, string returnType,
 	vector< boost::shared_ptr<Param> > v = params->getParams();
     vector< boost::shared_ptr<Param> >::iterator param;
 
+    ExprGen::_constRegs.clear();
+
     int i = 1;
     for (param = v.begin(); param != v.end(); ++param, ++i) {
        	boost::shared_ptr<Identifier> id = 
@@ -435,34 +437,38 @@ void ASTVisitor::visitWhile(boost::shared_ptr<ExprAST> cond,
 			   			   	  vector <boost::shared_ptr<ASTNode> > children, 
 							  boost::shared_ptr<SymbolTable> st,
 							  boost::shared_ptr<AssemFunc> func) {
-	Label loopLabel;
-	addLabel(func, loopLabel.getLabel());										// loop:
 
-	vector<boost::shared_ptr<ASTNode> >::iterator i;							// loop body
-	for (i = children.begin(); i != children.end(); ++i) {
-		(*i)->accept(shared_from_this(), func);
-	}
+	// Do nothing if the loop body is empty
+	if (!children.empty()) {
+		Label loopLabel;
+		addLabel(func, loopLabel.getLabel());										// loop:
 
-	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
-	  = ExprGen::generateExpression(cond->getRoot(), st, func->getFreeRegs(), func);
-	string resultReg = res->get<0>();
-	func->setFreeRegs(res->get<2>());
-	func->addListBack(res->get<1>());											// expr instrs
+		vector<boost::shared_ptr<ASTNode> >::iterator i;							// loop body
+		for (i = children.begin(); i != children.end(); ++i) {
+			(*i)->accept(shared_from_this(), func);
+		}
 
-	bool onStack = false;
-	if (resultReg[0] != 'r') {
-		// result is stored on the stack
-		onStack = true;
-		addCommand(func, "push", "{r0}");
-		addCommand(func, "ldr", "r0", resultReg);
-		resultReg = "r0";
-	}
+		boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
+		  = ExprGen::generateExpression(cond->getRoot(), st, func->getFreeRegs(), func);
+		string resultReg = res->get<0>();
+		func->setFreeRegs(res->get<2>());
+		func->addListBack(res->get<1>());											// expr instrs
 
-	addCommand(func, "cmp", resultReg, "#0");
-	addCommand(func, "beq", loopLabel.getLabel());
+		bool onStack = false;
+		if (resultReg[0] != 'r') {
+			// result is stored on the stack
+			onStack = true;
+			addCommand(func, "push", "{r0}");
+			addCommand(func, "ldr", "r0", resultReg);
+			resultReg = "r0";
+		}
 
-	if (onStack) {
-		addCommand(func, "pop", "{r0}");
+		addCommand(func, "cmp", resultReg, "#0");
+		addCommand(func, "beq", loopLabel.getLabel());
+
+		if (onStack) {
+			addCommand(func, "pop", "{r0}");
+		}
 	}
 }
 
@@ -471,40 +477,45 @@ void ASTVisitor::visitChoice(boost::shared_ptr<ExprAST> cond,
 				   			   boost::shared_ptr<IfBodyAST> falseBody, 
 							   boost::shared_ptr<SymbolTable> st,
 							   boost::shared_ptr<AssemFunc> func) {
-	Label elseLabel;
-	bool isStack = false;
 
-	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
-	  = ExprGen::generateExpression(cond->getRoot(), st, func->getFreeRegs(), func);
-	string resultReg = res->get<0>();
-	func->addListBack(res->get<1>());
-	func->setFreeRegs(res->get<2>());
+	// Check if both the if and else bodies are empty, if they are then do 
+	// nothing
+	if (!trueBody->isEmpty() || !falseBody->isEmpty()) {
+		Label elseLabel;
+		bool isStack = false;
 
-	if (resultReg[0] != 'r') {
-		// result is stored on the stack
-		isStack = true;
-		addCommand(func, "push", "{r0}");
-		addCommand(func, "ldr", "r0", resultReg);
-		resultReg = "r0";
+		boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
+		  = ExprGen::generateExpression(cond->getRoot(), st, func->getFreeRegs(), func);
+		string resultReg = res->get<0>();
+		func->addListBack(res->get<1>());
+		func->setFreeRegs(res->get<2>());
+
+		if (resultReg[0] != 'r') {
+			// result is stored on the stack
+			isStack = true;
+			addCommand(func, "push", "{r0}");
+			addCommand(func, "ldr", "r0", resultReg);
+			resultReg = "r0";
+		}
+
+		addCommand(func, "cmp", resultReg, "#0");
+
+		if (isStack) {
+			addCommand(func, "pop", "{r0}");
+		}
+
+		addCommand(func, "beq", elseLabel.getLabel());
+
+		trueBody->accept(shared_from_this(), func);								// if body
+
+		Label endLabel;
+		addCommand(func, "b", endLabel.getLabel());
+		addLabel(func, elseLabel.getLabel());									// else:
+
+		falseBody->accept(shared_from_this(), func);							// else body
+
+		addLabel(func, endLabel.getLabel());									// end:
 	}
-
-	addCommand(func, "cmp", resultReg, "#0");
-
-	if (isStack) {
-		addCommand(func, "pop", "{r0}");
-	}
-
-	addCommand(func, "beq", elseLabel.getLabel());
-
-	trueBody->accept(shared_from_this(), func);									// if body
-
-	Label endLabel;
-	addCommand(func, "b", endLabel.getLabel());
-	addLabel(func, elseLabel.getLabel());										// else:
-
-	falseBody->accept(shared_from_this(), func);								// else body
-
-	addLabel(func, endLabel.getLabel());										// end:
 }
 
 void ASTVisitor::visitIf(boost::shared_ptr<ExprAST> cond,
@@ -513,45 +524,50 @@ void ASTVisitor::visitIf(boost::shared_ptr<ExprAST> cond,
 						   boost::shared_ptr<SymbolTable> st,
 						   boost::shared_ptr<AssemFunc> func) {
 
-	Label elseLabel;
-	bool isStack = false;
+	// Check if the loop body is empty. If it is, then we can ignore the whole
+	// node (unless there is an else body, in which case we can use the negative
+	// condition from the if to create the condition for the else).
+	if (!trueBody->isEmpty() || children.size() > 1) {
+		Label elseLabel;
+		bool isStack = false;
 
-	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
-	  = ExprGen::generateExpression(cond->getRoot(), st, func->getFreeRegs(), func);
+		boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
+		  = ExprGen::generateExpression(cond->getRoot(), st, func->getFreeRegs(), func);
 
-	string resultReg = res->get<0>();
-	func->addListBack(res->get<1>());
-	func->setFreeRegs(res->get<2>());
+		string resultReg = res->get<0>();
+		func->addListBack(res->get<1>());
+		func->setFreeRegs(res->get<2>());
 
-	if (resultReg[0] != 'r') {
-		// result is stored on the stack
-		isStack = true;
-		addCommand(func, "push", "{r0}");
-		addCommand(func, "ldr", "r0", resultReg);
-		resultReg = "r0";
-	}
+		if (resultReg[0] != 'r') {
+			// result is stored on the stack
+			isStack = true;
+			addCommand(func, "push", "{r0}");
+			addCommand(func, "ldr", "r0", resultReg);
+			resultReg = "r0";
+		}
 
-	addCommand(func, "cmp", resultReg, "#0");
+		addCommand(func, "cmp", resultReg, "#0");
 
-	if (isStack) {
-		addCommand(func, "pop", "{r0}");
-	}
+		if (isStack) {
+			addCommand(func, "pop", "{r0}");
+		}
 
-	addCommand(func, "beq", elseLabel.getLabel());
+		addCommand(func, "beq", elseLabel.getLabel());
 
-	trueBody->accept(shared_from_this(), func);									// if body
+		trueBody->accept(shared_from_this(), func);									// if body
 
-	if (children.size() == 1) {
-		addLabel(func, elseLabel.getLabel());									// end:
+		if (children.size() == 1) {
+			addLabel(func, elseLabel.getLabel());									// end:
 
-	} else {
-		Label endLabel;
-		addCommand(func, "b", endLabel.getLabel());
-		addLabel(func, elseLabel.getLabel());									// else:
+		} else {
+			Label endLabel;
+			addCommand(func, "b", endLabel.getLabel());
+			addLabel(func, elseLabel.getLabel());									// else:
 
-		(*(children.begin() + 1))->accept(shared_from_this(), func);	
+			(*(children.begin() + 1))->accept(shared_from_this(), func);	
 
-		addLabel(func, endLabel.getLabel());									// end:
+			addLabel(func, endLabel.getLabel());									// end:
+		}
 	}
 }
 
