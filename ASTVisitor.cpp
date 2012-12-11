@@ -435,34 +435,38 @@ void ASTVisitor::visitWhile(boost::shared_ptr<ExprAST> cond,
 			   			   	  vector <boost::shared_ptr<ASTNode> > children, 
 							  boost::shared_ptr<SymbolTable> st,
 							  boost::shared_ptr<AssemFunc> func) {
-	Label loopLabel;
-	addLabel(func, loopLabel.getLabel());										// loop:
 
-	vector<boost::shared_ptr<ASTNode> >::iterator i;							// loop body
-	for (i = children.begin(); i != children.end(); ++i) {
-		(*i)->accept(shared_from_this(), func);
-	}
+	// Do nothing if the loop body is empty
+	if (!children.empty()) {
+		Label loopLabel;
+		addLabel(func, loopLabel.getLabel());										// loop:
 
-	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
-	  = ExprGen::generateExpression(cond->getRoot(), st, func->getFreeRegs(), func);
-	string resultReg = res->get<0>();
-	func->setFreeRegs(res->get<2>());
-	func->addListBack(res->get<1>());											// expr instrs
+		vector<boost::shared_ptr<ASTNode> >::iterator i;							// loop body
+		for (i = children.begin(); i != children.end(); ++i) {
+			(*i)->accept(shared_from_this(), func);
+		}
 
-	bool onStack = false;
-	if (resultReg[0] != 'r') {
-		// result is stored on the stack
-		onStack = true;
-		addCommand(func, "push", "{r0}");
-		addCommand(func, "ldr", "r0", resultReg);
-		resultReg = "r0";
-	}
+		boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
+		  = ExprGen::generateExpression(cond->getRoot(), st, func->getFreeRegs(), func);
+		string resultReg = res->get<0>();
+		func->setFreeRegs(res->get<2>());
+		func->addListBack(res->get<1>());											// expr instrs
 
-	addCommand(func, "cmp", resultReg, "#0");
-	addCommand(func, "beq", loopLabel.getLabel());
+		bool onStack = false;
+		if (resultReg[0] != 'r') {
+			// result is stored on the stack
+			onStack = true;
+			addCommand(func, "push", "{r0}");
+			addCommand(func, "ldr", "r0", resultReg);
+			resultReg = "r0";
+		}
 
-	if (onStack) {
-		addCommand(func, "pop", "{r0}");
+		addCommand(func, "cmp", resultReg, "#0");
+		addCommand(func, "beq", loopLabel.getLabel());
+
+		if (onStack) {
+			addCommand(func, "pop", "{r0}");
+		}
 	}
 }
 
@@ -472,6 +476,8 @@ void ASTVisitor::visitChoice(boost::shared_ptr<ExprAST> cond,
 							   boost::shared_ptr<SymbolTable> st,
 							   boost::shared_ptr<AssemFunc> func) {
 
+	// Check if both the if and else bodies are empty, if they are then do 
+	// nothing
 	if (!trueBody->isEmpty() || !falseBody->isEmpty()) {
 		Label elseLabel;
 		bool isStack = false;
