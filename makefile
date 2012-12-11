@@ -1,7 +1,7 @@
 CPP = g++ -g -I libantlr3c
 C   = gcc -I libantlr3c
 
-all: antlr grammar compile
+all: antlr grammar codegen
 
 antlr:
 	cd libantlr3c_build/; ./configure --enable-64bit; \

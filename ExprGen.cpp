@@ -560,7 +560,13 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 				rhsLoc = tempReg;
 			}
 
-			if (op == "||" || op == "|") {
+			/*
+				Binary Arithmetic operators
+				NB: divison has a seperate case since it is more complex
+			*/
+			if (op == "||" || op == "|" || op == "&&" || op == "&" ||
+				op == "^"  || op == "+" || op == "-"  || op == "*" ||
+				op == "%") {
 				vector<string> args;
     			string stackLoc, reg;
     			bool onStack = false;
@@ -584,8 +590,36 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					addCommand(instrs, "push", "{" + reg + "}");
 				}
 
-				// orr reg, lhsLoc, rhsLoc
-				addCommand(instrs, "orr", reg, lhsLoc, rhsLoc);
+				if (op == "||" || op == "|") {
+					// logical or bitwise or
+					addCommand(instrs, "orr", reg, lhsLoc, rhsLoc);
+				} else if (op == "&&" || op == "&") {
+					// logical or bitwise and
+					addCommand(instrs, "and", reg, lhsLoc, rhsLoc);
+				} else if (op == "^") {
+					// bitwise xor
+					addCommand(instrs, "eor", reg, lhsLoc, rhsLoc);
+				} else if (op == "+") {
+					// addition
+					addCommand(instrs, "add", reg, lhsLoc, rhsLoc);
+				} else if (op == "-") {
+					// subtraction
+					addCommand(instrs, "sub", reg, lhsLoc, rhsLoc);
+				} else if (op == "*") {
+					// multiplication
+					addCommand(instrs, "mul", reg, lhsLoc, rhsLoc);
+				} else if (op == "%") {
+					// modulo
+					addCommand(instrs, "mov", reg, lhsLoc);
+
+					Label l;
+					instrs.push_back(AssemCom(l.getLabel() + 
+										":", std::vector<string>()));
+
+					addCommand(instrs, "sub", reg, reg, rhsLoc);
+					addCommand(instrs, "cmp", reg, rhsLoc);
+					addCommand(instrs, "bge", l.getLabel());
+				}
 
 				if (onStack) {
 					// str reg, [fp, #-4]
@@ -608,248 +642,11 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
 				return ret;
-			} else if (op == "&&" || op == "&") {
-				vector<string> args;
-    			string stackLoc, reg;
-    			bool onStack = false;
-				if (!freeRegs.empty()) {
-			    	reg = freeRegs.front();
-					freeRegs.erase(freeRegs.begin());
-				} else {
-					onStack = true;
-					func->increaseStackPointer(4);
-					stackLoc = "[fp, #-" + 
-						boost::lexical_cast<string>(func->getStackPointer()) + 
-						"]";
 
-					// borrow a regiser to replace stackLoc in any calculations
-					vector<string> argRegs;
-					argRegs.push_back(lhsLoc);
-					argRegs.push_back(rhsLoc);
-					reg = Utils::borrowRegister(argRegs);
-
-					// push {reg}
-					addCommand(instrs, "push", "{" + reg + "}");
-				}
-
-				// and reg, lhsLoc, rhsLoc
-				addCommand(instrs, "and", reg, lhsLoc, rhsLoc);
-
-				if (onStack) {
-					// str reg, [fp, #-4]
-					addCommand(instrs, "str", reg, stackLoc);
-
-					// pop {reg}
-					addCommand(instrs, "pop", "{" + reg + "}");
-					reg = stackLoc;
-				}
-
-				if (rhsOnStack) {
-					addCommand(instrs, "pop", "{" + rhsLoc + "}");
-					rhsLoc = rhsTempLoc;
-				}
-
-				if (lhsOnStack) {
-					addCommand(instrs, "pop", "{" + lhsLoc + "}");
-					lhsLoc = lhsTempLoc;
-				}
-
-				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
-				return ret;
-			} else if (op == "^") {
-				vector<string> args;
-    			string stackLoc, reg;
-    			bool onStack = false;
-				if (!freeRegs.empty()) {
-			    	reg = freeRegs.front();
-					freeRegs.erase(freeRegs.begin());
-				} else {
-					onStack = true;
-					func->increaseStackPointer(4);
-					stackLoc = "[fp, #-" + 
-						boost::lexical_cast<string>(func->getStackPointer()) + 
-						"]";
-
-					// borrow a regiser to replace stackLoc in any calculations
-					vector<string> argRegs;
-					argRegs.push_back(lhsLoc);
-					argRegs.push_back(rhsLoc);
-					reg = Utils::borrowRegister(argRegs);
-
-					// push {reg}
-					addCommand(instrs, "push", "{" + reg + "}");
-				}
-
-				// eor reg, lhsLoc, rhsLoc
-				addCommand(instrs, "eor", reg, lhsLoc, rhsLoc);
-
-				if (onStack) {
-					// str reg, [fp, #-4]
-					addCommand(instrs, "str", reg, stackLoc);
-
-					// pop {reg}
-					addCommand(instrs, "pop", "{" + reg + "}");
-					reg = stackLoc;
-				}
-
-				if (rhsOnStack) {
-					addCommand(instrs, "pop", "{" + rhsLoc + "}");
-					rhsLoc = rhsTempLoc;
-				}
-
-				if (lhsOnStack) {
-					addCommand(instrs, "pop", "{" + lhsLoc + "}");
-					lhsLoc = lhsTempLoc;
-				}
-
-				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
-				return ret;
-			} else if (op == "+") {
-				vector<string> args;
-    			string stackLoc, reg;
-    			bool onStack = false;
-				if (!freeRegs.empty()) {
-			    	reg = freeRegs.front();
-					freeRegs.erase(freeRegs.begin());
-				} else {
-					onStack = true;
-					func->increaseStackPointer(4);
-					stackLoc = "[fp, #-" + 
-						boost::lexical_cast<string>(func->getStackPointer()) + 
-						"]";
-
-					// borrow a regiser to replace stackLoc in any calculations
-					vector<string> argRegs;
-					argRegs.push_back(lhsLoc);
-					argRegs.push_back(rhsLoc);
-					reg = Utils::borrowRegister(argRegs);
-
-					// push {reg}
-					addCommand(instrs, "push", "{" + reg + "}");
-				}
-
-				// add reg, lhsLoc, rhsLoc
-				addCommand(instrs, "add", reg, lhsLoc, rhsLoc);
-
-				if (onStack) {
-					// str reg, [fp, #-4]
-					addCommand(instrs, "str", reg, stackLoc);
-
-					// pop {reg}
-					addCommand(instrs, "pop", "{" + reg + "}");
-					reg = stackLoc;
-				}
-
-				if (rhsOnStack) {
-					addCommand(instrs, "pop", "{" + rhsLoc + "}");
-					rhsLoc = rhsTempLoc;
-				}
-
-				if (lhsOnStack) {
-					addCommand(instrs, "pop", "{" + lhsLoc + "}");
-					lhsLoc = lhsTempLoc;
-				}
-
-				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
-				return ret;
-			} else if (op == "-") {
-				vector<string> args;
-    			string stackLoc, reg;
-    			bool onStack = false;
-				if (!freeRegs.empty()) {
-			    	reg = freeRegs.front();
-					freeRegs.erase(freeRegs.begin());
-				} else {
-					onStack = true;
-					func->increaseStackPointer(4);
-					stackLoc = "[fp, #-" + 
-						boost::lexical_cast<string>(func->getStackPointer()) + 
-						"]";
-
-					// borrow a regiser to replace stackLoc in any calculations
-					vector<string> argRegs;
-					argRegs.push_back(lhsLoc);
-					argRegs.push_back(rhsLoc);
-					reg = Utils::borrowRegister(argRegs);
-
-					// push {reg}
-					addCommand(instrs, "push", "{" + reg + "}");
-
-				}
-
-				// sub reg, lhsLoc, rhsLoc
-				addCommand(instrs, "sub", reg, lhsLoc, rhsLoc);
-
-				if (onStack) {
-					// str reg, [fp, #-4]
-					addCommand(instrs, "str", reg, stackLoc);
-
-					// pop {reg}
-					addCommand(instrs, "pop", "{" + reg + "}");
-					reg = stackLoc;
-				}
-
-				if (rhsOnStack) {
-					addCommand(instrs, "pop", "{" + rhsLoc + "}");
-					rhsLoc = rhsTempLoc;
-				}
-
-				if (lhsOnStack) {
-					addCommand(instrs, "pop", "{" + lhsLoc + "}");
-					lhsLoc = lhsTempLoc;
-				}
-
-				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
-				return ret;
-			} else if (op == "*") {
-				vector<string> args;
-    			string stackLoc, reg;
-    			bool onStack = false;
-				if (!freeRegs.empty()) {
-			    	reg = freeRegs.front();
-					freeRegs.erase(freeRegs.begin());
-				} else {
-					onStack = true;
-					func->increaseStackPointer(4);
-					stackLoc = "[fp, #-" + 
-						boost::lexical_cast<string>(func->getStackPointer()) + 
-						"]";
-
-					// borrow a regiser to replace stackLoc in any calculations
-					vector<string> argRegs;
-					argRegs.push_back(lhsLoc);
-					argRegs.push_back(rhsLoc);
-					reg = Utils::borrowRegister(argRegs);
-
-					// push {reg}
-					addCommand(instrs, "push", "{" + reg + "}");
-
-				}
-
-				// mul reg, lhsLoc, rhsLoc
-				addCommand(instrs, "mul", reg, lhsLoc, rhsLoc);
-
-				if (onStack) {
-					// str reg, [fp, #-4]
-					addCommand(instrs, "str", reg, stackLoc);
-
-					// pop {reg}
-					addCommand(instrs, "pop", "{" + reg + "}");
-					reg = stackLoc;
-				}
-
-				if (rhsOnStack) {
-					addCommand(instrs, "pop", "{" + rhsLoc + "}");
-					rhsLoc = rhsTempLoc;
-				}
-
-				if (lhsOnStack) {
-					addCommand(instrs, "pop", "{" + lhsLoc + "}");
-					lhsLoc = lhsTempLoc;
-				}
-
-				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
-				return ret;
+			/*
+				Divison, implemented by hand since armv6 does not have integer
+				divison built in
+			*/
 			} else if (op == "/") {
 				string res, reg, stackLocRes, stackLocReg;
 				vector<string> args;
@@ -875,7 +672,6 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 						// push {reg}
 						addCommand(instrs, "push", "{" + reg + "}");
-;
 					}
 
 				} else {
@@ -892,9 +688,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 					res = Utils::borrowRegister(argRegs);
 
 					// push {reg}
-					args.push_back("{" + res + "}");
-					AssemCom push("push", args);
-					instrs.push_back(push);
+					addCommand(instrs, "push", "{" + res + "}");
 				}
 
 				addCommand(instrs, "eor", res, res, res);
@@ -937,63 +731,14 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 				treble_ptr_t ret(new treble_t(res, instrs, freeRegs));
 				return ret;
-			} else if (op == "%") {
-				vector<string> args;
-    			string stackLoc, reg;
-    			bool onStack = false;
-				if (!freeRegs.empty()) {
-					reg = freeRegs.front();
-					freeRegs.erase(freeRegs.begin());
-				} else {
-					onStack = true;
-					func->increaseStackPointer(4);
-					stackLoc = "[fp, #-" + 
-						boost::lexical_cast<string>(func->getStackPointer()) + 
-						"]";
 
-					// borrow a regiser to replace stackLoc in any calculations
-					vector<string> argRegs;
-					argRegs.push_back(lhsLoc);
-					argRegs.push_back(rhsLoc);
-					reg = Utils::borrowRegister(argRegs);
-
-					// push {reg}
-					addCommand(instrs, "push", "{" + reg + "}");
-
-				}
-
-				addCommand(instrs, "mov", reg, lhsLoc);
-
-				Label l;
-				instrs.push_back(AssemCom(l.getLabel() + 
-									":", std::vector<string>()));
-
-				addCommand(instrs, "sub", reg, reg, rhsLoc);
-				addCommand(instrs, "cmp", reg, rhsLoc);
-				addCommand(instrs, "bge", l.getLabel());
-
-				if (onStack && stackLoc != "") {
-					// str reg, [fp, #-4]
-					addCommand(instrs, "str", reg, stackLoc);
-
-					// pop {reg}
-					addCommand(instrs, "pop", "{" + reg + "}");
-					reg = stackLoc;
-				}
-
-				if (rhsOnStack) {
-					addCommand(instrs, "pop", "{" + rhsLoc + "}");
-					rhsLoc = rhsTempLoc;
-				}
-
-				if (lhsOnStack) {
-					addCommand(instrs, "pop", "{" + lhsLoc + "}");
-					lhsLoc = lhsTempLoc;
-				}
-
-				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
-				return ret;
-			} else if (op == "==") {
+			/*
+				Relational operators
+				(logical AND and OR can be handled with their equivalent biwise
+				operators and are therefore not included here)
+			*/
+			} else if (op == "==" || op == "!=" || op == ">" || op == "<" ||
+					   op == ">=" || op == "<=") {
 				vector<string> args;
     			string stackLoc, reg;
     			bool onStack = false;
@@ -1020,7 +765,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 
 				// eor reg, reg, reg
 				// cmp lhsLoc, rhsLoc
-				// moveq reg, #0xFFFFFFFF
+				// mov<op> reg, #0xFFFFFFFF
 				addCommand(instrs, "eor", reg, reg, reg);
 
 				string tmpl = "";
@@ -1044,414 +789,26 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root, boost::shared_p
 				}
 
 				addCommand(instrs, "cmp", lhsLoc, rhsLoc);
-				addCommand(instrs, "moveq", reg, "#0xFFFFFFFF");
 
-				if (tmpl != "") {
-					freeRegs.push_back(tmpl);
+				if (op == "==") {
+					// Equal to
+					addCommand(instrs, "moveq", reg, "#0xFFFFFFFF");
+				} else if (op == "!=") {
+					// Not equal to
+					addCommand(instrs, "movne", reg, "#0xFFFFFFFF");
+				} else if (op == ">") {
+					// Greater than
+					addCommand(instrs, "movgt", reg, "#0xFFFFFFFF");
+				} else if (op == "<") {
+					// Less than
+					addCommand(instrs, "movlt", reg, "#0xFFFFFFFF");
+				} else if (op == ">=") {
+					// Greater than or equal to
+					addCommand(instrs, "movge", reg, "#0xFFFFFFFF");
+				} else if (op == "<=") {
+					// Less than or equal to
+					addCommand(instrs, "movle", reg, "#0xFFFFFFFF");
 				}
-
-				if (tmpr != "") {
-					freeRegs.push_back(tmpr);
-				}
-
-				if (onStack) {
-					// str reg, [fp, #-4]
-					addCommand(instrs, "str", reg, stackLoc);
-
-					// pop {reg}
-					addCommand(instrs, "pop", "{" + reg + "}");
-					reg = stackLoc;
-				}
-
-				if (rhsOnStack) {
-					addCommand(instrs, "pop", "{" + rhsLoc + "}");
-					rhsLoc = rhsTempLoc;
-				}
-
-				if (lhsOnStack) {
-					addCommand(instrs, "pop", "{" + lhsLoc + "}");
-					lhsLoc = lhsTempLoc;
-				}
-
-				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
-				return ret;
-			} else if (op == "!=") {
-				vector<string> args;
-    			string stackLoc, reg;
-    			bool onStack = false;
-				if (!freeRegs.empty()) {
-			    	reg = freeRegs.front();
-					freeRegs.erase(freeRegs.begin());
-				} else {
-					onStack = true;
-					func->increaseStackPointer(4);
-					stackLoc = "[fp, #-" + 
-						boost::lexical_cast<string>(func->getStackPointer()) + 
-						"]";
-
-					// borrow a regiser to replace stackLoc in any calculations
-					vector<string> argRegs;
-					argRegs.push_back(lhsLoc);
-					argRegs.push_back(rhsLoc);
-					reg = Utils::borrowRegister(argRegs);
-
-					// push {reg}
-					addCommand(instrs, "push", "{" + reg + "}");
-
-				}
-
-				// mov reg, #0xFFFFFFFF
-				// cmp lhsLoc, rhsLoc
-				// eoreq reg, reg, reg
-				addCommand(instrs, "mov", reg, "#0xFFFFFFFF");
-
-				string tmpl = "";
-				if (lhsLoc[0] == '.') {
-					// global var
-					pair<string, vector<string> > p = 
-						Utils::tempForGlobal(lhsLoc, freeRegs, instrs);
-					tmpl = p.first;
-					freeRegs = p.second;
-					lhsLoc = tmpl;
-				}
-
-				string tmpr = "";
-				if (rhsLoc[0] == '.') {
-					// global var
-					pair<string, vector<string> > p = 
-						Utils::tempForGlobal(rhsLoc, freeRegs, instrs);
-					tmpr = p.first;
-					freeRegs = p.second;
-					rhsLoc = tmpr;
-				}
-
-				addCommand(instrs, "cmp", lhsLoc, rhsLoc);
-				addCommand(instrs, "eoreq", reg, reg, reg);
-
-				if (tmpl != "") {
-					freeRegs.push_back(tmpl);
-				}
-
-				if (tmpr != "") {
-					freeRegs.push_back(tmpr);
-				}
-
-				if (onStack) {
-					// str reg, [fp, #-4]
-					addCommand(instrs, "str", reg, stackLoc);
-
-					// pop {reg}
-					addCommand(instrs, "pop", "{" + reg + "}");
-					reg = stackLoc;
-				}
-
-				if (rhsOnStack) {
-					addCommand(instrs, "pop", "{" + rhsLoc + "}");
-					rhsLoc = rhsTempLoc;
-				}
-
-				if (lhsOnStack) {
-					addCommand(instrs, "pop", "{" + lhsLoc + "}");
-					lhsLoc = lhsTempLoc;
-				}
-
-				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
-				return ret;
-			} else if (op == ">") {
-				vector<string> args;
-    			string stackLoc, reg;
-    			bool onStack = false;
-				if (!freeRegs.empty()) {
-			    	reg = freeRegs.front();
-					freeRegs.erase(freeRegs.begin());
-				} else {
-					onStack = true;
-					func->increaseStackPointer(4);
-					stackLoc = "[fp, #-" + 
-						boost::lexical_cast<string>(func->getStackPointer()) + 
-						"]";
-
-					// borrow a regiser to replace stackLoc in any calculations
-					vector<string> argRegs;
-					argRegs.push_back(lhsLoc);
-					argRegs.push_back(rhsLoc);
-					reg = Utils::borrowRegister(argRegs);
-
-					// push {reg}
-					addCommand(instrs, "push", "{" + reg + "}");
-
-				}
-
-				// eor reg, reg, reg
-				// cmp lhsLoc, rhsLoc
-				// movgt reg, #0xFFFFFFFF
-				addCommand(instrs, "eor", reg, reg, reg);
-
-				string tmpl = "";
-				if (lhsLoc[0] == '.') {
-					// global var
-					pair<string, vector<string> > p = 
-						Utils::tempForGlobal(lhsLoc, freeRegs, instrs);
-					tmpl = p.first;
-					freeRegs = p.second;
-					lhsLoc = tmpl;
-				}
-
-				string tmpr = "";
-				if (rhsLoc[0] == '.') {
-					// global var
-					pair<string, vector<string> > p = 
-						Utils::tempForGlobal(rhsLoc, freeRegs, instrs);
-					tmpr = p.first;
-					freeRegs = p.second;
-					rhsLoc = tmpr;
-				}
-
-				addCommand(instrs, "cmp", lhsLoc, rhsLoc);
-				addCommand(instrs, "movgt", reg, "#0xFFFFFFFF");
-
-				if (tmpl != "") {
-					freeRegs.push_back(tmpl);
-				}
-
-				if (tmpr != "") {
-					freeRegs.push_back(tmpr);
-				}
-
-				if (onStack) {
-					// str reg, [fp, #-4]
-					addCommand(instrs, "str", reg, stackLoc);
-
-					// pop {reg}
-					addCommand(instrs, "pop", "{" + reg + "}");
-					reg = stackLoc;
-				}
-
-				if (rhsOnStack) {
-					addCommand(instrs, "pop", "{" + rhsLoc + "}");
-					rhsLoc = rhsTempLoc;
-				}
-
-				if (lhsOnStack) {
-					addCommand(instrs, "pop", "{" + lhsLoc + "}");
-					lhsLoc = lhsTempLoc;
-				}
-
-				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
-				return ret;
-			} else if (op == "<") {
-				vector<string> args;
-    			string stackLoc, reg;
-    			bool onStack = false;
-				if (!freeRegs.empty()) {
-			    	reg = freeRegs.front();
-					freeRegs.erase(freeRegs.begin());
-				} else {
-					onStack = true;
-					func->increaseStackPointer(4);
-					stackLoc = "[fp, #-" + 
-						boost::lexical_cast<string>(func->getStackPointer()) + 
-						"]";
-
-					// borrow a regiser to replace stackLoc in any calculations
-					vector<string> argRegs;
-					argRegs.push_back(lhsLoc);
-					argRegs.push_back(rhsLoc);
-					reg = Utils::borrowRegister(argRegs);
-
-					// push {reg}
-					addCommand(instrs, "push", "{" + reg + "}");
-				}
-
-				// eor reg, reg, reg
-				// cmp lhsLoc, rhsLoc
-				// movlt reg, #0xFFFFFFFF
-				addCommand(instrs, "eor", reg, reg, reg);
-
-				string tmpl = "";
-				if (lhsLoc[0] == '.') {
-					// global var
-					pair<string, vector<string> > p = 
-						Utils::tempForGlobal(lhsLoc, freeRegs, instrs);
-					tmpl = p.first;
-					freeRegs = p.second;
-					lhsLoc = tmpl;
-				}
-
-				string tmpr = "";
-				if (rhsLoc[0] == '.') {
-					// global var
-					pair<string, vector<string> > p = 
-						Utils::tempForGlobal(rhsLoc, freeRegs, instrs);
-					tmpr = p.first;
-					freeRegs = p.second;
-					rhsLoc = tmpr;
-				}
-
-				addCommand(instrs, "cmp", lhsLoc, rhsLoc);
-				addCommand(instrs, "movlt", reg, "#0xFFFFFFFF");
-
-				if (tmpl != "") {
-					freeRegs.push_back(tmpl);
-				}
-
-				if (tmpr != "") {
-					freeRegs.push_back(tmpr);
-				}
-
-				if (onStack) {
-					// str reg, [fp, #-4]
-					addCommand(instrs, "str", reg, stackLoc);
-
-					// pop {reg}
-					addCommand(instrs, "pop", "{" + reg + "}");
-					reg = stackLoc;
-				}
-
-				if (rhsOnStack) {
-					addCommand(instrs, "pop", "{" + rhsLoc + "}");
-					rhsLoc = rhsTempLoc;
-				}
-
-				if (lhsOnStack) {
-					addCommand(instrs, "pop", "{" + lhsLoc + "}");
-					lhsLoc = lhsTempLoc;
-				}
-
-				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
-				return ret;
-			} else if (op == ">=") {
-				vector<string> args;
-    			string stackLoc, reg;
-    			bool onStack = false;
-				if (!freeRegs.empty()) {
-			    	reg = freeRegs.front();
-					freeRegs.erase(freeRegs.begin());
-				} else {
-					onStack = true;
-					func->increaseStackPointer(4);
-					stackLoc = "[fp, #-" + 
-						boost::lexical_cast<string>(func->getStackPointer()) + 
-						"]";
-
-					// borrow a regiser to replace stackLoc in any calculations
-					vector<string> argRegs;
-					argRegs.push_back(lhsLoc);
-					argRegs.push_back(rhsLoc);
-					reg = Utils::borrowRegister(argRegs);
-
-					// push {reg}
-					addCommand(instrs, "push", "{" + reg + "}");
-				}
-
-				// eor reg, reg, reg
-				// cmp lhsLoc, rhsLoc
-				// movge reg, #0xFFFFFFFF
-				addCommand(instrs, "eor", reg, reg, reg);
-
-				string tmpl = "";
-				if (lhsLoc[0] == '.') {
-					// global var
-					pair<string, vector<string> > p = 
-						Utils::tempForGlobal(lhsLoc, freeRegs, instrs);
-					tmpl = p.first;
-					freeRegs = p.second;
-					lhsLoc = tmpl;
-				}
-
-				string tmpr = "";
-				if (rhsLoc[0] == '.') {
-					// global var
-					pair<string, vector<string> > p = 
-						Utils::tempForGlobal(rhsLoc, freeRegs, instrs);
-					tmpr = p.first;
-					freeRegs = p.second;
-					rhsLoc = tmpr;
-				}
-
-				addCommand(instrs, "cmp", lhsLoc, rhsLoc);
-				addCommand(instrs, "movge", reg, "#0xFFFFFFFF");
-
-				if (tmpl != "") {
-					freeRegs.push_back(tmpl);
-				}
-
-				if (tmpr != "") {
-					freeRegs.push_back(tmpr);
-				}
-
-				if (onStack) {
-					// str reg, [fp, #-4]
-					addCommand(instrs, "str", reg, stackLoc);
-
-					// pop {reg}
-					addCommand(instrs, "pop", "{" + reg + "}");
-					reg = stackLoc;
-				}
-
-				if (rhsOnStack) {
-					addCommand(instrs, "pop", "{" + rhsLoc + "}");
-					rhsLoc = rhsTempLoc;
-				}
-
-				if (lhsOnStack) {
-					addCommand(instrs, "pop", "{" + lhsLoc + "}");
-					lhsLoc = lhsTempLoc;
-				}
-
-				treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
-				return ret;
-			} else if (op == "<=") {
-				vector<string> args;
-    			string stackLoc, reg;
-    			bool onStack = false;
-				if (!freeRegs.empty()) {
-			    	reg = freeRegs.front();
-					freeRegs.erase(freeRegs.begin());
-				} else {
-					onStack = true;
-					func->increaseStackPointer(4);
-					stackLoc = "[fp, #-" + 
-						boost::lexical_cast<string>(func->getStackPointer()) + 
-						"]";
-
-					// borrow a regiser to replace stackLoc in any calculations
-					vector<string> argRegs;
-					argRegs.push_back(lhsLoc);
-					argRegs.push_back(rhsLoc);
-					reg = Utils::borrowRegister(argRegs);
-
-					// push {reg}
-					addCommand(instrs, "push", "{" + reg + "}");
-				}
-
-				// eor reg, reg, reg
-				// cmp lhsLoc, rhsLoc
-				// movle reg, #0xFFFFFFFF
-				addCommand(instrs, "eor", reg, reg, reg);
-
-				string tmpl = "";
-				if (lhsLoc[0] == '.') {
-					// global var
-					pair<string, vector<string> > p = 
-						Utils::tempForGlobal(lhsLoc, freeRegs, instrs);
-					tmpl = p.first;
-					freeRegs = p.second;
-					lhsLoc = tmpl;
-				}
-
-				string tmpr = "";
-				if (rhsLoc[0] == '.') {
-					// global var
-					pair<string, vector<string> > p = 
-						Utils::tempForGlobal(rhsLoc, freeRegs, instrs);
-					tmpr = p.first;
-					freeRegs = p.second;
-					rhsLoc = tmpr;
-				}
-
-				addCommand(instrs, "cmp", lhsLoc, rhsLoc);
-				addCommand(instrs, "movle", reg, "#0xFFFFFFFF");
 
 				if (tmpl != "") {
 					freeRegs.push_back(tmpl);
