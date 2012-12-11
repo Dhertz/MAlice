@@ -24,7 +24,7 @@
 .DS_Store
 .project
 
-compile
+codegen
 libantlr3c/antlr3config.h
 
 #ignore system-specific junk
