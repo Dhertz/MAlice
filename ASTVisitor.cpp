@@ -513,45 +513,50 @@ void ASTVisitor::visitIf(boost::shared_ptr<ExprAST> cond,
 						   boost::shared_ptr<SymbolTable> st,
 						   boost::shared_ptr<AssemFunc> func) {
 
-	Label elseLabel;
-	bool isStack = false;
+	// Check if the loop body is empty. If it is, then we can ignore the whole
+	// node (unless there is an else body, in which case we can use the negative
+	// condition from the if to create the condition for the else).
+	if (!trueBody->isEmpty() || children.size() > 1) {
+		Label elseLabel;
+		bool isStack = false;
 
-	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
-	  = ExprGen::generateExpression(cond->getRoot(), st, func->getFreeRegs(), func);
+		boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
+		  = ExprGen::generateExpression(cond->getRoot(), st, func->getFreeRegs(), func);
 
-	string resultReg = res->get<0>();
-	func->addListBack(res->get<1>());
-	func->setFreeRegs(res->get<2>());
+		string resultReg = res->get<0>();
+		func->addListBack(res->get<1>());
+		func->setFreeRegs(res->get<2>());
 
-	if (resultReg[0] != 'r') {
-		// result is stored on the stack
-		isStack = true;
-		addCommand(func, "push", "{r0}");
-		addCommand(func, "ldr", "r0", resultReg);
-		resultReg = "r0";
-	}
+		if (resultReg[0] != 'r') {
+			// result is stored on the stack
+			isStack = true;
+			addCommand(func, "push", "{r0}");
+			addCommand(func, "ldr", "r0", resultReg);
+			resultReg = "r0";
+		}
 
-	addCommand(func, "cmp", resultReg, "#0");
+		addCommand(func, "cmp", resultReg, "#0");
 
-	if (isStack) {
-		addCommand(func, "pop", "{r0}");
-	}
+		if (isStack) {
+			addCommand(func, "pop", "{r0}");
+		}
 
-	addCommand(func, "beq", elseLabel.getLabel());
+		addCommand(func, "beq", elseLabel.getLabel());
 
-	trueBody->accept(shared_from_this(), func);									// if body
+		trueBody->accept(shared_from_this(), func);									// if body
 
-	if (children.size() == 1) {
-		addLabel(func, elseLabel.getLabel());									// end:
+		if (children.size() == 1) {
+			addLabel(func, elseLabel.getLabel());									// end:
 
-	} else {
-		Label endLabel;
-		addCommand(func, "b", endLabel.getLabel());
-		addLabel(func, elseLabel.getLabel());									// else:
+		} else {
+			Label endLabel;
+			addCommand(func, "b", endLabel.getLabel());
+			addLabel(func, elseLabel.getLabel());									// else:
 
-		(*(children.begin() + 1))->accept(shared_from_this(), func);	
+			(*(children.begin() + 1))->accept(shared_from_this(), func);	
 
-		addLabel(func, endLabel.getLabel());									// end:
+			addLabel(func, endLabel.getLabel());									// end:
+		}
 	}
 }
 

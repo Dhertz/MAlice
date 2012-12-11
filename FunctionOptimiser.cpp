@@ -5,7 +5,7 @@
 
 /*
 	FunctionOptimiser::optimise:
-	- Remove empty conditions
+	- Remove empty conditions (This happens in ASTVisitor now)
 	- Track function calls
 	- Remove unecessary mov instructions
 	- Remove unecessary mov sequences
@@ -48,42 +48,6 @@ void FunctionOptimiser::optimise(boost::shared_ptr<AssemFunc>& func,
 			} else {
 				calls[calledFunction]++;
 			}
-		} else if (name == "beq") {
-			string labelName = args[0];
-			AssemCom nextComm = *(++it);
-			if (labelName + ":" == nextComm.getName()) {
-				//Unecessary condition, let's remove it
-
-				// First trace back to start of condition check
-				list<AssemCom>::iterator end = ++it;
-				vector<string> regs;
-				while (it->getName() != "eor") {
-					it--;
-					AssemCom trackBack = *(it);
-					if (trackBack.getName() == "cmp") {
-						// We also want to remove any instructions that alter 
-						// registers used in comparions, track those registers 
-						// as we track back
-						if (trackBack.getArgs()[0][0] == 'r') {
-							regs.push_back(trackBack.getArgs()[0]);
-						}
-						if (trackBack.getArgs()[1][0] == 'r') {
-							regs.push_back(trackBack.getArgs()[1]);
-						}
-					}
-				}
-				// Then remove all commands between eor and beq
-				it = comms.erase(it, end);
-
-				if ((--it)->getName() == "mov") {
-					string reg = it->getArgs()[0];
-					if (find(regs.begin(), regs.end(), reg) != regs.end()) {
-						// remove the mov instruction if it was used in a cmp
-						it = comms.erase(it);
-					}
-				}
-			}
-			it--;
 		} else {
 			// Check that all labels are correct after removing duplicates
 			vector<string>::iterator argIt = args.begin();
