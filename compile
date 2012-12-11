@@ -1,13 +1,27 @@
 #!/usr/bin/perl
-
+my $flag = shift(@ARGV);
+if($flag =~ /-s/) {
+    print "Leaving assembly file in place.\n";
+} else {
+   unshift(@ARGV, $flag);
+   $flag = '';
+}
 foreach (@ARGV) {
-	*STDERR = *STDOUT;
-	print "./compile $_\n";
+    *STDERR = *STDOUT;
+    print "./compile $_\n";
     `./codegen $_`;
-	$_ =~ m/.*\/(\w*)\.alice/;
-	if(($? << 8) == 0) {
-		print "gcc -o $1 $_.s\n\n";
-		`gcc -g -o $1 $_.s`;
-		`rm $_.s`; 
+    $_ =~ m/.*\/(\w*)\.alice/;
+    my $filename = $1;
+    if(($? << 8) == 0) {
+	my $arch = `uname -a`;
+        if($arch =~ /.*armv6.*/) {
+            print "gcc -o $filename $_.s\n\n";
+            `gcc -g -o $filename $_.s`;
+        } else {
+            print "Can only compile to execuable on arm!\n";
 	}
+        if(!$flag) { 
+            `rm $_.s`;
+        } 
+    }
 }
