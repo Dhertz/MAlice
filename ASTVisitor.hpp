@@ -102,6 +102,24 @@ public:
     void visitArrayDec(string name, boost::shared_ptr<ExprAST> length, 
 								 boost::shared_ptr<Type> type, 
 							     boost::shared_ptr<SymbolTable> st);
+    void visitMakeIn(boost::shared_ptr<ExprAST> expr, 
+					boost::shared_ptr<SymbolTable> st,
+					boost::shared_ptr<AssemFunc> func);
+    void visitMakeOut(boost::shared_ptr<ExprAST> expr, 
+					boost::shared_ptr<SymbolTable> st,
+					boost::shared_ptr<AssemFunc> func);
+    void visitPause(boost::shared_ptr<ExprAST> expr, 
+					boost::shared_ptr<SymbolTable> st,
+					boost::shared_ptr<AssemFunc> func);
+    void visitReadIn(boost::shared_ptr<ExprAST> expr, 
+					boost::shared_ptr<SymbolTable> st,
+					boost::shared_ptr<AssemFunc> func);
+    void visitSetHigh(boost::shared_ptr<ExprAST> expr, 
+					boost::shared_ptr<SymbolTable> st,
+					boost::shared_ptr<AssemFunc> func);
+    void visitSetLow(boost::shared_ptr<ExprAST> expr, 
+					boost::shared_ptr<SymbolTable> st,
+					boost::shared_ptr<AssemFunc> func);
     
     void addLabel(boost::shared_ptr<AssemFunc> f, string comm);
     void addCommand(boost::shared_ptr<AssemFunc> f, string comm, string arg0);
