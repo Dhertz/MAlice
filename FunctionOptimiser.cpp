@@ -10,9 +10,10 @@
 	- Remove unecessary mov instructions
 	- Remove unecessary mov sequences
 */
-void FunctionOptimiser::optimise(boost::shared_ptr<AssemFunc>& func, 
-								   std::map<string, int>& calls,
-								   std::map<int, int> duplicateLabels) {
+std::map<string, int> 
+FunctionOptimiser::optimise(boost::shared_ptr<AssemFunc>& func, 
+							  std::map<string, int> calls,
+							  std::map<int, int> duplicateLabels) {
 	list<AssemCom>& comms = func->getComms();
 	list<AssemCom>::iterator it;
 	for (it = comms.begin(); it != comms.end(); ++it) {
@@ -29,6 +30,7 @@ void FunctionOptimiser::optimise(boost::shared_ptr<AssemFunc>& func,
 
 			AssemCom nextComm = *(it++);
 			string next = nextComm.getName();
+			--it;
 
 			if (nextComm.getName() == "mov") {
 				if (args[0] == nextComm.getArgs()[1] && 
@@ -45,7 +47,7 @@ void FunctionOptimiser::optimise(boost::shared_ptr<AssemFunc>& func,
 			string calledFunction = args[0];
 			if (calls.find(calledFunction) == calls.end()) {
 				calls[calledFunction] = 1;
-			} else {
+			} else {;
 				calls[calledFunction]++;
 			}
 		} else {
@@ -72,4 +74,6 @@ void FunctionOptimiser::optimise(boost::shared_ptr<AssemFunc>& func,
 			}
 		}
 	}
+
+	return calls;
 }

@@ -12,8 +12,8 @@
 using namespace std;
 
 class ExprGen {
-	static map<int, string> _constRegs;
 public:
+	static map<int, string> _constRegs;
 	static boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > generateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<SymbolTable> st, vector<string> freeRegs, boost::shared_ptr<AssemFunc> func);
 	static int evaluateExpression(pANTLR3_BASE_TREE root, 
 									boost::shared_ptr<SymbolTable> st);

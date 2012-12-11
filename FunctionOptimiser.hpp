@@ -8,9 +8,9 @@
 class FunctionOptimiser {
 
 public:
-	static void optimise(boost::shared_ptr<AssemFunc>& f, 
-						   std::map<string, int>& calls,
-						   std::map<int, int> duplicateLabels);
+	static std::map<string, int> optimise(boost::shared_ptr<AssemFunc>& f, 
+						   					std::map<string, int> calls,
+						   					std::map<int, int> duplicateLabels);
 
 };
 

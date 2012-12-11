@@ -24,8 +24,7 @@ void Optimiser::processFunctions() {
 			(*i)->addListFront(_visitor->getGlobalInlines());
 		}
 		(*i)->finalise();
-		calls[(*i)->getName()] = 0;
-		FunctionOptimiser::optimise((*i), calls, _duplicateLabels);
+		calls = FunctionOptimiser::optimise((*i), calls, _duplicateLabels);
 	}
 
 	// Remove unreachable functions from code

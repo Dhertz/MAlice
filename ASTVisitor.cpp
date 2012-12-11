@@ -68,6 +68,8 @@ void ASTVisitor::visitFuncDec(string name, string returnType,
 	vector< boost::shared_ptr<Param> > v = params->getParams();
     vector< boost::shared_ptr<Param> >::iterator param;
 
+    ExprGen::_constRegs.clear();
+
     int i = 1;
     for (param = v.begin(); param != v.end(); ++param, ++i) {
        	boost::shared_ptr<Identifier> id = 
