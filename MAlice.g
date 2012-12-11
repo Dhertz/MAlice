@@ -40,6 +40,12 @@ tokens {
     STR;
     CHAR;
     NS;
+    MAKEOUT;
+    MAKEIN;
+    READIN;
+    SETHIGH;
+    SETLOW;
+    PAUSE;
 }
 
 @parser::postinclude {
@@ -256,10 +262,16 @@ statement: body |
            (ID idOptions) => ID idOptions delimiter 
            -> ^(VARSTAT ID idOptions) |
 
+           (expression 'said' 'Tweedledee' delimiter) => expression 'said' 'Tweedledee' delimiter
+           -> ^(SETHIGH expression) |
+
+           (expression 'said' 'Tweedledum' delimiter) => expression 'said' 'Tweedledum' delimiter
+           -> ^(SETLOW expression) |
+
            expression print delimiter 
            -> ^(PRINT expression) |
 
-           'Alice' 'found' expression '.' 
+           ('Alice' 'found') => 'Alice' 'found' expression '.'
            -> ^(RETURN expression) |
 
            ('what' 'was' expression '?' delimiter) => 'what' 'was' expression '?' delimiter
@@ -285,8 +297,19 @@ statement: body |
            (conditionalStatement delimiter) => conditionalStatement delimiter
            -> conditionalStatement |
 
-           conditionalStatement;
+           conditionalStatement |
 
+           ('The' 'Caterpillar' 'blew' 'out' expression 'smoke' 'rings' delimiter) => 'The' 'Caterpillar' 'blew' 'out' expression 'smoke' 'rings' delimiter
+           -> ^(MAKEOUT expression) |
+
+           ('The' 'Caterpillar' 'inhaled' expression 'times' delimiter) => 'The' 'Caterpillar' 'inhaled' expression 'times' delimiter
+           -> ^(MAKEIN expression) |
+
+           ('Alice' 'discovered') => 'Alice' 'discovered' ident=expression 'through' 'door' pin=expression delimiter
+           -> ^(READIN $ident $pin) |
+
+           ('Alice' 'slept') => 'Alice' 'slept' 'for' expression 'milliseconds' delimiter
+           -> ^(PAUSE expression);
 
 conditionalStatement: 'perhaps' '(' e1=expression ')' 'so' sl1=statementList elseif* ('or' sl3=statementList)? 'because' 'Alice' 'was' 'unsure' 'which'
                       -> ^(IF $e1 ^(IFSTS $sl1) elseif* ^(ELSESTS $sl3)?);
