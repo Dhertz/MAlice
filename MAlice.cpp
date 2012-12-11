@@ -8,6 +8,7 @@
 #include "InstructionPrinter.hpp"
 #include "Label.hpp"
 #include <boost/lexical_cast.hpp>
+#include "Optimiser.hpp"
 
 using namespace std;
 
@@ -79,23 +80,7 @@ void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
     	boost::shared_ptr<ASTVisitor> treeVisitor(new ASTVisitor(globalSt));
 	    semanticTree->getRoot()->accept(treeVisitor);
 
-	    list<AssemCom> program = treeVisitor->getStartDefs();
-
-	    vector<boost::shared_ptr<AssemFunc> > functions 
-	    	= treeVisitor->getFunctions();
-	    vector<boost::shared_ptr<AssemFunc> >::iterator i;
-	    for (i = functions.begin(); i != functions.end(); ++i) {
-	    	if ((*i)->getName() == "main") {
-	    		(*i)->addListFront(treeVisitor->getGlobalInlines());
-	    	}
-	    	(*i)->finalise();
-	    	program.splice(program.end(), (*i)->getComms());
-	    }
-
-	    program.splice(program.end(), treeVisitor->getEndDefs());
-
-		InstructionPrinter::printList(program, 
-			boost::lexical_cast<string>(filename).append(".s"));
+	    Optimiser opt(treeVisitor, boost::lexical_cast<string>(filename));
     }
 
     Label::nextUnusedLabel = 0;

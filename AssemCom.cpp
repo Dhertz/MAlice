@@ -1,4 +1,5 @@
 #include "AssemCom.hpp"
+#include <iostream>
 
 AssemCom::AssemCom(string name, vector<string> args) {
 	_name = name;
@@ -14,6 +15,11 @@ int AssemCom::getArity() {
 	return _arity;
 }
 
-vector<string> AssemCom::getArgs() {
+vector<string>& AssemCom::getArgs() {
 	return _args;
+}
+
+bool operator== (AssemCom& com1, AssemCom& com2) {
+	return (com1.getName() == com2.getName() && 
+			com1.getArgs()[0] == com2.getArgs()[0]);
 }

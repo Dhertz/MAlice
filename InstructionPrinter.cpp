@@ -26,7 +26,7 @@ void InstructionPrinter::printList(list<AssemCom> l, string filename) {
 				file << comm.getName() << "\t";
 			}
 
-			vector<string> args = comm.getArgs();
+			vector<string>& args = comm.getArgs();
 
 			for (int i = 0; i < comm.getArity() - 1; ++i) {
 				file << args[i] << ", ";
