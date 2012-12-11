@@ -15,6 +15,8 @@ void printVector(vector<string> vec) {
 	cout << endl;
 }
 
+map<int, string> ExprGen::_constRegs;
+
 /*
 	Generate the intructions required to create an expression
 	Returns the register containing the final result, the list of instructions
@@ -293,13 +295,18 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root,
     	    	string reg = freeRegs.front();
     			freeRegs.erase(freeRegs.begin());
 
-    			if (atoi(n.c_str()) > 255) {
-    				// To large a value to use mov, use ldr instead
-    				// ldr rx, =#n
-    				addCommand(instrs, "ldr", reg, "=" + n);
+    			if (_constRegs.find(atoi(n.c_str())) != _constRegs.end()) {
+    				reg = _constRegs.find(atoi(n.c_str()))->second;
     			} else {
-	    			// mov rx, #n
-	    			addCommand(instrs, "mov", reg, "#" + n);
+    				if (atoi(n.c_str()) > 255) {
+	    				// To large a value to use mov, use ldr instead
+	    				// ldr rx, =#n
+	    				addCommand(instrs, "ldr", reg, "=" + n);
+	    			} else {
+		    			// mov rx, #n
+		    			addCommand(instrs, "mov", reg, "#" + n);
+	    			}
+	    			_constRegs.insert(pair<int, string>(atoi(n.c_str()), reg));
     			}
 
     			treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
@@ -507,9 +514,6 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root,
 
 			int lhsW = calculateWeight(lhs, freeRegs, st);
 			int rhsW = calculateWeight(rhs, freeRegs, st);
-
-			cout << lhsW << endl;
-			cout << rhsW << endl;
 
 			treble_ptr_t lhsEval, rhsEval;
 			string lhsLoc, rhsLoc;
