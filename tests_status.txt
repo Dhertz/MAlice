@@ -8,6 +8,7 @@ Correct behaviour:
 - test10
 - test05
 - test11
+- test15
 
 Incorrect behaviour:
 - test12 (hangs)
@@ -15,7 +16,6 @@ Incorrect behaviour:
 - fibonacciIterative (wrong nubmer printed)
 - gcdIterative (hangs)
 - gcdRecursive (hangs)
-- test15 (address printed not number)
 - binarySearch (hangs)
 
 Seg faults:

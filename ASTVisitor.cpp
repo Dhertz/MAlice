@@ -759,6 +759,15 @@ void ASTVisitor::visitFuncCall(string name,
 			//Parameter needs to be moved into correct register
 			addCommand(func, "ldr", "r" + boost::lexical_cast<string>(i), 
 						 "=" + strLbl.getLabel());
+		} else if ((*it)->getType()->getTypeName() == "Array") {
+			// Set up the pass by reference
+			string arrLoc = 
+				paramLoc.substr(paramLoc.find("-") + 1, paramLoc.size() - 8);
+
+			addCommand(func, "push", "{r" + boost::lexical_cast<string>(i) + 
+								"}");
+			addCommand(func, "sub", "r" + boost::lexical_cast<string>(i), "fp", 
+								"#" + arrLoc);
 		} else if (i < 4) {
 			if (paramLoc[0] != 'r') {
 				string tempReg = Utils::borrowRegister(vector<string>());
@@ -773,6 +782,7 @@ void ASTVisitor::visitFuncCall(string name,
   						 		 paramLoc);
   			}
 
+  			// CHECK THIS - OWEN
 			for (int j = 1; j < maxpush; ++j) {
 				addCommand(func, "push", "{r" + boost::lexical_cast<string>(j) + "}");
 			}
@@ -782,16 +792,13 @@ void ASTVisitor::visitFuncCall(string name,
 				addCommand(func, "push", "{" + paramLoc + "}");
 			} else if (func->getFreeRegs().empty()) {
 				addCommand(func, "push", "{r0}");
-				addCommand(func, "ldr", "r0", paramLoc);// check ldr here - Owen
-
-				// WHy is this here? - Owen
-				// addCommand(func, "push", "{r0}");
+				addCommand(func, "ldr", "r0", paramLoc);
 
 				addCommand(func, "pop", "{r0}");
 			} else {
 				string reg = func->getFreeRegs().front();
-				addCommand(func, "mov", reg, paramLoc);
 				addCommand(func, "push", "{" + reg + "}");
+				addCommand(func, "mov", reg, paramLoc);
 			}
 	  	}
 	  	i++;
@@ -851,6 +858,7 @@ void ASTVisitor::visitArrayAssign(string name,
 		arrayLoc = tempArrReg;
 	} else {
 		// reference case
+		indexVal *= 4;
 		addCommand(func, "str", valReg, 
 		  "[" + arrayLoc + ", #" + boost::lexical_cast<string>(indexVal) + "]");
 	}
