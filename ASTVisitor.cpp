@@ -1116,7 +1116,6 @@ void ASTVisitor::visitSetHigh(boost::shared_ptr<ExprAST> expr,
 
 		resultReg = "r0";
 	}
-
 	addCommand(func, "bl", "set_high");
 
 	if (isStack) {
@@ -1145,7 +1144,6 @@ void ASTVisitor::visitSetLow(boost::shared_ptr<ExprAST> expr,
 
 		resultReg = "r0";
 	}
-
 	addCommand(func, "bl", "set_low");
 
 	if (isStack) {
