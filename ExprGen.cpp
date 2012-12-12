@@ -184,9 +184,11 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root,
 		boost::shared_ptr<Type> arrType = boost::shared_polymorphic_downcast<Type>(arrIdent);
         boost::shared_ptr<Array> arr = boost::shared_polymorphic_downcast<Array>(arrType);
 
-		string loc = arr->getAssLoc();
+		string arrayLoc = arr->getAssLoc();
 
 		pANTLR3_BASE_TREE index = Utils::childByNum(root, 1);
+
+		int indexVal = ExprGen::evaluateExpression(index, st);
 
 		treble_ptr_t genIndex = generateExpression(index, st, freeRegs, func);
 		string indexLoc = genIndex->get<0>();
@@ -194,9 +196,9 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root,
 
 		// Move the instructions to generate the index to the end of my
 		//   rolling list of instructions
-		instrs.splice(instrs.end(), indexInstrs);
+		//instrs.splice(instrs.end(), indexInstrs);
 
-		bool onStack = false;
+		/*bool onStack = false;
 		if (indexLoc[0] != 'r') {
 			// result is stored on the stack
 			onStack = true;
@@ -204,43 +206,23 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root,
 			addCommand(instrs, "ldr", "r7", indexLoc);
 
 			indexLoc = "r7";
-		}
+		}*/
 
-		string elemType = arr->getElemType()->getTypeName();
+		// array location in label or on stack
+		// load label in temp reg then add to indexLoc
+		vector<string> argRegs;
+		argRegs.push_back(indexLoc);
+		string reg = Utils::borrowRegister(argRegs);
 
-		if (elemType == "Number") {
-			addCommand(instrs, "mov", indexLoc, indexLoc, "LSL #2");
-		}
+		int arrayStartIndex = atoi(arrayLoc.substr(arrayLoc.find("-")).c_str());
+		int indexLocInt = arrayStartIndex + (indexVal * 4);
 
-		if (loc[0] == 'r') {
-			// array location in register
-			// add location reg to index reg
-			addCommand(instrs, "add", indexLoc, indexLoc, loc);
-		} else {
-			// array location in label
-			// load label in temp reg then add to indexLoc
-			// I *think* this also works in the stack case
-			vector<string> argRegs;
-			argRegs.push_back(indexLoc);
-			string reg = Utils::borrowRegister(argRegs);
+		indexLoc = "[fp, #" + boost::lexical_cast<string>(indexLocInt) + "]";
 
-			addCommand(instrs, "ldr", reg, loc);
-			addCommand(instrs, "add", indexLoc, indexLoc, reg);
-		}
-
-		if (onStack) {
-			// return the newly created stack value, not the temp reg
-			func->increaseStackPointer(4);
-			string sp = boost::lexical_cast<string>(func->getStackPointer());
-
-			// str reg, [fp, #-sp]
-			addCommand(instrs, "str", indexLoc, "[fp, #-" + sp + "]");
-
+		/*if (onStack) {
 			// pop {reg}
-			addCommand(instrs, "pop", "{" + indexLoc + "}");
-
-			indexLoc = "[fp, #-" + sp + "]";
-		}
+			addCommand(instrs, "pop", "{r7}");
+		}*/
 
 		treble_ptr_t ret(new treble_t(indexLoc, instrs, freeRegs));
 		return ret;
