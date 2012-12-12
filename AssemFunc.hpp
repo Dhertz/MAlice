@@ -28,6 +28,7 @@ public:
 	void removeReg(string reg);
 	vector<string> getFreeRegs();
 	bool regIsFree(string reg);
+	void freeReg(string reg);
 };
 
 #endif

@@ -1065,13 +1065,15 @@ void ASTVisitor::visitSetHigh(boost::shared_ptr<ExprAST> expr,
 		addCommand(func, "push", "{r0}");
 		string command = resultReg[0] != 'r' ? "ldr" : "mov";
 		addCommand(func, command, "r0", resultReg);
-
+		func->freeReg(resultReg);
 		resultReg = "r0";
 	}
 	addCommand(func, "bl", "set_high");
 
 	if (isStack) {
 		addCommand(func, "pop", "{r0}");
+	} else {
+		func->freeReg(resultReg);
 	}
 }
 
