@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 my $flag = shift(@ARGV);
 if($flag =~ /-s/) {
-    print "Leaving assembly file in place.\n";
+    print "Clean up assemmbly after compilation.\n";
 } else {
    unshift(@ARGV, $flag);
    $flag = '';
@@ -15,12 +15,19 @@ foreach (@ARGV) {
     if(($? << 8) == 0) {
 	my $arch = `uname -a`;
         if($arch =~ /.*armv6.*/) {
-            print "gcc -o $filename $_.s\n\n";
-            `gcc -g -o $filename $_.s`;
+            open my $file, '<', $_; 
+            if(<$file> =~ /###include io/) {
+                print "gcc -o $filename $_.s\n\n";
+                `gcc -g -o $filename $_.s utils.o`;
+            } else {
+                print "gcc -o $filename $_.s\n\n";
+               `gcc -g -o $filename $_.s`;
+            }
+            close $file;
         } else {
-            print "Can only compile to execuable on arm!\n";
+            print "Can only compile to execuable on ARMv6!\n";
 	}
-        if(!$flag) { 
+        if($flag) { 
             `rm $_.s`;
         } 
     }
