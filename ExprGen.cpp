@@ -217,10 +217,10 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root,
 		addCommand(instrs, "mov", indexLoc, indexLoc, "LSL #2");
 		addCommand(instrs, "sub", indexLoc, indexLoc, "#" + boost::lexical_cast<string>(arrayStartIndex));
 		addCommand(instrs, "add", indexLoc, "fp", indexLoc);
+		addCommand(instrs, "ldr", indexLoc, "[" + indexLoc + "]");
 
 		if (onStack) {
 			// pop {reg}
-			addCommand(instrs, "ldr", "r7", "[r7]");
 			addCommand(instrs, "str", "r7", oldLoc);
 			addCommand(instrs, "pop", "{r7}");
 		}

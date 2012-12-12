@@ -243,7 +243,7 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 		vector<string> ignoreRegs;
 		ignoreRegs.push_back("r0");
 		ignoreRegs.push_back("r1");
-		ignoreRegs.push_back(resultReg.substr(1, resultReg.size() - 2));
+		ignoreRegs.push_back(resultReg);
 		tmpReg = Utils::borrowRegister(ignoreRegs);
 
 		addCommand(func, "push", "{" + tmpReg + "}");
