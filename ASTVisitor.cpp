@@ -975,6 +975,184 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 		
 }
 
+void ASTVisitor::visitMakeIn(boost::shared_ptr<ExprAST> expr, 
+							boost::shared_ptr<SymbolTable> st,
+							boost::shared_ptr<AssemFunc> func) {
+	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
+	  = ExprGen::generateExpression(expr->getRoot(), st, func->getFreeRegs(), func);
+	string resultReg = res->get<0>();
+	func->addListBack(res->get<1>());
+	func->setFreeRegs(res->get<2>());
+
+	bool isStack = false;
+
+	if (resultReg != "r0") {
+		// it's not where we want it.
+		isStack = true;
+
+		addCommand(func, "push", "{r0}");
+		string command = resultReg[0] != 'r' ? "ldr" : "mov";
+		addCommand(func, command, "r0", resultReg);
+
+		resultReg = "r0";
+	}
+
+	addCommand(func, "bl", "make_input");
+
+	if (isStack) {
+		addCommand(func, "pop", "{r0}");
+	}
+}
+
+void ASTVisitor::visitMakeOut(boost::shared_ptr<ExprAST> expr, 
+							boost::shared_ptr<SymbolTable> st,
+							boost::shared_ptr<AssemFunc> func) {
+	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
+	  = ExprGen::generateExpression(expr->getRoot(), st, func->getFreeRegs(), func);
+	string resultReg = res->get<0>();
+	func->addListBack(res->get<1>());
+	func->setFreeRegs(res->get<2>());
+
+	bool isStack = false;
+
+	if (resultReg != "r0") {
+		// it's not where we want it.
+		isStack = true;
+
+		addCommand(func, "push", "{r0}");
+		string command = resultReg[0] != 'r' ? "ldr" : "mov";
+		addCommand(func, command, "r0", resultReg);
+
+		resultReg = "r0";
+	}
+
+	addCommand(func, "bl", "make_output");
+
+	if (isStack) {
+		addCommand(func, "pop", "{r0}");
+	}
+}
+
+void ASTVisitor::visitPause(boost::shared_ptr<ExprAST> expr, 
+							boost::shared_ptr<SymbolTable> st,
+							boost::shared_ptr<AssemFunc> func) {
+	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
+	  = ExprGen::generateExpression(expr->getRoot(), st, func->getFreeRegs(), func);
+	string resultReg = res->get<0>();
+	func->addListBack(res->get<1>());
+	func->setFreeRegs(res->get<2>());
+
+	bool isStack = false;
+
+	if (resultReg != "r0") {
+		// it's not where we want it.
+		isStack = true;
+
+		addCommand(func, "push", "{r0}");
+		string command = resultReg[0] != 'r' ? "ldr" : "mov";
+		addCommand(func, command, "r0", resultReg);
+
+		resultReg = "r0";
+	}
+	
+	addCommand(func, "mul", resultReg, resultReg, "#1000");
+
+	addCommand(func, "bl", "usleep");
+
+	if (isStack) {
+		addCommand(func, "pop", "{r0}");
+	}
+}
+
+void ASTVisitor::visitReadIn(boost::shared_ptr<ExprAST> expr, 
+							boost::shared_ptr<SymbolTable> st,
+							boost::shared_ptr<AssemFunc> func) {
+	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
+	  = ExprGen::generateExpression(expr->getRoot(), st, func->getFreeRegs(), func);
+	string resultReg = res->get<0>();
+	func->addListBack(res->get<1>());
+	func->setFreeRegs(res->get<2>());
+
+	bool isStack = false;
+
+	if (resultReg != "r0") {
+		// it's not where we want it.
+		isStack = true;
+
+		addCommand(func, "push", "{r0}");
+		string command = resultReg[0] != 'r' ? "ldr" : "mov";
+		addCommand(func, command, "r0", resultReg);
+
+		resultReg = "r0";
+	}
+	
+	addCommand(func, "mul", resultReg, resultReg, "#1000");
+
+	addCommand(func, "bl", "usleep");
+
+	if (isStack) {
+		addCommand(func, "pop", "{r0}");
+	}
+}
+
+void ASTVisitor::visitSetHigh(boost::shared_ptr<ExprAST> expr, 
+							boost::shared_ptr<SymbolTable> st,
+							boost::shared_ptr<AssemFunc> func) {
+	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
+	  = ExprGen::generateExpression(expr->getRoot(), st, func->getFreeRegs(), func);
+	string resultReg = res->get<0>();
+	func->addListBack(res->get<1>());
+	func->setFreeRegs(res->get<2>());
+
+	bool isStack = false;
+	
+	if (resultReg != "r0") {
+		// it's not where we want it.
+		isStack = true;
+
+		addCommand(func, "push", "{r0}");
+		string command = resultReg[0] != 'r' ? "ldr" : "mov";
+		addCommand(func, command, "r0", resultReg);
+
+		resultReg = "r0";
+	}
+
+	addCommand(func, "bl", "set_high");
+
+	if (isStack) {
+		addCommand(func, "pop", "{r0}");
+	}
+}
+
+void ASTVisitor::visitSetLow(boost::shared_ptr<ExprAST> expr, 
+							boost::shared_ptr<SymbolTable> st,
+							boost::shared_ptr<AssemFunc> func) {
+	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
+	  = ExprGen::generateExpression(expr->getRoot(), st, func->getFreeRegs(), func);
+	string resultReg = res->get<0>();
+	func->addListBack(res->get<1>());
+	func->setFreeRegs(res->get<2>());
+
+	bool isStack = false;
+
+	if (resultReg != "r0") {
+		// it's not where we want it.
+		isStack = true;
+
+		addCommand(func, "push", "{r0}");
+		string command = resultReg[0] != 'r' ? "ldr" : "mov";
+		addCommand(func, command, "r0", resultReg);
+
+		resultReg = "r0";
+	}
+
+	addCommand(func, "bl", "set_low");
+
+	if (isStack) {
+		addCommand(func, "pop", "{r0}");
+	}
+}
+
 void ASTVisitor::addLabel(boost::shared_ptr<AssemFunc> f, string label) {
 	f->addBack(label + ":", std::vector<string>());
 }

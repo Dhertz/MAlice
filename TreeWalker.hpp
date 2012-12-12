@@ -29,6 +29,12 @@ class TreeWalker {
     void processCHOICE(pANTLR3_BASE_TREE, boost::shared_ptr<SymbolTable>, boost::weak_ptr<ASTNode> parent, int childNum);
     void processIF(pANTLR3_BASE_TREE, boost::shared_ptr<SymbolTable>, boost::weak_ptr<ASTNode> parent, int childNum);
     void processNS(pANTLR3_BASE_TREE, boost::shared_ptr<SymbolTable>, boost::weak_ptr<ASTNode> parent, int childNum);
+    void processMAKEIN(pANTLR3_BASE_TREE, boost::shared_ptr<SymbolTable>, boost::weak_ptr<ASTNode> parent, int childNum);
+    void processMAKEOUT(pANTLR3_BASE_TREE, boost::shared_ptr<SymbolTable>, boost::weak_ptr<ASTNode> parent, int childNum);
+    void processPAUSE(pANTLR3_BASE_TREE, boost::shared_ptr<SymbolTable>, boost::weak_ptr<ASTNode> parent, int childNum);
+    void processREADIN(pANTLR3_BASE_TREE, boost::shared_ptr<SymbolTable>, boost::weak_ptr<ASTNode> parent, int childNum);
+    void processSETHIGH(pANTLR3_BASE_TREE, boost::shared_ptr<SymbolTable>, boost::weak_ptr<ASTNode> parent, int childNum);
+    void processSETLOW(pANTLR3_BASE_TREE, boost::shared_ptr<SymbolTable>, boost::weak_ptr<ASTNode> parent, int childNum);
     bool findReturn(pANTLR3_BASE_TREE tree);
     int getLine(pANTLR3_BASE_TREE tree);
     void checkHatta();

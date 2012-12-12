@@ -30,5 +30,5 @@ string MakeOutAST::getNodeName() {
 }
 
 void MakeOutAST::accept(boost::shared_ptr<ASTVisitor> v, boost::shared_ptr<AssemFunc> func) {
-    // v->visitInc(_expr, _st, func);
+     v->visitInc(_expr, _st, func);
 }

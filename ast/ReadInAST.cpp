@@ -31,5 +31,5 @@ string ReadInAST::getNodeName() {
 }
 
 void ReadInAST::accept(boost::shared_ptr<ASTVisitor> v, boost::shared_ptr<AssemFunc> func) {
-    // v->visitReadIn(_expr, _st, func);
+     v->visitReadIn(_expr, _st, func);
 }
