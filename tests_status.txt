@@ -7,6 +7,7 @@ Correct behaviour:
 - test09
 - test10
 - test05
+- test11
 
 Incorrect behaviour:
 - test12 (hangs)
@@ -18,9 +19,8 @@ Incorrect behaviour:
 - binarySearch (hangs)
 
 Seg faults:
-- test03
-- test08 (right at the end, doesn't show in gdb)
-- test11
+- test03 (bx lr issue)
+- test08 (bx lr issue)
 - test14
 - fibonacciRecursive
 - sieveOfEratosthenes

@@ -188,25 +188,22 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root,
 
 		pANTLR3_BASE_TREE index = Utils::childByNum(root, 1);
 
-		int indexVal = ExprGen::evaluateExpression(index, st);
-
 		treble_ptr_t genIndex = generateExpression(index, st, freeRegs, func);
 		string indexLoc = genIndex->get<0>();
 		list<AssemCom> indexInstrs = genIndex->get<1>();
 
 		// Move the instructions to generate the index to the end of my
 		//   rolling list of instructions
-		//instrs.splice(instrs.end(), indexInstrs);
+		instrs.splice(instrs.end(), indexInstrs);
 
-		/*bool onStack = false;
+		bool onStack = false;
 		if (indexLoc[0] != 'r') {
 			// result is stored on the stack
 			onStack = true;
 			addCommand(instrs, "push", "{r7}");
 			addCommand(instrs, "ldr", "r7", indexLoc);
-
 			indexLoc = "r7";
-		}*/
+		}
 
 		// array location in label or on stack
 		// load label in temp reg then add to indexLoc
@@ -214,17 +211,18 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root,
 		argRegs.push_back(indexLoc);
 		string reg = Utils::borrowRegister(argRegs);
 
-		int arrayStartIndex = atoi(arrayLoc.substr(arrayLoc.find("-")).c_str());
-		int indexLocInt = arrayStartIndex + (indexVal * 4);
+		int arrayStartIndex = atoi(arrayLoc.substr(arrayLoc.find("-") + 1).c_str());
 
-		indexLoc = "[fp, #" + boost::lexical_cast<string>(indexLocInt) + "]";
+		addCommand(instrs, "mov", indexLoc, indexLoc, "LSL #2");
+		addCommand(instrs, "sub", indexLoc, indexLoc, "#" + boost::lexical_cast<string>(arrayStartIndex));
+		addCommand(instrs, "add", indexLoc, "fp", indexLoc);
 
-		/*if (onStack) {
+		if (onStack) {
 			// pop {reg}
 			addCommand(instrs, "pop", "{r7}");
-		}*/
+		}
 
-		treble_ptr_t ret(new treble_t(indexLoc, instrs, freeRegs));
+		treble_ptr_t ret(new treble_t("[" + indexLoc + "]", instrs, freeRegs));
 		return ret;
     } else if (tok == "'") {
         // Char of form 'x'

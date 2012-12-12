@@ -22,7 +22,8 @@ FunctionOptimiser::optimise(boost::shared_ptr<AssemFunc>& func,
 
 		if (name == "mov") {
 
-			if (args[0] == args[1]) {
+			if (args[0] == args[1] && args.size() == 2) {
+				cout << "hi" << endl;
 				// mov is uncessary, remove it
 				it = comms.erase(it);
 				continue;
@@ -34,7 +35,8 @@ FunctionOptimiser::optimise(boost::shared_ptr<AssemFunc>& func,
 
 			if (nextComm.getName() == "mov") {
 				if (args[0] == nextComm.getArgs()[1] && 
-					args[1] == nextComm.getArgs()[0]) {
+					args[1] == nextComm.getArgs()[0] && args.size() == 2 && 
+					nextComm.getArgs().size() == 2) {
 					// mov sequence is unecessary
 					// remove both commands
 					it = comms.erase(it);
