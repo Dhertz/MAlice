@@ -1,7 +1,7 @@
 CPP = g++ -g -I libantlr3c
 C   = gcc -I libantlr3c
 
-all: antlr grammar codegen
+all: antlr grammar codegen utils.o
 
 antlr:
 	cd libantlr3c_build/; ./configure --enable-64bit; \
@@ -43,6 +43,9 @@ codegen: idents/Type.o idents/Callable.o idents/Number.o idents/Sentence.o \
 
 .c.o:
 	$(C) -c -o $*.o $<
+
+utils.o:
+	gcc -c utils.c
 
 clean:
 	rm -rf codegen *.o libantlr3c/*.o ast/*.o idents/*.o

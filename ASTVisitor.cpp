@@ -17,6 +17,8 @@ ASTVisitor::ASTVisitor(boost::shared_ptr<SymbolTable> st) {
 	vector<string> alignArg;
 	alignArg.push_back("2");
 	_endDefs.push_back(AssemCom(".align", alignArg));							// .align 2
+
+	_init_io = true;
 }
 
 void ASTVisitor::visitProg(vector <boost::shared_ptr<ASTNode> > children) {
@@ -906,6 +908,12 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 void ASTVisitor::visitMakeIn(boost::shared_ptr<ExprAST> expr, 
 							boost::shared_ptr<SymbolTable> st,
 							boost::shared_ptr<AssemFunc> func) {
+	
+	if(_init_io) {
+		_init_io = false;
+		addCommand(func, "bl", "init_io");
+	}
+
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
 	  = ExprGen::generateExpression(expr->getRoot(), st, func->getFreeRegs(), func);
 	string resultReg = res->get<0>();
@@ -935,6 +943,12 @@ void ASTVisitor::visitMakeIn(boost::shared_ptr<ExprAST> expr,
 void ASTVisitor::visitMakeOut(boost::shared_ptr<ExprAST> expr, 
 							boost::shared_ptr<SymbolTable> st,
 							boost::shared_ptr<AssemFunc> func) {
+	
+	if(_init_io) {
+		_init_io = false;
+		addCommand(func, "bl", "init_io");
+	}
+
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
 	  = ExprGen::generateExpression(expr->getRoot(), st, func->getFreeRegs(), func);
 	string resultReg = res->get<0>();
