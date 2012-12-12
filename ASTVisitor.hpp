@@ -22,6 +22,7 @@ class ASTVisitor : public boost::enable_shared_from_this<ASTVisitor> {
 	list<AssemCom> _globalInlines;
 	list<AssemCom> _endDefs;
 	boost::shared_ptr<SymbolTable> _globalSt;
+	bool _init_io;
 	void initFreeRegs();
 public:
 	ASTVisitor(boost::shared_ptr<SymbolTable> st);
