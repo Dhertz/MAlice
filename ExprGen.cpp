@@ -295,19 +295,14 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root,
     	    	string reg = freeRegs.front();
     			freeRegs.erase(freeRegs.begin());
 
-    			if (_constRegs.find(atoi(n.c_str())) != _constRegs.end()) {
-    				reg = _constRegs.find(atoi(n.c_str()))->second;
-    			} else {
-    				if (atoi(n.c_str()) > 255) {
-	    				// To large a value to use mov, use ldr instead
-	    				// ldr rx, =#n
-	    				addCommand(instrs, "ldr", reg, "=" + n);
-	    			} else {
-		    			// mov rx, #n
-		    			addCommand(instrs, "mov", reg, "#" + n);
-	    			}
-	    			_constRegs.insert(pair<int, string>(atoi(n.c_str()), reg));
-    			}
+				if (atoi(n.c_str()) > 255) {
+					// To large a value to use mov, use ldr instead
+					// ldr rx, =#n
+					addCommand(instrs, "ldr", reg, "=" + n);
+				} else {
+	    			// mov rx, #n
+	    			addCommand(instrs, "mov", reg, "#" + n);
+				}
 
     			treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
     			return ret;
