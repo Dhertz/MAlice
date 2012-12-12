@@ -925,7 +925,7 @@ int ExprGen::evaluateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<Symbol
     	}
     }
 
-    Utils::printComErr("Could not evaluate expression at compile time.");
+    //Utils::printComErr("Could not evaluate expression at compile time.");
 }
 
 /*

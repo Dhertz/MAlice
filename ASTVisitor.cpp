@@ -609,6 +609,7 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 		}
 
 		if (loc == "") {
+			var->setVal(ExprGen::evaluateExpression(expr->getRoot(), st));
 			if (func->getFreeRegs().empty()) {
 				func->increaseStackPointer(4);
 				string stackLoc = "[fp,#-" + 
@@ -831,19 +832,18 @@ void ASTVisitor::visitArrayAssign(string name,
 		valReg = "r5";
 	}
 
-	int arrayStartIndex = atoi(arrayLoc.substr(arrayLoc.find("-")).c_str());
-	int indexLoc = arrayStartIndex + (indexVal * 4);
-
-	/*string tempArrReg = "";
-	if (reg[0] == '.') {
+	if (arrayLoc[0] == '[') {
+		// The array is local
+		int arrayStartIndex = atoi(arrayLoc.substr(arrayLoc.find("-")).c_str());
+		int indexLoc = arrayStartIndex + (indexVal * 4);
+		addCommand(func, "str", valReg, 
+						"[fp, #" + boost::lexical_cast<string>(indexLoc) + "]");
+	} else {
 		// array is global
-		tempArrReg = func->getFreeRegs().front();
-		addCommand(func, "ldr", tempArrReg, reg);
-		reg = tempArrReg;
-	}*/
-
-	addCommand(func, "str", valReg, 
-					"[fp, #" + boost::lexical_cast<string>(indexLoc) + "]");
+		string tempArrReg = func->getFreeRegs().front();
+		addCommand(func, "ldr", tempArrReg, arrayLoc);
+		arrayLoc = tempArrReg;
+	}
 
 	if (valOnStack) {
 		addCommand(func, "pop", "{r5}");
