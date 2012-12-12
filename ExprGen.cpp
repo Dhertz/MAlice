@@ -192,19 +192,19 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root,
 		string indexLoc = genIndex->get<0>();
 		list<AssemCom> indexInstrs = genIndex->get<1>();
 
+		// Move the instructions to generate the index to the end of my
+		//   rolling list of instructions
+		instrs.splice(instrs.end(), indexInstrs);
+
 		bool onStack = false;
 		if (indexLoc[0] != 'r') {
 			// result is stored on the stack
 			onStack = true;
-			addCommand(instrs, "push", "{r0}");
-			addCommand(instrs, "ldr", "r0", indexLoc);
+			addCommand(instrs, "push", "{r7}");
+			addCommand(instrs, "ldr", "r7", indexLoc);
 
-			indexLoc = "r0";
+			indexLoc = "r7";
 		}
-
-		// Move the instructions to generate the index to the end of my
-		//   rolling list of instructions
-		instrs.splice(instrs.end(), indexInstrs);
 
 		string elemType = arr->getElemType()->getTypeName();
 
