@@ -800,7 +800,7 @@ void ASTVisitor::visitFuncCall(string name,
 	addCommand(func, "bl", name);
 
 	for (int j = maxpush - 1; j >= 1; --j) {
-		addCommand(func, "pop", "{r" + boost::lexical_cast<string>(i) + "}");
+		addCommand(func, "pop", "{r" + boost::lexical_cast<string>(j) + "}");
 	}
 }
 
@@ -842,11 +842,17 @@ void ASTVisitor::visitArrayAssign(string name,
 						"[fp, #" + boost::lexical_cast<string>(indexLoc) + "]");
 	} else if (arrayLoc[0] == '.') {
 		// array is global
-		string tempArrReg = func->getFreeRegs().front();
+		indexVal *= 4;
+		string tempArrReg = 
+			Utils::borrowRegister(std::vector<string>(1, valReg));
 		addCommand(func, "ldr", tempArrReg, arrayLoc);
+		addCommand(func, "str", valReg, 
+		  "[" + tempArrReg + ", #" + boost::lexical_cast<string>(indexVal) + "]");
 		arrayLoc = tempArrReg;
 	} else {
 		// reference case
+		addCommand(func, "str", valReg, 
+		  "[" + arrayLoc + ", #" + boost::lexical_cast<string>(indexVal) + "]");
 	}
 
 	if (valOnStack) {
