@@ -162,3 +162,7 @@ vector<string> AssemFunc::getFreeRegs() {
 bool AssemFunc::regIsFree(string reg) {
 	return find(_freeRegs.begin(), _freeRegs.end(), reg) != _freeRegs.end();
 }
+
+void AssemFunc::freeReg(string reg) {
+	_freeRegs.push_back(reg);
+}

@@ -759,6 +759,15 @@ void ASTVisitor::visitFuncCall(string name,
 			//Parameter needs to be moved into correct register
 			addCommand(func, "ldr", "r" + boost::lexical_cast<string>(i), 
 						 "=" + strLbl.getLabel());
+		} else if ((*it)->getType()->getTypeName() == "Array") {
+			// Set up the pass by reference
+			string arrLoc = 
+				paramLoc.substr(paramLoc.find("-") + 1, paramLoc.size() - 8);
+
+			addCommand(func, "push", "{r" + boost::lexical_cast<string>(i) + 
+								"}");
+			addCommand(func, "sub", "r" + boost::lexical_cast<string>(i), "fp", 
+								"#" + arrLoc);
 		} else if (i < 4) {
 			if (paramLoc[0] != 'r') {
 				string tempReg = Utils::borrowRegister(vector<string>());
@@ -773,6 +782,7 @@ void ASTVisitor::visitFuncCall(string name,
   						 		 paramLoc);
   			}
 
+  			// CHECK THIS - OWEN
 			for (int j = 1; j < maxpush; ++j) {
 				addCommand(func, "push", "{r" + boost::lexical_cast<string>(j) + "}");
 			}
@@ -782,16 +792,13 @@ void ASTVisitor::visitFuncCall(string name,
 				addCommand(func, "push", "{" + paramLoc + "}");
 			} else if (func->getFreeRegs().empty()) {
 				addCommand(func, "push", "{r0}");
-				addCommand(func, "ldr", "r0", paramLoc);// check ldr here - Owen
-
-				// WHy is this here? - Owen
-				// addCommand(func, "push", "{r0}");
+				addCommand(func, "ldr", "r0", paramLoc);
 
 				addCommand(func, "pop", "{r0}");
 			} else {
 				string reg = func->getFreeRegs().front();
-				addCommand(func, "mov", reg, paramLoc);
 				addCommand(func, "push", "{" + reg + "}");
+				addCommand(func, "mov", reg, paramLoc);
 			}
 	  	}
 	  	i++;
@@ -851,6 +858,7 @@ void ASTVisitor::visitArrayAssign(string name,
 		arrayLoc = tempArrReg;
 	} else {
 		// reference case
+		indexVal *= 4;
 		addCommand(func, "str", valReg, 
 		  "[" + arrayLoc + ", #" + boost::lexical_cast<string>(indexVal) + "]");
 	}
@@ -986,42 +994,18 @@ void ASTVisitor::visitMakeOut(boost::shared_ptr<ExprAST> expr,
 void ASTVisitor::visitPause(boost::shared_ptr<ExprAST> expr, 
 							boost::shared_ptr<SymbolTable> st,
 							boost::shared_ptr<AssemFunc> func) {
-	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
-	  = ExprGen::generateExpression(expr->getRoot(), st, func->getFreeRegs(), func);
-	string resultReg = res->get<0>();
-	func->addListBack(res->get<1>());
-	func->setFreeRegs(res->get<2>());
-
-	bool isStack = false;
-
-	if (resultReg != "r0") {
-		// it's not where we want it.
-		isStack = true;
-
-		addCommand(func, "push", "{r0}");
-		string command = resultReg[0] != 'r' ? "ldr" : "mov";
-		addCommand(func, command, "r0", resultReg);
-
-		resultReg = "r0";
-	}
 	
-	if (func->getFreeRegs().empty()) {
-		addCommand(func, "push", "{r1}");
-		addCommand(func, "mov", "r1", "#1000");
-		addCommand(func, "mul", resultReg, resultReg, "r1");
-		addCommand(func, "pop", "{r1}");
-	} else {
-		string tmpReg = func->getFreeRegs().front();
-		addCommand(func, "mov", tmpReg, "#1000");
-		addCommand(func, "mul", resultReg, resultReg, tmpReg);
-	}
-	
-	
+	int pin = ExprGen::evaluateExpression(expr->getRoot(), st);
+
+	string number = boost::lexical_cast<string>(pin);
+
+	addCommand(func, "push", "{r0, r1}");
+	addCommand(func, "ldr", "r0", "=" + number);
+	addCommand(func, "mov", "r1", "#1000");
+	addCommand(func, "mul", "r0", "r0", "r1");
 	addCommand(func, "bl", "usleep");
+	addCommand(func, "pop", "{r0, r1}");
 
-	if (isStack) {
-		addCommand(func, "pop", "{r0}");
-	}
 }
 
 void ASTVisitor::visitReadIn(boost::shared_ptr<ExprAST> expr, 
@@ -1058,57 +1042,26 @@ void ASTVisitor::visitReadIn(boost::shared_ptr<ExprAST> expr,
 void ASTVisitor::visitSetHigh(boost::shared_ptr<ExprAST> expr, 
 							boost::shared_ptr<SymbolTable> st,
 							boost::shared_ptr<AssemFunc> func) {
-	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
-	  = ExprGen::generateExpression(expr->getRoot(), st, func->getFreeRegs(), func);
-	string resultReg = res->get<0>();
-	func->addListBack(res->get<1>());
-	func->setFreeRegs(res->get<2>());
-
-	bool isStack = false;
 	
-	if (resultReg != "r0") {
-		// it's not where we want it.
-		isStack = true;
+	int pin = ExprGen::evaluateExpression(expr->getRoot(), st);
+	string number = boost::lexical_cast<string>(pin);
 
-		addCommand(func, "push", "{r0}");
-		string command = resultReg[0] != 'r' ? "ldr" : "mov";
-		addCommand(func, command, "r0", resultReg);
-
-		resultReg = "r0";
-	}
+	addCommand(func, "push", "{r0}");
+	addCommand(func, "mov", "r0", "#" + number);
 	addCommand(func, "bl", "set_high");
-
-	if (isStack) {
-		addCommand(func, "pop", "{r0}");
-	}
+	addCommand(func, "pop", "{r0}");
 }
 
 void ASTVisitor::visitSetLow(boost::shared_ptr<ExprAST> expr, 
 							boost::shared_ptr<SymbolTable> st,
 							boost::shared_ptr<AssemFunc> func) {
-	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
-	  = ExprGen::generateExpression(expr->getRoot(), st, func->getFreeRegs(), func);
-	string resultReg = res->get<0>();
-	func->addListBack(res->get<1>());
-	func->setFreeRegs(res->get<2>());
+	int pin = ExprGen::evaluateExpression(expr->getRoot(), st);
+	string number = boost::lexical_cast<string>(pin);
 
-	bool isStack = false;
-
-	if (resultReg != "r0") {
-		// it's not where we want it.
-		isStack = true;
-
-		addCommand(func, "push", "{r0}");
-		string command = resultReg[0] != 'r' ? "ldr" : "mov";
-		addCommand(func, command, "r0", resultReg);
-
-		resultReg = "r0";
-	}
+	addCommand(func, "push", "{r0}");
+	addCommand(func, "mov", "r0", "#" + number);
 	addCommand(func, "bl", "set_low");
-
-	if (isStack) {
-		addCommand(func, "pop", "{r0}");
-	}
+	addCommand(func, "pop", "{r0}");
 }
 
 void ASTVisitor::addLabel(boost::shared_ptr<AssemFunc> f, string label) {

@@ -226,7 +226,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root,
 			addCommand(instrs, "ldr", oldLoc, "[" + reg + ", " + indexLoc + "]");
 		} else {
 			// reference
-			
+			addCommand(instrs, "ldr", oldLoc, "[" + arrayLoc + ", " + indexLoc + "]");
 		}
 
 		if (onStack) {
