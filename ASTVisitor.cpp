@@ -1055,8 +1055,18 @@ void ASTVisitor::visitPause(boost::shared_ptr<ExprAST> expr,
 		resultReg = "r0";
 	}
 	
-	addCommand(func, "mul", resultReg, resultReg, "#1000");
-
+	if (func->getFreeRegs().empty()) {
+		addCommand(func, "push", "{r1}");
+		addCommand(func, "mov", "r1", "#1000");
+		addCommand(func, "mul", resultReg, resultReg, "r1");
+		addCommand(func, "pop", "{r1}");
+	} else {
+		string tmpReg = func->getFreeRegs().front();
+		addCommand(func, "mov", tmpReg, "#1000");
+		addCommand(func, "mul", resultReg, resultReg, tmpReg);
+	}
+	
+	
 	addCommand(func, "bl", "usleep");
 
 	if (isStack) {
