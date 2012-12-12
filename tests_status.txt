@@ -9,8 +9,10 @@ Correct behaviour:
 - test05
 - test11
 - test15
+- test08
 
 Incorrect behaviour:
+- test03 (abs(-1) == 0)
 - test12 (hangs)
 - test13 (hangs)
 - fibonacciIterative (wrong nubmer printed)
@@ -19,8 +21,6 @@ Incorrect behaviour:
 - binarySearch (hangs)
 
 Seg faults:
-- test03 (bx lr issue)
-- test08 (bx lr issue)
 - test14
 - fibonacciRecursive
 - sieveOfEratosthenes

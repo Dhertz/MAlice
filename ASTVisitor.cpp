@@ -356,7 +356,7 @@ void ASTVisitor::visitReturn(boost::shared_ptr<ExprAST> expr,
 		addCommand(func, "mov", "r0", resultReg);
 	}
 
-	addCommand(func, "bx", "lr");
+	addCommand(func, "ldmfd", "sp!", "{r4-r10, fp, pc}");
 
 	if (isStack) {
 		addCommand(func, "pop", "{r0}");
