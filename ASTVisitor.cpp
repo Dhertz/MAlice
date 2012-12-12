@@ -840,11 +840,13 @@ void ASTVisitor::visitArrayAssign(string name,
 		int indexLoc = arrayStartIndex + (indexVal * 4);
 		addCommand(func, "str", valReg, 
 						"[fp, #" + boost::lexical_cast<string>(indexLoc) + "]");
-	} else {
+	} else if (arrayLoc[0] == '.') {
 		// array is global
 		string tempArrReg = func->getFreeRegs().front();
 		addCommand(func, "ldr", tempArrReg, arrayLoc);
 		arrayLoc = tempArrReg;
+	} else {
+		// reference case
 	}
 
 	if (valOnStack) {
