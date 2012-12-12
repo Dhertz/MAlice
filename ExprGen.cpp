@@ -206,18 +206,28 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root,
 			indexLoc = "r7";
 		}
 
-		// array location in label or on stack
-		// load label in temp reg then add to indexLoc
-		vector<string> argRegs;
-		argRegs.push_back(indexLoc);
-		string reg = Utils::borrowRegister(argRegs);
-
-		int arrayStartIndex = atoi(arrayLoc.substr(arrayLoc.find("-") + 1).c_str());
-
 		addCommand(instrs, "mov", indexLoc, indexLoc, "LSL #2");
-		addCommand(instrs, "sub", indexLoc, indexLoc, "#" + boost::lexical_cast<string>(arrayStartIndex));
-		addCommand(instrs, "add", indexLoc, "fp", indexLoc);
-		addCommand(instrs, "ldr", indexLoc, "[" + indexLoc + "]");
+		if (arrayLoc[0] == '[') {
+			// local array
+			int arrayStartIndex = atoi(arrayLoc.substr(arrayLoc.find("-") + 1).c_str());
+
+			addCommand(instrs, "sub", indexLoc, indexLoc, "#" + boost::lexical_cast<string>(arrayStartIndex));
+			addCommand(instrs, "add", indexLoc, "fp", indexLoc);
+			addCommand(instrs, "ldr", indexLoc, "[" + indexLoc + "]");
+		} else if (arrayLoc[0] == '.') {
+			// global array
+			string reg = Utils::borrowRegister(vector<string>(1, indexLoc));
+			vector<string> args;
+			args.push_back(reg);
+			args.push_back(indexLoc);
+			oldLoc = Utils::borrowRegister(args);
+
+			addCommand(instrs, "ldr", reg, arrayLoc);
+			addCommand(instrs, "ldr", oldLoc, "[" + reg + ", " + indexLoc + "]");
+		} else {
+			// reference
+			
+		}
 
 		if (onStack) {
 			// pop {reg}
@@ -925,7 +935,7 @@ int ExprGen::evaluateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<Symbol
     	}
     }
 
-    Utils::printComErr("Could not evaluate expression at compile time.");
+    //Utils::printComErr("Could not evaluate expression at compile time.");
 }
 
 /*
