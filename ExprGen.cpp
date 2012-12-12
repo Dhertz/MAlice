@@ -197,6 +197,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root,
 		instrs.splice(instrs.end(), indexInstrs);
 
 		bool onStack = false;
+		string oldLoc = indexLoc;
 		if (indexLoc[0] != 'r') {
 			// result is stored on the stack
 			onStack = true;
@@ -219,10 +220,12 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root,
 
 		if (onStack) {
 			// pop {reg}
+			addCommand(instrs, "ldr", "r7", "[r7]");
+			addCommand(instrs, "str", "r7", oldLoc);
 			addCommand(instrs, "pop", "{r7}");
 		}
 
-		treble_ptr_t ret(new treble_t("[" + indexLoc + "]", instrs, freeRegs));
+		treble_ptr_t ret(new treble_t(oldLoc, instrs, freeRegs));
 		return ret;
     } else if (tok == "'") {
         // Char of form 'x'
