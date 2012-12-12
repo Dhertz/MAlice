@@ -184,7 +184,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root,
 		boost::shared_ptr<Type> arrType = boost::shared_polymorphic_downcast<Type>(arrIdent);
         boost::shared_ptr<Array> arr = boost::shared_polymorphic_downcast<Array>(arrType);
 
-		string loc = arr->getAssLoc();
+		string arrayLoc = arr->getAssLoc();
 
 		pANTLR3_BASE_TREE index = Utils::childByNum(root, 1);
 
@@ -192,57 +192,40 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root,
 		string indexLoc = genIndex->get<0>();
 		list<AssemCom> indexInstrs = genIndex->get<1>();
 
-		bool onStack = false;
-		if (indexLoc[0] != 'r') {
-			// result is stored on the stack
-			onStack = true;
-			addCommand(instrs, "push", "{r0}");
-			addCommand(instrs, "ldr", "r0", indexLoc);
-
-			indexLoc = "r0";
-		}
-
 		// Move the instructions to generate the index to the end of my
 		//   rolling list of instructions
 		instrs.splice(instrs.end(), indexInstrs);
 
-		string elemType = arr->getElemType()->getTypeName();
-
-		if (elemType == "Number") {
-			addCommand(instrs, "mov", indexLoc, indexLoc, "LSL #2");
+		bool onStack = false;
+		string oldLoc = indexLoc;
+		if (indexLoc[0] != 'r') {
+			// result is stored on the stack
+			onStack = true;
+			addCommand(instrs, "push", "{r7}");
+			addCommand(instrs, "ldr", "r7", indexLoc);
+			indexLoc = "r7";
 		}
 
-		if (loc[0] == 'r') {
-			// array location in register
-			// add location reg to index reg
-			addCommand(instrs, "add", indexLoc, indexLoc, loc);
-		} else {
-			// array location in label
-			// load label in temp reg then add to indexLoc
-			// I *think* this also works in the stack case
-			vector<string> argRegs;
-			argRegs.push_back(indexLoc);
-			string reg = Utils::borrowRegister(argRegs);
+		// array location in label or on stack
+		// load label in temp reg then add to indexLoc
+		vector<string> argRegs;
+		argRegs.push_back(indexLoc);
+		string reg = Utils::borrowRegister(argRegs);
 
-			addCommand(instrs, "ldr", reg, loc);
-			addCommand(instrs, "add", indexLoc, indexLoc, reg);
-		}
+		int arrayStartIndex = atoi(arrayLoc.substr(arrayLoc.find("-") + 1).c_str());
+
+		addCommand(instrs, "mov", indexLoc, indexLoc, "LSL #2");
+		addCommand(instrs, "sub", indexLoc, indexLoc, "#" + boost::lexical_cast<string>(arrayStartIndex));
+		addCommand(instrs, "add", indexLoc, "fp", indexLoc);
+		addCommand(instrs, "ldr", indexLoc, "[" + indexLoc + "]");
 
 		if (onStack) {
-			// return the newly created stack value, not the temp reg
-			func->increaseStackPointer(4);
-			string sp = boost::lexical_cast<string>(func->getStackPointer());
-
-			// str reg, [fp, #-sp]
-			addCommand(instrs, "str", indexLoc, "[fp, #-" + sp + "]");
-
 			// pop {reg}
-			addCommand(instrs, "pop", "{" + indexLoc + "}");
-
-			indexLoc = "[fp, #-" + sp + "]";
+			addCommand(instrs, "str", "r7", oldLoc);
+			addCommand(instrs, "pop", "{r7}");
 		}
 
-		treble_ptr_t ret(new treble_t(indexLoc, instrs, freeRegs));
+		treble_ptr_t ret(new treble_t(oldLoc, instrs, freeRegs));
 		return ret;
     } else if (tok == "'") {
         // Char of form 'x'
@@ -295,19 +278,14 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root,
     	    	string reg = freeRegs.front();
     			freeRegs.erase(freeRegs.begin());
 
-    			if (_constRegs.find(atoi(n.c_str())) != _constRegs.end()) {
-    				reg = _constRegs.find(atoi(n.c_str()))->second;
-    			} else {
-    				if (atoi(n.c_str()) > 255) {
-	    				// To large a value to use mov, use ldr instead
-	    				// ldr rx, =#n
-	    				addCommand(instrs, "ldr", reg, "=" + n);
-	    			} else {
-		    			// mov rx, #n
-		    			addCommand(instrs, "mov", reg, "#" + n);
-	    			}
-	    			_constRegs.insert(pair<int, string>(atoi(n.c_str()), reg));
-    			}
+				if (atoi(n.c_str()) > 255) {
+					// To large a value to use mov, use ldr instead
+					// ldr rx, =#n
+					addCommand(instrs, "ldr", reg, "=" + n);
+				} else {
+	    			// mov rx, #n
+	    			addCommand(instrs, "mov", reg, "#" + n);
+				}
 
     			treble_ptr_t ret(new treble_t(reg, instrs, freeRegs));
     			return ret;

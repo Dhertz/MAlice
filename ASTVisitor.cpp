@@ -233,6 +233,7 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 
 	func->setFreeRegs(res->get<2>());
 	string resultReg = res->get<0>();
+	func->addListBack(res->get<1>());											// expr instrs
 
 	bool isStack = false;
 	string global = resultReg;
@@ -244,6 +245,7 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 		vector<string> ignoreRegs;
 		ignoreRegs.push_back("r0");
 		ignoreRegs.push_back("r1");
+		ignoreRegs.push_back(resultReg);
 		tmpReg = Utils::borrowRegister(ignoreRegs);
 
 		addCommand(func, "push", "{" + tmpReg + "}");
@@ -279,7 +281,6 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 
 		if (resultReg[0] != '.' && global[0] != '.') {
 			// local variable or expression
-			func->addListBack(res->get<1>());									// expr instrs
 
 			if (resultReg != "r1") {
 				if (!func->regIsFree("r1")) {
@@ -305,10 +306,6 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 
 	}
 
-	/*if (!func->regIsFree("r0") && resultReg[0] == '\"') {
-		addCommand(func, "push", "{r0}");
-	}*/
-
 	if ((expr->getType()->getTypeName() == "Sentence" && resultReg[0] == '\"') 
 		|| !(expr->getType()->getTypeName() == "Sentence")) {
 
@@ -316,9 +313,7 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 		addCommand(func, "ldr", "r0", "=" + strLbl.getLabel());
 	}
 
-	addCommand(func, "push", "{r2}");
 	addCommand(func, "bl", "printf");
-	addCommand(func, "pop", "{r2}");
 
 	if ((expr->getType()->getTypeName() == "Sentence" && resultReg[0] == '\"') 
 		|| !(expr->getType()->getTypeName() == "Sentence")) {
@@ -700,7 +695,7 @@ void ASTVisitor::visitVarAss(string varName, boost::shared_ptr<ExprAST> expr,
 		Label strLbl;
 		_endDefs.push_back(
 			AssemCom(strLbl.getLabel() + ":", std::vector<string>()));
-		var->setAssLoc(strLbl.getLabel());
+		var->setAssLoc(res->get<0>());
 		_endDefs.push_back(AssemCom(".asciz", asciiArg));
 	} else {
 		string rhs = res->get<0>();
@@ -817,28 +812,10 @@ void ASTVisitor::visitArrayAssign(string name,
 	  st->lookupCurrLevelAndEnclosingLevels(name);
 	boost::shared_ptr<Array> arr =  
 	  boost::shared_polymorphic_downcast<Array>(arrIdent);
-	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > ind
-	   = ExprGen::generateExpression(index->getRoot(), st, func->getFreeRegs(), func);
 	
-	string resultReg = ind->get<0>();
-	func->addListBack(ind->get<1>());
-	func->setFreeRegs(ind->get<2>());
-	bool resOnStack = false;
+	int indexVal = ExprGen::evaluateExpression(index->getRoot(), st);
 
-	if (resultReg[0] != 'r') {
-		// it's on the stack
-		resOnStack = true;
-		addCommand(func, "push", "{r0}");
-		addCommand(func, "ldr", "r0", resultReg);
-		resultReg = "r0";
-	}
-
-	//make size bigger for integers
-	if (arr->getElemType()->getTypeName() == "Number") {
-		addCommand(func, "mov", resultReg, resultReg, "LSL #2");
-	}
-	
-	string reg = arr->getAssLoc();
+	string arrayLoc = arr->getAssLoc();
 
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > val
 	  		= ExprGen::generateExpression(value->getRoot(), st, func->getFreeRegs(), func);
@@ -851,27 +828,27 @@ void ASTVisitor::visitArrayAssign(string name,
 	if (valReg[0] != 'r') {
 		// it's on the stack
 		valOnStack = true;
-		addCommand(func, "push", "{r1}");
-		addCommand(func, "ldr", "r1", valReg);
-		valReg = "r1";
+		addCommand(func, "push", "{r5}");
+		addCommand(func, "ldr", "r5", valReg);
+		valReg = "r5";
 	}
 
-	string tempArrReg = "";
+	int arrayStartIndex = atoi(arrayLoc.substr(arrayLoc.find("-")).c_str());
+	int indexLoc = arrayStartIndex + (indexVal * 4);
+
+	/*string tempArrReg = "";
 	if (reg[0] == '.') {
 		// array is global
 		tempArrReg = func->getFreeRegs().front();
 		addCommand(func, "ldr", tempArrReg, reg);
 		reg = tempArrReg;
-	}
+	}*/
 
-	addCommand(func, "str", valReg, "[" + reg + ", " + resultReg + "]");
+	addCommand(func, "str", valReg, 
+					"[fp, #" + boost::lexical_cast<string>(indexLoc) + "]");
 
 	if (valOnStack) {
-		addCommand(func, "pop", "{r1}");
-	}
-
-	if (resOnStack) {
-		addCommand(func, "pop", "{r0}");
+		addCommand(func, "pop", "{r5}");
 	}
 }
 
@@ -883,68 +860,19 @@ void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length,
 		st->lookupCurrLevelAndEnclosingLevels(name);
 	boost::shared_ptr<Array> arr =  
 			boost::shared_polymorphic_downcast<Array>(arrIdent);
+
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
   			= ExprGen::generateExpression(length->getRoot(), st, func->getFreeRegs(), func);
-	string resultReg = res->get<0>();
+
+	string lengthReg = res->get<0>();
 	func->addListBack(res->get<1>());
 
-	bool onStack = false;
-	string tempReg;
-	if (type->getTypeName() == "Number") {
-		if (resultReg[0] == 'r') {
-			//make it bigger for integers
-			addCommand(func, "mov", resultReg, resultReg, "LSL #2");
-		} else {
-			tempReg = func->getFreeRegs().front();
-			addCommand(func, "ldr", tempReg, resultReg);
-			addCommand(func, "mov", tempReg, tempReg, "LSL #2");
-			addCommand(func, "str", tempReg, resultReg);
-		}
-	}
+	int len = (ExprGen::evaluateExpression(length->getRoot(), st) + 1) * 4;
 
-	string reg;
-	if (func->getFreeRegs().empty()) {
-		onStack = true;
-		addCommand(func, "push", "{r0}");
-		reg = "r0";
-	} else {
-		reg = func->getFreeRegs().front();
-		func->removeReg(reg);
-		arr->setAssLoc(reg);
-	}
+	func->increaseStackPointer(len);
 
-	if (res->get<1>().size() < 1) {
-		// length is not known, let's look at its location
-		func->increaseStackPointerByReg(resultReg);
-		if (resultReg[0] == 'r') {
-			addCommand(func, "sub", reg, "fp", resultReg);
-		} else {
-			// length is stored in gloabl variable
-			tempReg = func->getFreeRegs().front();
-			addCommand(func, "ldr", tempReg, resultReg);
-			addCommand(func, "sub", reg, "fp", tempReg);
-		}
-	} else {
-		int len = ExprGen::evaluateExpression(length->getRoot(), st);
+	arr->setAssLoc("[fp, #-" + boost::lexical_cast<string>(len) + "]");
 
-		if (type->getTypeName() == "Number") {
-			len *= 4;
-		}
-		func->increaseStackPointer(len);
-
-		// make it point len down the stack
-		addCommand(func, "sub", reg, "fp", "#" + boost::lexical_cast<string>(len));
-	}
-
-	if (onStack) {
-		func->increaseStackPointer(4);
-		string sp = boost::lexical_cast<string>(func->getStackPointer());
-
-		addCommand(func, "str", reg, "[fp, #-" + sp + "]");
-		addCommand(func, "pop", "{r0}");
-
-		arr->setAssLoc("[fp, #-" + sp + "]");
-	}
 }
 
 void ASTVisitor::visitArrayDec(string name, boost::shared_ptr<ExprAST> length, 
