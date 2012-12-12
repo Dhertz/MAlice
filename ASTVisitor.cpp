@@ -911,7 +911,7 @@ void ASTVisitor::visitMakeIn(boost::shared_ptr<ExprAST> expr,
 	
 	if(_init_io) {
 		_init_io = false;
-		addCommand(func, "bl", "setup_io");
+		addCommand(func, "bl", "init_io");
 	}
 
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
@@ -946,7 +946,7 @@ void ASTVisitor::visitMakeOut(boost::shared_ptr<ExprAST> expr,
 	
 	if(_init_io) {
 		_init_io = false;
-		addCommand(func, "bl", "setup_io");
+		addCommand(func, "bl", "init_io");
 	}
 
 	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > res
