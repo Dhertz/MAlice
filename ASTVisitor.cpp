@@ -313,7 +313,15 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 		addCommand(func, "ldr", "r0", "=" + strLbl.getLabel());
 	}
 
+	if (!func->regIsFree("r2")) {
+		addCommand(func, "push", "{r2}");
+	}
+	
 	addCommand(func, "bl", "printf");
+
+	if (!func->regIsFree("r2")) {
+		addCommand(func, "pop", "{r2}");
+	}
 
 	if ((expr->getType()->getTypeName() == "Sentence" && resultReg[0] == '\"') 
 		|| !(expr->getType()->getTypeName() == "Sentence")) {
