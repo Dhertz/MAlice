@@ -999,12 +999,13 @@ void ASTVisitor::visitPause(boost::shared_ptr<ExprAST> expr,
 
 	string number = boost::lexical_cast<string>(pin);
 
-	addCommand(func, "push", "{r0, r1}");
+	//addCommand(func, "push", "{r0, r1}");
 	addCommand(func, "ldr", "r0", "=" + number);
 	addCommand(func, "mov", "r1", "#1000");
 	addCommand(func, "mul", "r0", "r0", "r1");
 	addCommand(func, "bl", "usleep");
-	addCommand(func, "pop", "{r0, r1}");
+	//addCommand(func, "pop", "{r0, r1}");
+    addCommand(func, ".ltorg", "");
 
 }
 
@@ -1046,10 +1047,10 @@ void ASTVisitor::visitSetHigh(boost::shared_ptr<ExprAST> expr,
 	int pin = ExprGen::evaluateExpression(expr->getRoot(), st);
 	string number = boost::lexical_cast<string>(pin);
 
-	addCommand(func, "push", "{r0}");
+	//addCommand(func, "push", "{r0}");
 	addCommand(func, "mov", "r0", "#" + number);
 	addCommand(func, "bl", "set_high");
-	addCommand(func, "pop", "{r0}");
+	//addCommand(func, "pop", "{r0}");
 }
 
 void ASTVisitor::visitSetLow(boost::shared_ptr<ExprAST> expr, 
@@ -1058,10 +1059,10 @@ void ASTVisitor::visitSetLow(boost::shared_ptr<ExprAST> expr,
 	int pin = ExprGen::evaluateExpression(expr->getRoot(), st);
 	string number = boost::lexical_cast<string>(pin);
 
-	addCommand(func, "push", "{r0}");
+	//addCommand(func, "push", "{r0}");
 	addCommand(func, "mov", "r0", "#" + number);
 	addCommand(func, "bl", "set_low");
-	addCommand(func, "pop", "{r0}");
+	//addCommand(func, "pop", "{r0}");
 }
 
 void ASTVisitor::addLabel(boost::shared_ptr<AssemFunc> f, string label) {
