@@ -231,13 +231,13 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 
 	func->setFreeRegs(res->get<2>());
 	string resultReg = res->get<0>();
+	func->addListBack(res->get<1>());											// expr instrs
 
 	bool isStack = false;
 	string global = resultReg;
 	string tmpReg;
 	if (resultReg[0] != 'r' && resultReg[0] != '\"') {
 		// it's on the stack
-		cout << resultReg << endl;
 		isStack = true;
 
 		vector<string> ignoreRegs;
@@ -278,7 +278,6 @@ void ASTVisitor::visitPrint(boost::shared_ptr<ExprAST> expr,
 
 		if (resultReg[0] != '.' && global[0] != '.') {
 			// local variable or expression
-			func->addListBack(res->get<1>());									// expr instrs
 
 			if (resultReg != "r1") {
 				if (!func->regIsFree("r1")) {
