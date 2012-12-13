@@ -22,6 +22,8 @@ public:
     string getNodeName();
     void print();
     void accept(boost::shared_ptr<ASTVisitor> v);
+    void accept(boost::shared_ptr<ASTVisitor> v, 
+				  boost::shared_ptr<AssemFunc> func);
     string checkHatta();
 };
 

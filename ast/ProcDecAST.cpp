@@ -63,6 +63,11 @@ void ProcDecAST::accept(boost::shared_ptr<ASTVisitor> v) {
     v->visitProcDec(_name, _params, _children, _st);
 }
 
+void ProcDecAST::accept(boost::shared_ptr<ASTVisitor> v, 
+						  boost::shared_ptr<AssemFunc> func) {
+    v->visitFuncDec(_name, _params, _children, _st, func);
+}
+
 string ProcDecAST::checkHatta() {
 	// make sure that hatta methods are named uniquely (makes life much simpler
 	// in codegen)
