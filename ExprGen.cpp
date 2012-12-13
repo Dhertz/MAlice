@@ -311,6 +311,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root,
     	    if (!freeRegs.empty()) {
     	    	string reg = freeRegs.front();
     	    	if (func) {
+    	    		freeRegs.erase(freeRegs.begin());
     				func->removeReg(reg);
     	    	}
 

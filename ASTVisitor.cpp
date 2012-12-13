@@ -527,26 +527,36 @@ void ASTVisitor::visitStdin(boost::shared_ptr<ExprAST> expr,
 		}
 		_endDefs.push_back(AssemCom(".asciz", asciiArg));
 
-		if (!func->regIsFree("r0")) {
-			addCommand(func, "push", "{r0}");
-		}
-
 		if(resultReg[0] != '.') {
 			// global variable
 			addCommand(func, "str", resultReg, "[fp, #-" + sp + "]");
+
+			if (!func->regIsFree("r0")) {
+				addCommand(func, "push", "{r0}");
+			}
+
 			addCommand(func, "ldr", "r0", "=" + strLbl.getLabel());
 			addCommand(func, "sub", "r1", "fp", "#" + sp);
 			addCommand(func, "bl", "__isoc99_scanf");
+
+			if (!func->regIsFree("r0")) {
+				addCommand(func, "pop", "{r0}");
+			}
+
 			addCommand(func, "ldr", resultReg, "[fp, #-" + sp + "]");
 		} else {
 			// local variable
+			if (!func->regIsFree("r0")) {
+				addCommand(func, "push", "{r0}");
+			}
+
 			addCommand(func, "ldr", "r0", "=" + strLbl.getLabel());
 			addCommand(func, "ldr", "r1", resultReg);
 			addCommand(func, "bl", "__isoc99_scanf");
-		}
 
-		if (!func->regIsFree("r0")) {
-			addCommand(func, "pop", "{r0}");
+			if (!func->regIsFree("r0")) {
+				addCommand(func, "pop", "{r0}");
+			}
 		}
 	}
 
