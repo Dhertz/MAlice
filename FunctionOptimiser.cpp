@@ -41,8 +41,13 @@ FunctionOptimiser::optimise(boost::shared_ptr<AssemFunc>& func,
 					it = comms.erase(it);
 					it = comms.erase(it);
 					continue;
+				} else if (args[0] == nextComm.getArgs()[1] && 
+						   args.size() == 2 && nextComm.getArgs().size() == 2) {
+
 				}
 			}
+
+
 		} else if (name == "bl") {
 			// track function call
 			string calledFunction = args[0];

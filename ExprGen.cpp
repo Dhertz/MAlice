@@ -310,7 +310,9 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root,
     	    string n = Utils::createStringFromTree(root);
     	    if (!freeRegs.empty()) {
     	    	string reg = freeRegs.front();
-    			freeRegs.erase(freeRegs.begin());
+    	    	if (func) {
+    				func->removeReg(reg);
+    	    	}
 
 				if (atoi(n.c_str()) > 255) {
 					// To large a value to use mov, use ldr instead

@@ -61,21 +61,21 @@ void ASTVisitor::visitProcDec(string name,
 		// moved nested functions outside of parent function
 		vector<int>::iterator cIt;
 		for (cIt = callableKids.begin(); cIt != callableKids.end(); ++cIt) {
-			(*(children.begin() + (*cIt)))->accept(shared_from_this());				
+			(*(children.begin() + (*cIt)))->accept(shared_from_this(), func);				
 		}
 
 	} else {
 		// If it's not the top level hatta then we can just do exactly the same
 		// as for a ProcDec
-		visitFuncDec(name, "", params, children, st);
+		visitFuncDec(name, params, children, st);
 	}
 }
 
-// same as above at the moment
-void ASTVisitor::visitFuncDec(string name, string returnType,
+void ASTVisitor::visitFuncDec(string name,
 								boost::shared_ptr<HeaderParamsAST> params,
 								vector <boost::shared_ptr<ASTNode> > children,
 								boost::shared_ptr<SymbolTable> st) {
+
 	boost::shared_ptr<AssemFunc> func(new AssemFunc(name));
 	_functions.push_back(func);
 	vector< boost::shared_ptr<Param> > v = params->getParams();
@@ -126,7 +126,91 @@ void ASTVisitor::visitFuncDec(string name, string returnType,
 	// moved nested functions outside of parent function
 	vector<int>::iterator cIt;
 	for (cIt = callableKids.begin(); cIt != callableKids.end(); ++cIt) {
-		(*(children.begin() + (*cIt)))->accept(shared_from_this());				
+		(*(children.begin() + (*cIt)))->accept(shared_from_this(), func);				
+	}
+}
+
+void ASTVisitor::visitFuncDec(string name,
+								boost::shared_ptr<HeaderParamsAST> params,
+								vector <boost::shared_ptr<ASTNode> > children,
+								boost::shared_ptr<SymbolTable> st,
+								boost::shared_ptr<AssemFunc> parent) {
+	// This method is called is nested inner functions. We need to remove any 
+	// registers used in the parent function from the new function's list of 
+	// free registers.
+
+	boost::shared_ptr<AssemFunc> func(new AssemFunc(name));
+	_functions.push_back(func);
+
+	string regs[] = {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9",
+					 "r10"};
+
+	vector<string> allRegs =
+		vector<string>(regs, regs + sizeof(regs) / sizeof(string));
+
+	vector<string>::iterator regIt = allRegs.begin();
+
+	// Loop through the list of all registers, if the register isn't in the 
+	// parent functions list of free registers, then remove it from the new 
+	// function's list of free registers
+	vector<string> parRegs = parent->getFreeRegs();
+
+	for (; regIt != allRegs.end(); ++regIt) {
+		if (find(parRegs.begin(), parRegs.end(), *regIt) == parRegs.end()) {
+			// The register is used in the parent
+			func->removeReg(*regIt);
+		}
+	}
+
+	vector< boost::shared_ptr<Param> > v = params->getParams();
+    vector< boost::shared_ptr<Param> >::iterator param;
+
+    // Reset the static list of registers containing constants
+    ExprGen::_constRegs.clear();
+
+    int i = 1;
+    for (param = v.begin(); param != v.end(); ++param, ++i) {
+       	boost::shared_ptr<Identifier> id = 
+       		st->lookupCurrLevelOnly((*param)->getName());
+        
+        if ((*param)->getType()->getTypeName() == "Array") {
+        	// Need to do a seperate downcast for Arrays
+            boost::shared_ptr<Array> a 
+            	= boost::shared_polymorphic_downcast<Array>(id);
+            int rNum = ((i + 1) / 2) - 1;
+			a->setAssLoc("r" + boost::lexical_cast<string>(rNum));
+			func->removeReg("r" + boost::lexical_cast<string>(rNum));
+		} else if ((*param)->getType()->getTypeName() == "Sentence") {
+			// Do nothing since sentence is stored in a label already
+        } else {
+        	// Otherwise, set var location to correct register
+            boost::shared_ptr<Variable> v 
+            	= boost::shared_polymorphic_downcast<Variable>(id);
+            int rNum = ((i + 1) / 2) - 1;
+			v->setAssLoc("r" + boost::lexical_cast<string>(rNum));
+			func->removeReg("r" + boost::lexical_cast<string>(rNum));
+    	}
+    	i++;
+	}
+
+	vector<int> callableKids;
+	i = 0;
+	vector<boost::shared_ptr<ASTNode> >::iterator it;
+	for (it = children.begin(); it != children.end(); ++it) {
+		if ((*it)->getNodeName() == "FuncDec" 
+				|| (*it)->getNodeName() == "ProcDec") {
+			callableKids.push_back(i);
+		} else {
+			// function body
+			(*it)->accept(shared_from_this(), func);
+		}
+		i++;
+	}
+
+	// moved nested functions outside of parent function
+	vector<int>::iterator cIt;
+	for (cIt = callableKids.begin(); cIt != callableKids.end(); ++cIt) {
+		(*(children.begin() + (*cIt)))->accept(shared_from_this(), func);				
 	}
 }
 
@@ -780,7 +864,11 @@ void ASTVisitor::visitFuncCall(string name,
 	if (!func->getFreeRegs().empty()) {
 		maxpush = min(func->getFreeRegs().front()[1] - 48, 3);
 	}
-	
+
+	for (int j = 1; j < maxpush; ++j) {
+		addCommand(func, "push", "{r" + boost::lexical_cast<string>(j) + "}");
+	}
+
 	vector<boost::shared_ptr< ExprAST> >::iterator it;
 	int i = 0;
 	for (it = exprs.begin(); it != exprs.end(); ++it) {
@@ -827,10 +915,6 @@ void ASTVisitor::visitFuncCall(string name,
   						 		 paramLoc);
   			}
 
-			for (int j = 1; j < maxpush; ++j) {
-				addCommand(func, "push", "{r" + boost::lexical_cast<string>(j) +
-							 "}");
-			}
 	  	} else {
 	  		// Push any other params
 			if (paramLoc[0] == 'r') {
@@ -1017,8 +1101,8 @@ void ASTVisitor::visitMakeOut(boost::shared_ptr<ExprAST> expr,
 		addCommand(func, "bl", "init_io");
 	}
 
-	treble_ptr_t res
-	  = ExprGen::generateExpression(expr->getRoot(), st, func->getFreeRegs(), func);
+	treble_ptr_t res = ExprGen::generateExpression(expr->getRoot(), st, 
+													 func->getFreeRegs(), func);
 	string resultReg = res->get<0>();
 	func->addListBack(res->get<1>());
 	func->setFreeRegs(res->get<2>());
@@ -1064,8 +1148,8 @@ void ASTVisitor::visitPause(boost::shared_ptr<ExprAST> expr,
 void ASTVisitor::visitReadIn(boost::shared_ptr<ExprAST> expr, 
 							boost::shared_ptr<SymbolTable> st,
 							boost::shared_ptr<AssemFunc> func) {
-	treble_ptr_t res
-	  = ExprGen::generateExpression(expr->getRoot(), st, func->getFreeRegs(), func);
+	treble_ptr_t res = ExprGen::generateExpression(expr->getRoot(), st, 
+													 func->getFreeRegs(), func);
 	string resultReg = res->get<0>();
 	func->addListBack(res->get<1>());
 	func->setFreeRegs(res->get<2>());

@@ -45,10 +45,14 @@ public:
 						vector <boost::shared_ptr<ASTNode> > children,
 						boost::shared_ptr<SymbolTable> st);
 
-	void visitFuncDec(string name, string returnType, 
-						boost::shared_ptr<HeaderParamsAST> params,  
+	void visitFuncDec(string name, boost::shared_ptr<HeaderParamsAST> params,  
 						vector <boost::shared_ptr<ASTNode> > children,
 						boost::shared_ptr<SymbolTable> st);
+
+	void visitFuncDec(string name, boost::shared_ptr<HeaderParamsAST> params,  
+						vector <boost::shared_ptr<ASTNode> > children,
+						boost::shared_ptr<SymbolTable> st, 
+						boost::shared_ptr<AssemFunc> func);
 
 	void visitVarDec(string typeName, string varName, 
 					   boost::shared_ptr<SymbolTable> st,
