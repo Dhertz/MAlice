@@ -33,10 +33,14 @@ void AssemFunc::addListFront(list<AssemCom> l) {
 	_comms.splice(_comms.begin(), l);
 }
 
+// Increase the running count of the stack depth. This is called from ASTVisitor
+// whenever something is put onto the stack
 void AssemFunc::increaseStackPointer(int i) {
 	_stackPointer += i;
 }
 
+// The stack pointer might be moved an amount that is unknown at compile time, 
+// we allow for that here
 void AssemFunc::increaseStackPointerByReg(string reg) {
 	_pointerByReg = reg;
 }
@@ -50,7 +54,11 @@ string AssemFunc::getName() {
 }
 
 void AssemFunc::finalise() {
-	// Front intrsuctions are done in reverse
+	// Add the necessary commands to the top and bottom of the function, 
+	// depending on if the function is the main entry point, and whether the
+	// local stack pointer needs to be moved or not
+
+	// NB: Front intrsuctions are done in reverse
 
 	if (_name == "main") {
 		vector<string> args;
@@ -60,6 +68,8 @@ void AssemFunc::finalise() {
 	}
 
 	if (_stackPointer > 0) {
+		// Only do this if we actually need to move the pointer, avoid 
+		// sub sp sp #0 and the like.
 		vector<string> spArgs(2, "sp");
 		spArgs.push_back("#" + boost::lexical_cast<string>(_stackPointer));
 		addFront("sub", spArgs);

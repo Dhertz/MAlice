@@ -31,11 +31,14 @@ void initST(boost::shared_ptr<SymbolTable> top) {
 void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
     cout << endl << "Parsing File " << filename << "..." << endl << endl;
 
+    // Set up our Lexer and Parser
     pANTLR3_INPUT_STREAM input;
     pMAliceLexer lex;
     pANTLR3_COMMON_TOKEN_STREAM tokens;
     pMAliceParser parser;
 
+    // Check to make sure there were no issues creating any of the structs we 
+    // need
     input = antlr3AsciiFileStreamNew(filename);
     if (input == NULL)
         printError("Unable to open file.");
@@ -44,7 +47,8 @@ void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
     if (lex == NULL)
         printError("Unable to create lexer.");
 
-    tokens = antlr3CommonTokenStreamSourceNew(ANTLR3_SIZE_HINT, TOKENSOURCE(lex));
+    tokens = 
+    	antlr3CommonTokenStreamSourceNew(ANTLR3_SIZE_HINT, TOKENSOURCE(lex));
     if (tokens == NULL)
         printError("Unable to create tokenstream.");
 
@@ -52,37 +56,52 @@ void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
     if (parser == NULL)
         printError("Unable to create parser.");
 
+    // Parse the program from the top level rule (named program)
     MAliceParser_program_return r = parser->program(parser);
+
+    // Create the parse tree
     pANTLR3_BASE_TREE tree = r.tree;
 
-    if (parser->pParser->rec->getNumberOfSyntaxErrors(parser->pParser->rec) > 0) {
+    // Check for syntax errors before continuing
+    if (parser->pParser->rec->getNumberOfSyntaxErrors(parser->pParser->rec) 
+    		> 0) {
         cerr << "Syntax errors found. Stopping." << endl;
         exit(1);
-        }
+    }
 
+    // A nice debug tool
     if (doPrintTree)
         Utils::printTree(tree);
 
-    boost::shared_ptr<SymbolTable> top(new SymbolTable(boost::shared_ptr<SymbolTable>()));
+    // Create the top level (static) symbol table with type info
+    boost::shared_ptr<SymbolTable> top(
+    	new SymbolTable(boost::shared_ptr<SymbolTable>()));
     initST(top);
 
+    // Create the AST
     boost::shared_ptr<AST> semanticTree(new AST());
 
+    // Build the AST doing semantic checks along the way
     TreeWalker walker(top, tree, semanticTree);
 
+    // Stop if there are any semantic errors
     if (Utils::globalErrorCount > 0) {
         cerr << "Errors found. Stopping." << endl;
         Utils::globalErrorCount = 0;
         exit(1);
     }
 
-    if (boost::shared_ptr<SymbolTable> globalSt = top->getChildren()[0].lock()) {
+    if (boost::shared_ptr<SymbolTable> globalSt 
+    										= top->getChildren()[0].lock()) {
+    	// Visit the AST to generate code
     	boost::shared_ptr<ASTVisitor> treeVisitor(new ASTVisitor(globalSt));
 	    semanticTree->getRoot()->accept(treeVisitor);
 
+	    // Run the code through the optimiser and print to file
 	    Optimiser opt(treeVisitor, boost::lexical_cast<string>(filename));
     }
 
+    // Reset the label count for the next file if there are any
     Label::nextUnusedLabel = 0;
 
     parser->free(parser);
@@ -90,9 +109,13 @@ void parseFile(pANTLR3_UINT8 filename, bool doPrintTree) {
     lex->free(lex);
     input->close(input);
 
-    cout << endl << "Done." << endl;
+    cout << "Done." << endl;
 }
 
+/*
+	The main entry point for the program. Loop through all the arguments given
+	and attempt to parse each one.
+*/
 int main(int argc, char* argv[]) {
     for (int i = 1; i < argc; i++) {
         parseFile((pANTLR3_UINT8) argv[i], false);

@@ -9,6 +9,7 @@ Label::Label() {
 	nextUnusedLabel++;
 }
 
+// Return a string holding the unique label, created with the static field.
 std::string Label::getLabel() {
 	std::string lbl(".L");
 	std::ostringstream s;
