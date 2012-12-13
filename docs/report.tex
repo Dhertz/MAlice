@@ -3,13 +3,15 @@
 \usepackage[tmargin=2cm, lmargin=2cm, rmargin=2cm, bmargin=3cm]{geometry}
 \usepackage{parskip}
 \usepackage[latin1]{inputenc}
+\usepackage{graphicx}
+\usepackage{wrapfig}
 
 \begin{document}
 
 
 \title{MAlice Report}
 \author{Owen Davies, Daniel Hertz, Charlie Hothersall}
-\date{}
+\date{\today}
 
 \maketitle
 
@@ -57,6 +59,7 @@ We have made a number of optimisations in our compiler:
 Since we had decided to compile down to ARM assembly, and we had a Raspberry Pi to hand, we thought that it would be fun to extend malice to control the General Purpose I/O pins on the Pi. The following MAlice code shows the new commands we have extended the MAlice language to include:
 
 \begin{verbatim}
+###include io
 The looking-glass hatta()
 opened
     x was a number.
@@ -71,5 +74,31 @@ opened
     17 said Tweedledum.                     ### set pin IO17 low
 closed
 \end{verbatim}
+
+The implementation of these features required changes to almost every element in the project, and this is where our design came into play, as it took minimal effort to add commands to the language and get some output. This meant we could spend the majority of the time getting to grips with the Raspberry Pi's (somewhat undocumented) GPIO controller. We implemented setting up the virtual memory to the controllers registers in C, and linked the generated assembly with this library at compile time. This is why \texttt{\#\#\#include io} is needed as the first line of the file, to tell the preprocessor to change the assemble command.
+
+\begin{wrapfigure}{r}{0.35\textwidth}
+  \vspace{-20pt}
+  \begin{center}
+    \includegraphics[width=0.35\textwidth]{IMG_9457.JPG}
+    \caption{Charlie's awesome circuit}
+  \end{center}
+  \vspace{-10pt}
+\end{wrapfigure}
+After the basics had been implemented, we then had lots of fun trying to communicate with the GPIO controller on the lowest level. Our first proof of concept was done in python, with just a LED flashing:
+
+We then wrote out C library to include methods to set pins as input and output, as well as set them high and low. As well as that, we implemented an assembly method to pause the program, so we could then blink an LED.
+
+\begin{wrapfigure}{r}{0.35\textwidth}
+  \vspace{-20pt}
+  \begin{center}
+    \includegraphics[width=0.35\textwidth, angle=270]{IMG_9458.JPG}
+    \caption{}
+  \end{center}
+  \vspace{-10pt}
+\end{wrapfigure}
+We then put all these elements together, and to test the new commands, we built some electronics to interface with an Xbox 360, and wrote some malice files to play songs from 'Guitar Hero 3'. During our first effort, the timing of the notes was slightly off, so we asked to use Robotics Society's digital oscilloscope to test our timing code. We then proved that it was millisecond perfect:
+
+This lead to us changing the malice files by eye to account for the mysterious delays in the code, and we had Alice up and rocking.
 
 \end{document}
