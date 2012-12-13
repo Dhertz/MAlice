@@ -897,10 +897,16 @@ void ASTVisitor::visitFuncCall(string name,
 			string arrLoc = 
 				paramLoc.substr(paramLoc.find("-") + 1, paramLoc.size() - 8);
 
-			addCommand(func, "push", "{r" + boost::lexical_cast<string>(i) + 
-								"}");
-			addCommand(func, "sub", "r" + boost::lexical_cast<string>(i), "fp", 
-								"#" + arrLoc);
+			if (arrLoc[0] == 'r') {
+				// The start of the array is stored in a register (probably it's
+				// already a parameter or we're in a nested function)
+				addCommand(func, "sub", "r" + boost::lexical_cast<string>(i), 
+								"fp", arrLoc);
+			} else {
+				addCommand(func, "sub", "r" + boost::lexical_cast<string>(i), 
+								"fp", "#" + arrLoc);
+			}
+
 		} else if (i < 4) {
 			if (paramLoc[0] != 'r') {
 				string tempReg = Utils::borrowRegister(vector<string>());
