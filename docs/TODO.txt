@@ -1,4 +1,0 @@
-TODO list:
-Part 3:
-	- Use Variable::getVal() in optimisation?
-	  Perhaps in the ExprGen VAR case, for example
