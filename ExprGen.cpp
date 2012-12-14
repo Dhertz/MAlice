@@ -255,7 +255,13 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root,
 
 		if (onStack) {
 			// pop {reg}
-			addCommand(instrs, "str", "r7", oldLoc);
+
+			if (oldLoc[0] == 'r') {
+				addCommand(instrs, "str", "r7", "[" + oldLoc + "]");
+			} else {
+				addCommand(instrs, "str", "r7", oldLoc);
+			}
+
 			addCommand(instrs, "pop", "{r7}");
 		}
 
