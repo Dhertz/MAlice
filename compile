@@ -26,7 +26,7 @@ foreach (@ARGV) {
             push(@args, "gcc");
         }
 
-        push(@args, "$filename -o $_.s");
+        push(@args, "-o $filename $_.s");
 
         open my $source, '<', $_; 
         if(<$source> =~ /###include io/) {
@@ -42,7 +42,8 @@ foreach (@ARGV) {
             print "Failure to execute. $!\n";
         }
 
-        if($flag) { 
+        if($flag) {
+            print "HELLO!"; 
             system("rm $_.s");
 
             if($? != 0) {
