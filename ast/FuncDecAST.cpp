@@ -71,5 +71,10 @@ void FuncDecAST::print() {
 }
 
 void FuncDecAST::accept(boost::shared_ptr<ASTVisitor> v) {
-  	v->visitFuncDec(_name, _returnType, _params, _children, _st);
+  	v->visitFuncDec(_name,  _params, _children, _st);
+}
+
+void FuncDecAST::accept(boost::shared_ptr<ASTVisitor> v, 
+				  		  boost::shared_ptr<AssemFunc> func) {
+  	v->visitFuncDec(_name,  _params, _children, _st, func);
 }
