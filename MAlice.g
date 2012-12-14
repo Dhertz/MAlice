@@ -47,6 +47,8 @@ tokens {
     SETLOW;
     PAUSE;
     PULLUP;
+    PULLDOWN;
+    STOPPULL;
 }
 
 @parser::postinclude {
@@ -315,8 +317,14 @@ statement: body |
            ('Alice' 'slept') => 'Alice' 'slept' 'for' expression 'milliseconds' delimiter
            -> ^(PAUSE expression) |
 
-           ('The' 'rabbit') => 'The' 'rabbit' 'jumped' delimiter
-           -> ^(PULLUP);
+           ('The' 'Rabbit' 'jumped') => 'The' 'Rabbit' 'jumped' expression 'times' delimiter
+           -> ^(PULLUP expression) |
+
+           ('The' 'Rabbit' 'went') => 'The' 'Rabbit' 'went' 'down' 'the' expression 'hole' delimiter
+           -> ^(PULLDOWN expression) |
+
+           ('The' 'Rabbit' 'checked') => 'The' 'Rabbit' 'checked' 'his' 'watch' 'for' expression 'seconds' delimiter
+           -> ^(STOPPULL expression);
 
 conditionalStatement: 'perhaps' '(' e1=expression ')' 'so' sl1=statementList elseif* ('or' sl3=statementList)? 'because' 'Alice' 'was' 'unsure' 'which'
                       -> ^(IF $e1 ^(IFSTS $sl1) elseif* ^(ELSESTS $sl3)?);

@@ -1278,8 +1278,89 @@ void ASTVisitor::visitSetLow(boost::shared_ptr<ExprAST> expr,
 }
 
 void ASTVisitor::visitPullUp(boost::shared_ptr<SymbolTable> st,
+							   boost::shared_ptr<ExprAST> expr,
 							   boost::shared_ptr<AssemFunc> func) {
+
+	treble_ptr_t res = ExprGen::generateExpression(expr->getRoot(), st, 
+													 func->getFreeRegs(), func);
+	string resultReg = res->get<0>();
+	func->addListBack(res->get<1>());
+	func->setFreeRegs(res->get<2>());
+
+	bool isStack = false;
+	
+	if (resultReg != "r0") {
+		// it's not where we want it.
+		isStack = true;
+
+		addCommand(func, "push", "{r0}");
+		string command = resultReg[0] != 'r' ? "ldr" : "mov";
+		addCommand(func, command, "r0", resultReg);
+
+		resultReg = "r0";
+	}
 	addCommand(func, "bl", "pull_up");
+
+	if (isStack) {
+		addCommand(func, "pop", "{r0}");
+	}
+}
+
+void ASTVisitor::visitPullDown(boost::shared_ptr<SymbolTable> st,
+							   boost::shared_ptr<ExprAST> expr, 
+							   boost::shared_ptr<AssemFunc> func) {
+
+	treble_ptr_t res = ExprGen::generateExpression(expr->getRoot(), st, 
+													 func->getFreeRegs(), func);
+	string resultReg = res->get<0>();
+	func->addListBack(res->get<1>());
+	func->setFreeRegs(res->get<2>());
+
+	bool isStack = false;
+	
+	if (resultReg != "r0") {
+		// it's not where we want it.
+		isStack = true;
+
+		addCommand(func, "push", "{r0}");
+		string command = resultReg[0] != 'r' ? "ldr" : "mov";
+		addCommand(func, command, "r0", resultReg);
+
+		resultReg = "r0";
+	}
+	addCommand(func, "bl", "pull_down");
+
+	if (isStack) {
+		addCommand(func, "pop", "{r0}");
+	}
+}
+
+void ASTVisitor::visitStopPull(boost::shared_ptr<SymbolTable> st,
+							boost::shared_ptr<ExprAST> expr,
+							boost::shared_ptr<AssemFunc> func) {
+	treble_ptr_t res = ExprGen::generateExpression(expr->getRoot(), st, 
+													 func->getFreeRegs(), func);
+	string resultReg = res->get<0>();
+	func->addListBack(res->get<1>());
+	func->setFreeRegs(res->get<2>());
+
+	bool isStack = false;
+	
+	if (resultReg != "r0") {
+		// it's not where we want it.
+		isStack = true;
+
+		addCommand(func, "push", "{r0}");
+		string command = resultReg[0] != 'r' ? "ldr" : "mov";
+		addCommand(func, command, "r0", resultReg);
+
+		resultReg = "r0";
+	}
+	addCommand(func, "bl", "stop_pull");
+
+	if (isStack) {
+		addCommand(func, "pop", "{r0}");
+	}
 }
 
 void ASTVisitor::addLabel(boost::shared_ptr<AssemFunc> f, string label) {
