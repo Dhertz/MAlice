@@ -67,46 +67,46 @@ The looking-glass hatta()
 opened
     x was a number.
 
-    The Caterpillar blew out 4 smoke rings. ### make IO4 an output pin
-    The Caterpillar inhaled 24 times.       ### make IO24 an input pin
+    The Caterpillar blew out 4 smoke rings.     ### make IO4 an output pin
+    The Caterpillar inhaled 24 times.           ### make IO24 an input pin
 
-    The rabbit jumped.                      ### enable pull-up resistors on IO24 and 
-                                            ### IO25
 
-    Alice discovered x through door 24.     ### x = 0 or 1, depending on IO24's value
+    The Rabbit jumped x times.                  ### enable pull-up resistors on pin x 
+    The Rabbit went down the x hole.            ### enable pull-down resistors on pin x 
+    The Rabbit checked his watch for x seconds. ### stop pull-up/pull-down on pin x
 
-    4 said Tweedledee.                      ### set pin IO4 high
-    Alice slept for 100 milliseconds.       ### sleep for 100ms
-    4 said Tweedledum.                      ### set pin IO4 low
+    Alice discovered x through door 24.         ### x = 0 or 1, depending on IO24's 
+                                                ### value
+
+    4 said Tweedledee.                          ### set pin IO4 high
+    4 said Tweedledum.                          ### set pin IO4 low
 closed
 \end{verbatim}
 
-Certain Raspberry PI IO pins have internal pull-up resistors, which can be enabled on request. This means that an input switch can be connected directly from ground, with no need for an external pull-up resistor to 3.3V. The \texttt{The rabbit jumped} command enables these internal pull-up resistors on pins IO24 and IO25.
+Certain Raspberry PI IO pins have internal pull-up resistors, which can be enabled on request. This means that an input switch can be connected directly from ground, with no need for an external pull-up resistor to 3.3V.
 
 The implementation of these new commands required changes to almost every element of the compiler. However, thanks to our good design choices earlier on in the project, it took minimal effort to add the commands to the language and output their ARM assembly code. The majority of time allocated to the extension was spent getting to grips with the Raspberry Pi's (somewhat undocumented) GPIO controller.
 
-Initially, we hooked our Pi up to a simple LED circuit and used a pre-written Python library to blink the LED. We did this to confirm that the LED was wired up correctly, and were then ready to try hardware IO at a lower level.
+Initially, we hooked our Pi up to a simple LED circuit and used a pre-written Python library to blink the LED. We did this to confirm that the LED was wired up correctly. Once we had established this, we were ready to implement hardware IO at a lower level.
 
-We used C's \texttt{mmap} function to map from Linux virtual addresses to the physical hardware address of the Pi's GPIO controller. From here, hardware IO was a case of using integer division/modulo arithmetic and bitwise operations to manipulate the correct pin (pins are stored in blocks of 10, and each pin is represented by 3 bits). For programs that use IO commands, the C file which controls memory mapping and other IO utils is compiled and linked with the program's generated assembly at compile time. This is why \texttt{\#\#\#include io} is required as the first line of the file, to tell the preprocessor to change the assemble command.
+We used C's \texttt{mmap} function to map from Linux virtual addresses to the physical hardware address of the Pi's GPIO controller. From here, hardware IO was a case of using integer division/modulo arithmetic and bitwise operations to manipulate the correct pin (pins are stored in blocks of 10, and each pin is represented by 3 bits). For programs that use IO commands, a C file which controls memory mapping and other IO utils is compiled and linked with the program's generated assembly at compile time. We therefore implemented some simple preproccessing in our compile script, which would only link the C file if \texttt{\#\#\#include io} is the first line of the \texttt{.alice} file, as in the example above.
 
 \subsection*{Extension Demonstration: `Town Called MAlice'}
 
 At this stage, we had simple MAlice programs blinking LEDs and reading inputs from physical switches, using our new commands. However, we wanted to demonstrate the power of IO-enriched MAlice properly.
 
+ \vspace{-10pt}
 \begin{wrapfigure}{r}{0.3\textwidth}
-  \vspace{-20pt}
   \begin{center}
     \includegraphics[width=0.3\textwidth]{IMG_9457.JPG}
     \caption{Interfacing circuit}
   \end{center}
-  \vspace{-10pt}
 \end{wrapfigure}
 
 We decided to do this by writing a MAlice program to play \emph{Guitar Hero 3} on an Xbox 360 console. We built a simple electronic circuit with some NPN transistors and a 4066 logic chip to interface with a wired USB Xbox 360 controller. By connecting this circuit to the Raspberry Pi's GPIO pins (all set to outputs), we had the Pi playing notes in the game. All we had to do then was write a MAlice program to play a song, which we produced automatically using the note data from the game. In order to do this, we had to introduce one further new MAlice command:
 
 \begin{verbatim}
     Alice slept for 16 milliseconds. ### sleep for 16ms
-
 \end{verbatim}
 
 Our first attempt at MAlice playing \emph{Guitar Hero} resulted in the timing of the notes being slightly off. To investigate this, we borrowed a digital oscilloscope from Imperial College Robotics Society to work out what was going on. It transpired that our program was in fact accurate to the millisecond, and that our problem lied elsewhere.
