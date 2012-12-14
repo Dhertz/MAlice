@@ -21,12 +21,28 @@ foreach (@ARGV) {
 
         my $arch = `uname -a`;
         if($arch !~ /.*armv6.*/) {
-            push(@args, "arm-elf-gcc");
+            push(@args, "arm-elf-gcc $filename.run");
+
+            open SCRIPT, ">", $filename;
+            
+            if($? != 0) {
+                print "Failed to create file. $!\n";
+            }
+
+            my $str = "#!/bin/bash\nqemu-arm $filename.run";
+            print SCRIPT $str;
+            close SCRIPT;
+
+            system("chmod +rx $filename");
+            if($? != 0) {
+                print "Failed to execute. $!\n";
+            }
+
         } else {
-            push(@args, "gcc");
+            push(@args, "gcc $filename");
         }
 
-        push(@args, "$filename -o $_.s");
+        push(@args, "-o $_.s");
 
         open my $source, '<', $_; 
         if(<$source> =~ /###include io/) {
@@ -39,14 +55,14 @@ foreach (@ARGV) {
         system("@args");
 
         if($? != 0) {
-            print "Failure to execute. $!\n";
+            print "Failed to execute. $!\n";
         }
 
         if($flag) { 
             system("rm $_.s");
 
             if($? != 0) {
-                print "Failure to execute. $!\n";
+                print "Failed to execute. $!\n";
             }
         } 
     }
