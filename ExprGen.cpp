@@ -6,13 +6,8 @@
 #include <boost/lexical_cast.hpp>
 #include <algorithm>
 
-typedef 
-	boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > 
-	treble_ptr_t;
-
-typedef 
-	boost::tuple< string, list<AssemCom>, vector<string> > 
-	treble_t;
+typedef boost::shared_ptr< boost::tuple< string, list<AssemCom>, vector<string> > > treble_ptr_t;
+typedef boost::tuple< string, list<AssemCom>, vector<string> > treble_t;
 
 void printVector(vector<string> vec) {
 	vector<string>::const_iterator i;
@@ -42,8 +37,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root,
 		//   the label matches the one made in the function declaration), and
 		//   I know my result will be in r0 by convention
 
-        string funcName = 
-        	Utils::createStringFromTree(Utils::childByNum(root, 0));
+        string funcName = Utils::createStringFromTree(Utils::childByNum(root, 0));
         pANTLR3_BASE_TREE cplTree = Utils::childByNum(root, 1);
 
         int maxpush = 3;
@@ -135,31 +129,24 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root,
         // Also allowed to be an array, so that function calls with array
         //   arguments are allowed
 
-		// look up the ST until we find the Identifier,
+		// I can just look up my ST until I find the Identifier,
 		//   which will now have a string field of its assembly location
-		// If this is set, return it
+		// If this is set, I return it
 		// If not, I allocate a register if possible, or memory space otherwise
 
-		string varName = 
-			Utils::createStringFromTree(Utils::childByNum(root, 0));
-	    boost::shared_ptr<Identifier> varIdent = 
-	    	st->lookupCurrLevelAndEnclosingLevels(varName);
+		string varName = Utils::createStringFromTree(Utils::childByNum(root, 0));
+	    boost::shared_ptr<Identifier> varIdent = st->lookupCurrLevelAndEnclosingLevels(varName);
 
 		if (varIdent->getBaseName() == "Type") {
-            boost::shared_ptr<Type> varType = 
-            	boost::shared_polymorphic_downcast<Type>(varIdent);
-
-            boost::shared_ptr<Array> arr = 
-            	boost::shared_polymorphic_downcast<Array>(varType);
+            boost::shared_ptr<Type> varType = boost::shared_polymorphic_downcast<Type>(varIdent);
+            boost::shared_ptr<Array> arr = boost::shared_polymorphic_downcast<Array>(varType);
 
 			// Array will definitely have been allocated by now
 			string loc = arr->getAssLoc();
 			treble_ptr_t ret(new treble_t(loc, instrs, freeRegs));
 			return ret;
         } else {
-            boost::shared_ptr<Variable> var = 
-            	boost::shared_polymorphic_downcast<Variable>(varIdent);
-
+            boost::shared_ptr<Variable> var = boost::shared_polymorphic_downcast<Variable>(varIdent);
 			string loc = var->getAssLoc();
 
 			if (loc == "") {
@@ -192,17 +179,10 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root,
     } else if (tok == "ARRMEMBER") {
         // Array member reference
 
-        string arrName = 
-        	Utils::createStringFromTree(Utils::childByNum(root, 0));
-
-        boost::shared_ptr<Identifier> arrIdent = 
-        	st->lookupCurrLevelAndEnclosingLevels(arrName);
-
-		boost::shared_ptr<Type> arrType = 
-			boost::shared_polymorphic_downcast<Type>(arrIdent);
-
-        boost::shared_ptr<Array> arr = 
-        	boost::shared_polymorphic_downcast<Array>(arrType);
+        string arrName = Utils::createStringFromTree(Utils::childByNum(root, 0));
+        boost::shared_ptr<Identifier> arrIdent = st->lookupCurrLevelAndEnclosingLevels(arrName);
+		boost::shared_ptr<Type> arrType = boost::shared_polymorphic_downcast<Type>(arrIdent);
+        boost::shared_ptr<Array> arr = boost::shared_polymorphic_downcast<Array>(arrType);
 
 		string arrayLoc = arr->getAssLoc();
 
@@ -229,11 +209,9 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root,
 		addCommand(instrs, "mov", indexLoc, indexLoc, "LSL #2");
 		if (arrayLoc[0] == '[') {
 			// local array
-			int arrayStartIndex = 
-				atoi(arrayLoc.substr(arrayLoc.find("-") + 1).c_str());
+			int arrayStartIndex = atoi(arrayLoc.substr(arrayLoc.find("-") + 1).c_str());
 
-			addCommand(instrs, "sub", indexLoc, indexLoc, "#" + 
-								boost::lexical_cast<string>(arrayStartIndex));
+			addCommand(instrs, "sub", indexLoc, indexLoc, "#" + boost::lexical_cast<string>(arrayStartIndex));
 			addCommand(instrs, "add", indexLoc, "fp", indexLoc);
 			addCommand(instrs, "ldr", indexLoc, "[" + indexLoc + "]");
 		} else if (arrayLoc[0] == '.') {
@@ -245,12 +223,10 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root,
 			oldLoc = Utils::borrowRegister(args);
 
 			addCommand(instrs, "ldr", reg, arrayLoc);
-			addCommand(instrs, "ldr", oldLoc, 
-								"[" + reg + ", " + indexLoc + "]");
+			addCommand(instrs, "ldr", oldLoc, "[" + reg + ", " + indexLoc + "]");
 		} else {
 			// reference
-			addCommand(instrs, "ldr", oldLoc, 
-								"[" + arrayLoc + ", " + indexLoc + "]");
+			
 		}
 
 		if (onStack) {
@@ -310,10 +286,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root,
     	    string n = Utils::createStringFromTree(root);
     	    if (!freeRegs.empty()) {
     	    	string reg = freeRegs.front();
-    	    	if (func) {
-    	    		freeRegs.erase(freeRegs.begin());
-    				func->removeReg(reg);
-    	    	}
+    			freeRegs.erase(freeRegs.begin());
 
 				if (atoi(n.c_str()) > 255) {
 					// To large a value to use mov, use ldr instead
@@ -372,8 +345,7 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root,
 					freeRegs.erase(freeRegs.begin());
 				} else {
 					int currPtr = func->getStackPointer() + 4;
-					stackLoc = "[fp, #-" + boost::lexical_cast<string>(currPtr) 
-									+ "]";
+					stackLoc = "[fp, #-" + boost::lexical_cast<string>(currPtr) + "]";
 					func->increaseStackPointer(4);
 
 					// borrow a regiser to replace stackLoc in any calculations
@@ -711,10 +683,10 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root,
 						regOnStack = true;
 						func->increaseStackPointer(4);
 						stackLocReg = "[fp, #-" + 
-						  boost::lexical_cast<string>(func->getStackPointer()) + 
-						  "]";
+							boost::lexical_cast<string>(func->getStackPointer()) + 
+							"]";
 
-						// borrow a regiser to replace stackLoc
+						// borrow a regiser to replace stackLoc in any calculations
 						vector<string> argRegs;
 						argRegs.push_back(lhsLoc);
 						argRegs.push_back(rhsLoc);
@@ -896,21 +868,17 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root,
 
 /*
 	Calculate the value of a constant expression, can be used for allocating
-		space for arrays at compile time etc
+		space for arrays etc
 */
-int ExprGen::evaluateExpression(pANTLR3_BASE_TREE root, 
-									boost::shared_ptr<SymbolTable> st) {
+int ExprGen::evaluateExpression(pANTLR3_BASE_TREE root, boost::shared_ptr<SymbolTable> st) {
 	string tok = Utils::createStringFromTree(root);
 
 	if (tok == "VAR") {
-		string varName = 
-			Utils::createStringFromTree(Utils::childByNum(root, 0));
-	    boost::shared_ptr<Identifier> varIdent = 
-	    	st->lookupCurrLevelAndEnclosingLevels(varName);
+		string varName = Utils::createStringFromTree(Utils::childByNum(root, 0));
+	    boost::shared_ptr<Identifier> varIdent = st->lookupCurrLevelAndEnclosingLevels(varName);
 
 		if (varIdent->getBaseName() != "Type") {
-            boost::shared_ptr<Variable> var = 
-            	boost::shared_polymorphic_downcast<Variable>(varIdent);
+            boost::shared_ptr<Variable> var = boost::shared_polymorphic_downcast<Variable>(varIdent);
             if (var->hasEvaluatedVal())
             	return var->getVal();
         }

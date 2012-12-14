@@ -6,30 +6,48 @@ if($flag =~ /-s/) {
    unshift(@ARGV, $flag);
    $flag = '';
 }
+
 foreach (@ARGV) {
-    *STDERR = *STDOUT;
-    print "./compile $_\n";
-    `./codegen $_`;
+    
+    print "./codegen $_\n";
+    system("./codegen $_");
+    
     $_ =~ m/([^\^\?\*\/\:\;\{\}\\]+)\.alice/;
     my $filename = $1;
-    print "$filename\n";
+    
     if(($? << 8) == 0) {
-	my $arch = `uname -a`;
-        if($arch =~ /.*armv6.*/) {
-            open my $source, '<', $_; 
-            if(<$source> =~ /###include io/) {
-                print "gcc -o $filename $_.s utils.o\n\n";
-                `gcc -o $filename $_.s utils.o`;
-            } else {
-                print "gcc -o $filename $_.s\n\n";
-               `gcc -o $filename $_.s`;
-            }
-            close $source;
+
+    	my @args;
+
+        my $arch = `uname -a`;
+        if($arch !~ /.*armv6.*/) {
+            push(@args, "arm-elf-gcc");
         } else {
-            print "Can only compile to execuable on ARMv6!\n";
-	}
+            push(@args, "gcc");
+        }
+
+        push(@args, "$filename -o $_.s");
+
+        open my $source, '<', $_; 
+        if(<$source> =~ /###include io/) {
+            push(@args, "utils.o");
+        }
+        close $source;
+
+    	print "@args\n\n";
+        *STDERR = *STDOUT;
+        system("@args");
+
+        if($? != 0) {
+            print "Failure to execute. $!\n";
+        }
+
         if($flag) { 
-            `rm $_.s`;
+            system("rm $_.s");
+
+            if($? != 0) {
+                print "Failure to execute. $!\n";
+            }
         } 
     }
 }

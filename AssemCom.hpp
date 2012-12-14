@@ -6,12 +6,6 @@
 
 using namespace std;
 
-/*
-	AssemCom
-	--------
-	Object representing a command in ARM Assembler. Holds the command name, it's
-	arity and it's arguments.
-*/
 class AssemCom {
 	string _name;
 	int _arity;

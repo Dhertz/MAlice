@@ -2,13 +2,8 @@
 #include <fstream>
 #include <iostream>
 
-/*
-	InstructionPrinter::printList
-	-----------------------------
-	static method which takes a list of commands and an output file name
-	and turns each AssemCom into an actual valid ARM Assembler command.
-	Attempts to tab the assembly code out nicely as well.
-*/
+// NB: change file to file and uncomment things to write to "filename.s" - Owen
+
 void InstructionPrinter::printList(list<AssemCom> l, string filename) {
 	list<AssemCom>::const_iterator it;
 

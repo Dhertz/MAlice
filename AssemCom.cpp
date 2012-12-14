@@ -19,8 +19,6 @@ vector<string>& AssemCom::getArgs() {
 	return _args;
 }
 
-// Allow equality check on commands for use in various places across code
-// generation
 bool operator== (AssemCom& com1, AssemCom& com2) {
 	return (com1.getName() == com2.getName() && 
 			com1.getArgs() == com2.getArgs());

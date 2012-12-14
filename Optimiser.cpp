@@ -69,8 +69,7 @@ list<AssemCom>& Optimiser::removeDuplicateLabels() {
 				// mark this label as a duplciate for later and remove the
 				// duplicate instructions
 				_duplicateLabels.insert(
-					pair<int, int>(atoi(it->getName().substr(2).c_str()),
-															 previousLabel));
+					pair<int, int>(atoi(it->getName().substr(2).c_str()), previousLabel));
 				it = _visitor->getEndDefs().erase(it);
 				it = _visitor->getEndDefs().erase(it);
 				--it;

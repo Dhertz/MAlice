@@ -26,9 +26,8 @@ pANTLR3_BASE_TREE Utils::childByNum(pANTLR3_BASE_TREE tree, int num) {
 }
 
 string Utils::createStringFromTree(pANTLR3_BASE_TREE tree) {
-    string res(
-    	(const char *) tree->getText(tree)->to8(tree->getText(tree))->chars,
-        tree->getText(tree)->len);
+    string res((const char *) tree->getText(tree)->to8(tree->getText(tree))->chars,
+               tree->getText(tree)->len);
     return res;
 }
 
@@ -72,12 +71,10 @@ string Utils::borrowRegister(vector<string> args) {
 	vector<string> allRegs =
 		vector<string>(regs, regs + sizeof(regs) / sizeof(string));
 
-	for (vector<string>::iterator it = allRegs.begin(); it != allRegs.end(); 
-																		++it) {
+	for (vector<string>::iterator it = allRegs.begin(); it != allRegs.end(); ++it) {
 		if (find(args.begin(), args.end(), *it) == args.end())
 			return *it;
 	}
-	// This won't ever be hit, since no function in ASTVisitor or ExprGen 
-	// requires all the registers concretely
+	// This won't ever be hit, as no case above uses so many arguments
 	return "";
 }
