@@ -138,6 +138,13 @@ public:
 					   boost::shared_ptr<SymbolTable> st,
 					   boost::shared_ptr<AssemFunc> func);
     void visitPullUp(boost::shared_ptr<SymbolTable> st,
+    				   boost::shared_ptr<ExprAST> expr,
+					   boost::shared_ptr<AssemFunc> func);
+    void visitPullDown(boost::shared_ptr<SymbolTable> st,
+    				   boost::shared_ptr<ExprAST> expr,
+					   boost::shared_ptr<AssemFunc> func);
+    void visitStopPull(boost::shared_ptr<SymbolTable> st,
+    				   boost::shared_ptr<ExprAST> expr,
 					   boost::shared_ptr<AssemFunc> func);
 
     

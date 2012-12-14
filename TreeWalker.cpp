@@ -27,6 +27,8 @@
 #include "ast/SetHighAST.hpp"
 #include "ast/SetLowAST.hpp"
 #include "ast/PullUpAST.hpp"
+#include "ast/PullDownAST.hpp"
+#include "ast/StopPullAST.hpp"
 #include <antlr3commontree.h>
 
 //Construct object, assign fields and start walking the input tree from the top
@@ -559,8 +561,50 @@ void TreeWalker::processPULLUP(pANTLR3_BASE_TREE tree,
                                  boost::weak_ptr<ASTNode> parent, 
                                  int childNum) {
 
+    boost::shared_ptr<ExprAST> expr(
+        new ExprAST(st, Utils::childByNum(tree, 0), parent, getLine(tree), 
+                      true));
+
     boost::shared_ptr<PullUpAST> low(
-        new PullUpAST(st, parent, getLine(tree)));
+        new PullUpAST(st, expr, parent, getLine(tree)));
+
+    if(boost::shared_ptr<ASTNode> p = parent.lock()) {
+        p->addChild(low);
+    } else {
+        cout << "Bad parent." << endl;
+    }
+}
+
+void TreeWalker::processPULLDOWN(pANTLR3_BASE_TREE tree,
+                                 boost::shared_ptr<SymbolTable> st,
+                                 boost::weak_ptr<ASTNode> parent, 
+                                 int childNum) {
+
+    boost::shared_ptr<ExprAST> expr(
+        new ExprAST(st, Utils::childByNum(tree, 0), parent, getLine(tree), 
+                      true));
+
+    boost::shared_ptr<PullDownAST> low(
+        new PullDownAST(st, expr, parent, getLine(tree)));
+
+    if(boost::shared_ptr<ASTNode> p = parent.lock()) {
+        p->addChild(low);
+    } else {
+        cout << "Bad parent." << endl;
+    }
+}
+
+void TreeWalker::processSTOPPULL(pANTLR3_BASE_TREE tree,
+                                 boost::shared_ptr<SymbolTable> st,
+                                 boost::weak_ptr<ASTNode> parent, 
+                                 int childNum) {
+
+     boost::shared_ptr<ExprAST> expr(
+        new ExprAST(st, Utils::childByNum(tree, 0), parent, getLine(tree), 
+                      true));
+
+    boost::shared_ptr<StopPullAST> low(
+        new StopPullAST(st, expr, parent, getLine(tree)));
 
     if(boost::shared_ptr<ASTNode> p = parent.lock()) {
         p->addChild(low);
@@ -619,26 +663,28 @@ void TreeWalker::checkHatta() {
 
 // map intialisation
 void TreeWalker::init() {
-    _memberMap["PROG"]      = &TreeWalker::processPROG;
-    _memberMap["PROCDEC"]   = &TreeWalker::processPROCDEC;
-    _memberMap["BODY"]      = &TreeWalker::processBODY;
-    _memberMap["FUNCDEC"]   = &TreeWalker::processFUNCDEC;
-    _memberMap["VARDEC"]    = &TreeWalker::processVARDEC;
-    _memberMap["VARSTAT"]   = &TreeWalker::processVARSTAT;
-    _memberMap["INC"]       = &TreeWalker::processINC;
-    _memberMap["DEC"]       = &TreeWalker::processDEC;
-    _memberMap["PRINT"]     = &TreeWalker::processPRINT;
-    _memberMap["RETURN"]    = &TreeWalker::processRETURN;
-    _memberMap["STDIN"]     = &TreeWalker::processSTDIN;
-    _memberMap["WHILE"]     = &TreeWalker::processWHILE;
-    _memberMap["CHOICE"]    = &TreeWalker::processCHOICE;
-    _memberMap["IF"]        = &TreeWalker::processIF;
-    _memberMap["NS"]        = &TreeWalker::processNS;
-    _memberMap["MAKEIN"]    = &TreeWalker::processMAKEIN;
-    _memberMap["MAKEOUT"]   = &TreeWalker::processMAKEOUT;
-    _memberMap["PAUSE"]     = &TreeWalker::processPAUSE;
-    _memberMap["READIN"]    = &TreeWalker::processREADIN;
-    _memberMap["SETHIGH"]   = &TreeWalker::processSETHIGH;
-    _memberMap["SETLOW"]    = &TreeWalker::processSETLOW;
-    _memberMap["PULLUP"]    = &TreeWalker::processPULLUP;
+    _memberMap["PROG"]        = &TreeWalker::processPROG;
+    _memberMap["PROCDEC"]     = &TreeWalker::processPROCDEC;
+    _memberMap["BODY"]        = &TreeWalker::processBODY;
+    _memberMap["FUNCDEC"]     = &TreeWalker::processFUNCDEC;
+    _memberMap["VARDEC"]      = &TreeWalker::processVARDEC;
+    _memberMap["VARSTAT"]     = &TreeWalker::processVARSTAT;
+    _memberMap["INC"]         = &TreeWalker::processINC;
+    _memberMap["DEC"]         = &TreeWalker::processDEC;
+    _memberMap["PRINT"]       = &TreeWalker::processPRINT;
+    _memberMap["RETURN"]      = &TreeWalker::processRETURN;
+    _memberMap["STDIN"]       = &TreeWalker::processSTDIN;
+    _memberMap["WHILE"]       = &TreeWalker::processWHILE;
+    _memberMap["CHOICE"]      = &TreeWalker::processCHOICE;
+    _memberMap["IF"]          = &TreeWalker::processIF;
+    _memberMap["NS"]          = &TreeWalker::processNS;
+    _memberMap["MAKEIN"]      = &TreeWalker::processMAKEIN;
+    _memberMap["MAKEOUT"]     = &TreeWalker::processMAKEOUT;
+    _memberMap["PAUSE"]       = &TreeWalker::processPAUSE;
+    _memberMap["READIN"]      = &TreeWalker::processREADIN;
+    _memberMap["SETHIGH"]     = &TreeWalker::processSETHIGH;
+    _memberMap["SETLOW"]      = &TreeWalker::processSETLOW;
+    _memberMap["PULLUP"]      = &TreeWalker::processPULLUP;
+    _memberMap["PULLDOWN"]    = &TreeWalker::processPULLDOWN;
+    _memberMap["STOPPULL"]    = &TreeWalker::processSTOPPULL;
 }

@@ -99,16 +99,54 @@ void short_wait() {
     }
 }
 
-void pull_up() {
-    // enable pull=up on GPIO24 & 25
+void pull_up(int pin) {
+
+    //No overflows!
+    int shift = (pin%32);
+
+    // enable pull=up on pin
     *(gpio + 37) = 0b010;
 
     short_wait();
-    // clock on GPIO 24 & 25
-    *(gpio + 38) = 0b011 << 24;
+    // clock on GPIO pin
+    *(gpio + 38) = 0b001 << shift;
 
     short_wait();
     // set them back to 0
     *(gpio + 37) = 0b000;
     *(gpio + 38) = 0b000;
 }
+
+void pull_down(int pin) {
+    //No overflows!
+    int shift = (pin%32);
+
+    // enable pull down
+    *(gpio + 37) = 0b001;
+
+    short_wait();
+    // clock on GPIO pin
+    *(gpio + 38) = 0b001 << shift;
+
+    short_wait();
+    // set them back to 0
+    *(gpio + 37) = 0b000;
+    *(gpio + 38) = 0b000;
+}
+
+void stop_pull(int pin) {
+    //No overflows!
+    int shift = (pin%32);
+
+    //Clear the pull register.
+    *(gpio + 37) = 0b000;
+
+    // clock on GPIO pin
+    *(gpio + 38) = 0b001 << shift;
+
+    short_wait();
+    // set them back to 0
+    *(gpio + 37) = 0b000;
+    *(gpio + 38) = 0b000;
+}
+

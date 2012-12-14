@@ -1,17 +1,17 @@
-#ifndef PULL_UP_AST
-#define PULL_UP_AST
+#ifndef PULL_DOWN_AST
+#define PULL_DOWN_AST
 
 #include "ASTNode.hpp"
 #include "../ASTVisitor.hpp"
 #include "../AssemFunc.hpp"
 #include "ExprAST.hpp"
 
-class PullUpAST : public ASTNode {
+class PullDownAST : public ASTNode {
 	boost::shared_ptr<SymbolTable> _st;
 	boost::shared_ptr<ExprAST> _expr;
 	int _lineNo;
 public:
-	PullUpAST(boost::shared_ptr<SymbolTable> st,
+	PullDownAST(boost::shared_ptr<SymbolTable> st, 
 				boost::shared_ptr<ExprAST> expr, 
 				boost::weak_ptr<ASTNode> parent, int lineNo);
 	void check();
