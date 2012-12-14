@@ -704,25 +704,6 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root,
 				if (!freeRegs.empty()) {
 			    	res = freeRegs.front();
 					freeRegs.erase(freeRegs.begin());
-					if (!freeRegs.empty()) {
-						reg = freeRegs.front();
-						freeRegs.erase(freeRegs.begin());
-					} else {
-						regOnStack = true;
-						func->increaseStackPointer(4);
-						stackLocReg = "[fp, #-" + 
-						  boost::lexical_cast<string>(func->getStackPointer()) + 
-						  "]";
-
-						// borrow a regiser to replace stackLoc
-						vector<string> argRegs;
-						argRegs.push_back(lhsLoc);
-						argRegs.push_back(rhsLoc);
-						reg = Utils::borrowRegister(argRegs);
-
-						// push {reg}
-						addCommand(instrs, "push", "{" + reg + "}");
-					}
 
 				} else {
 					resOnStack = true;
@@ -741,6 +722,29 @@ treble_ptr_t ExprGen::generateExpression(pANTLR3_BASE_TREE root,
 					addCommand(instrs, "push", "{" + res + "}");
 				}
 
+				if (!freeRegs.empty()) {
+					reg = freeRegs.front();
+					cout << "reg = '" << reg << "'" << endl;
+					freeRegs.erase(freeRegs.begin());
+				} else {
+					regOnStack = true;
+					func->increaseStackPointer(4);
+					stackLocReg = "[fp, #-" + 
+					  boost::lexical_cast<string>(func->getStackPointer()) + 
+					  "]";
+
+					// borrow a regiser to replace stackLoc
+					vector<string> argRegs;
+					argRegs.push_back(lhsLoc);
+					argRegs.push_back(rhsLoc);
+					reg = Utils::borrowRegister(argRegs);
+
+					cout << "reg = '" << reg << "'" << endl;
+					// push {reg}
+					addCommand(instrs, "push", "{" + reg + "}");
+				}
+
+				cout << "hello '" << reg << "'" << endl;
 				addCommand(instrs, "eor", res, res, res);
 				addCommand(instrs, "mov", reg, lhsLoc);
 
