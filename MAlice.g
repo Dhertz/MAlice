@@ -46,6 +46,7 @@ tokens {
     SETHIGH;
     SETLOW;
     PAUSE;
+    PULLUP;
 }
 
 @parser::postinclude {
@@ -299,17 +300,23 @@ statement: body |
 
            conditionalStatement |
 
-           ('The' 'Caterpillar' 'blew' 'out' expression 'smoke' 'rings' delimiter) => 'The' 'Caterpillar' 'blew' 'out' expression 'smoke' 'rings' delimiter
+           ('The' 'Caterpillar' 'blew' 'out' expression 'smoke' 'rings' delimiter) => 
+           'The' 'Caterpillar' 'blew' 'out' expression 'smoke' 'rings' delimiter
            -> ^(MAKEOUT expression) |
 
-           ('The' 'Caterpillar' 'inhaled' expression 'times' delimiter) => 'The' 'Caterpillar' 'inhaled' expression 'times' delimiter
+           ('The' 'Caterpillar' 'inhaled' expression 'times' delimiter) => 
+           'The' 'Caterpillar' 'inhaled' expression 'times' delimiter
            -> ^(MAKEIN expression) |
 
-           ('Alice' 'discovered') => 'Alice' 'discovered' ident=expression 'through' 'door' pin=expression delimiter
+           ('Alice' 'discovered') => 
+           'Alice' 'discovered' ident=expression 'through' 'door' pin=expression delimiter
            -> ^(READIN $ident $pin) |
 
            ('Alice' 'slept') => 'Alice' 'slept' 'for' expression 'milliseconds' delimiter
-           -> ^(PAUSE expression);
+           -> ^(PAUSE expression) |
+
+           ('The' 'rabbit') => 'The' 'rabbit' 'jumped' delimiter
+           -> ^(PULLUP);
 
 conditionalStatement: 'perhaps' '(' e1=expression ')' 'so' sl1=statementList elseif* ('or' sl3=statementList)? 'because' 'Alice' 'was' 'unsure' 'which'
                       -> ^(IF $e1 ^(IFSTS $sl1) elseif* ^(ELSESTS $sl3)?);

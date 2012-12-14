@@ -16,13 +16,13 @@ codegen: idents/Type.o idents/Callable.o idents/Number.o idents/Sentence.o \
 	     idents/Param.o idents/Function.o idents/Proc.o \
 	     SymbolTable.o ast/AST.o ast/ASTNode.o ast/ExprAST.o ast/DecAST.o \
 	     ast/IncAST.o ast/IfBodyAST.o ast/IfAST.o ast/ChoiceAST.o ast/WhileAST.o \
-	     ast/PrintAST.o ast/ProgAST.o ast/StdinAST.o ast/VarDecAST.o ast/VarAssignAST.o \
+	     ast/PrintAST.o ast/ProgAST.o ast/StdinAST.o ast/VarDecAST.o \ast/VarAssignAST.o \
 	     ast/ArrayAssignAST.o ast/ArrayDecAST.o ast/HeaderParamsAST.o \
 	     ast/FuncDecAST.o ast/ProcDecAST.o ast/ReturnAST.o ast/CallParamsAST.o \
 	     ast/FuncProcCallAST.o ast/MakeInAST.o ast/MakeOutAST.o ast/PauseAST.o \
-	     ast/ReadInAST.o ast/SetHighAST.o ast/SetLowAST.o TreeWalker.o Utils.o \
-	     Label.o ASTVisitor.o AssemCom.o AssemFunc.o InstructionPrinter.o \
-	     ExprGen.o MAlice.o FunctionOptimiser.o Optimiser.o \
+	     ast/ReadInAST.o ast/SetHighAST.o ast/SetLowAST.o ast/PullUpAST.o \
+	     TreeWalker.o Utils.o Label.o ASTVisitor.o AssemCom.o AssemFunc.o \
+	     InstructionPrinter.o ExprGen.o MAlice.o FunctionOptimiser.o Optimiser.o \
 	     MAliceLexer.o MAliceParser.o libantlr3c/antlr3baserecognizer.o \
 	     libantlr3c/antlr3convertutf.o libantlr3c/antlr3parser.o \
 	     libantlr3c/antlr3basetree.o libantlr3c/antlr3cyclicdfa.o \

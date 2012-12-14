@@ -1,7 +1,10 @@
 #include "ReadInAST.hpp"
 #include "../Utils.hpp"
 
-ReadInAST::ReadInAST(boost::shared_ptr<SymbolTable> st, boost::shared_ptr<ExprAST> expr, boost::weak_ptr<ASTNode> parent, int lineNo) : ASTNode(st, parent, lineNo) {
+ReadInAST::ReadInAST(boost::shared_ptr<SymbolTable> st, 
+                       boost::shared_ptr<ExprAST> expr, 
+                       boost::weak_ptr<ASTNode> parent, int lineNo) 
+                       : ASTNode(st, parent, lineNo) {
     _st = st;
     _expr = expr;
     _lineNo = lineNo;

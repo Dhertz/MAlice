@@ -9,13 +9,25 @@
 #include "SymbolTable.hpp"
 #include <boost/enable_shared_from_this.hpp>
 
-// These are here to avoid circular includes
+// These class are forward declared to avoid circular header file includes
 class ASTNode;
 class IfBodyAST;
 class ExprAST;
 class CallParamsAST;
 class HeaderParamsAST;
 
+/*
+	ASTVisitor
+	----------
+	This class uses the visitor pattern to visit any node it comes across in 
+	an AST. For each node, it generates the required ARM Assembler code, 
+	calling static methods from ExprGen when needed.
+	It builds a list of functions, top and bottom definitions which can be
+	passed to Optimiser and InstructionPrinter to produce output files.
+
+	NB: Some visitor methods are overloaded, this is the case when the node can 
+	occur inside and outside of a function definition
+*/
 class ASTVisitor : public boost::enable_shared_from_this<ASTVisitor> {
 	vector<boost::shared_ptr<AssemFunc> > _functions;
 	list<AssemCom> _startDefs;
@@ -33,10 +45,14 @@ public:
 						vector <boost::shared_ptr<ASTNode> > children,
 						boost::shared_ptr<SymbolTable> st);
 
-	void visitFuncDec(string name, string returnType, 
-						boost::shared_ptr<HeaderParamsAST> params,  
+	void visitFuncDec(string name, boost::shared_ptr<HeaderParamsAST> params,  
 						vector <boost::shared_ptr<ASTNode> > children,
 						boost::shared_ptr<SymbolTable> st);
+
+	void visitFuncDec(string name, boost::shared_ptr<HeaderParamsAST> params,  
+						vector <boost::shared_ptr<ASTNode> > children,
+						boost::shared_ptr<SymbolTable> st, 
+						boost::shared_ptr<AssemFunc> func);
 
 	void visitVarDec(string typeName, string varName, 
 					   boost::shared_ptr<SymbolTable> st,
@@ -101,26 +117,29 @@ public:
                          boost::shared_ptr<AssemFunc> func);
     
     void visitArrayDec(string name, boost::shared_ptr<ExprAST> length, 
-								 boost::shared_ptr<Type> type, 
-							     boost::shared_ptr<SymbolTable> st);
+						 boost::shared_ptr<Type> type, 
+					     boost::shared_ptr<SymbolTable> st);
     void visitMakeIn(boost::shared_ptr<ExprAST> expr, 
-					boost::shared_ptr<SymbolTable> st,
-					boost::shared_ptr<AssemFunc> func);
+					   boost::shared_ptr<SymbolTable> st,
+				  	   boost::shared_ptr<AssemFunc> func);
     void visitMakeOut(boost::shared_ptr<ExprAST> expr, 
-					boost::shared_ptr<SymbolTable> st,
-					boost::shared_ptr<AssemFunc> func);
+					    boost::shared_ptr<SymbolTable> st,
+					    boost::shared_ptr<AssemFunc> func);
     void visitPause(boost::shared_ptr<ExprAST> expr, 
-					boost::shared_ptr<SymbolTable> st,
-					boost::shared_ptr<AssemFunc> func);
+					  boost::shared_ptr<SymbolTable> st,
+					  boost::shared_ptr<AssemFunc> func);
     void visitReadIn(boost::shared_ptr<ExprAST> expr, 
-					boost::shared_ptr<SymbolTable> st,
-					boost::shared_ptr<AssemFunc> func);
+					   boost::shared_ptr<SymbolTable> st,
+					   boost::shared_ptr<AssemFunc> func);
     void visitSetHigh(boost::shared_ptr<ExprAST> expr, 
-					boost::shared_ptr<SymbolTable> st,
-					boost::shared_ptr<AssemFunc> func);
+					    boost::shared_ptr<SymbolTable> st,
+					    boost::shared_ptr<AssemFunc> func);
     void visitSetLow(boost::shared_ptr<ExprAST> expr, 
-					boost::shared_ptr<SymbolTable> st,
-					boost::shared_ptr<AssemFunc> func);
+					   boost::shared_ptr<SymbolTable> st,
+					   boost::shared_ptr<AssemFunc> func);
+    void visitPullUp(boost::shared_ptr<SymbolTable> st,
+					   boost::shared_ptr<AssemFunc> func);
+
     
     void addLabel(boost::shared_ptr<AssemFunc> f, string comm);
     void addCommand(boost::shared_ptr<AssemFunc> f, string comm, string arg0);

@@ -84,3 +84,31 @@ void set_low(int pin) {
     // Clears bits which are 1 and ignores bits which are 0
     *(gpio + 10) = 1 << pin;
 }
+
+unsigned int read_in(int pin) {
+    // Returns the value of pin (high or low)
+    return (*(gpio + 13) >> pin) & 0b001;
+}
+
+void short_wait() {
+    // wait 100 clocks cycles for fun
+    int w = 0;
+    int i;
+    for (i = 0; i < 100; ++i) {
+        w++;
+    }
+}
+
+void pull_up() {
+    // enable pull=up on GPIO24 & 25
+    *(gpio + 37) = 0b010;
+
+    short_wait();
+    // clock on GPIO 24 & 25
+    *(gpio + 38) = 0b011 << 24;
+
+    short_wait();
+    // set them back to 0
+    *(gpio + 37) = 0b000;
+    *(gpio + 38) = 0b000;
+}
