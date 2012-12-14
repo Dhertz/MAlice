@@ -21,7 +21,7 @@ foreach (@ARGV) {
 
         my $arch = `uname -a`;
         if($arch !~ /.*armv6.*/) {
-            push(@args, "arm-elf-gcc $filename.run");
+            push(@args, "arm-elf-gcc -o $filename.run");
 
             open SCRIPT, ">", $filename;
             
@@ -39,10 +39,10 @@ foreach (@ARGV) {
             }
 
         } else {
-            push(@args, "gcc $filename");
+            push(@args, "gcc -o $filename");
         }
 
-        push(@args, "-o $_.s");
+        push(@args, "$_.s");
 
         open my $source, '<', $_; 
         if(<$source> =~ /###include io/) {
@@ -58,7 +58,8 @@ foreach (@ARGV) {
             print "Failed to execute. $!\n";
         }
 
-        if($flag) { 
+        if($flag) {
+            print "HELLO!"; 
             system("rm $_.s");
 
             if($? != 0) {
