@@ -46,7 +46,7 @@ If we'd have had the opportunity to go back and redo the project, we would have 
 
 We decided to manually write the semantic analysis component of our compiler. We could have perhaps used \emph{ANTLR} for this section as well, but decided that we didn't have enough time to learn the necessary complex aspects of the tool well enough to create a good solution with them. Additionally, the lectures we had been given on semantic analysis were comprehensive enough such that we felt equipped to hand craft this aspect of the compiler.
 
-As mentioned in the introduction, code generation was implemented using the visitor pattern on our AST nodes. Each \texttt{ASTNode} class has an \texttt{accept} method, which tells its visitor everything it knows about itself after semantic analysis (e.g.\ name, type, enclosing symbol table). The visitor, \texttt{ASTVisitor}, then has a method for each class that extends \texttt{ASTNode}, which calls the relevant accept methods and generates any assembly code required for the program.
+As mentioned in the first section, code generation was implemented using the visitor pattern on our AST nodes. Each of the child classes of \texttt{ASTNode} has an \texttt{accept} method, which tells its visitor everything it knows about itself after semantic analysis (e.g.\ name, type, enclosing symbol table). The \texttt{ASTVisitor} class then has a method for each class that extends \texttt{ASTNode}, which calls the relevant accept methods and generates any assembly code required for the program.
 
 \section*{Beyond the Specification}
 \subsection*{Optimisations}
@@ -70,7 +70,8 @@ opened
     The Caterpillar blew out 4 smoke rings. ### make IO4 an output pin
     The Caterpillar inhaled 24 times.       ### make IO24 an input pin
 
-    The rabbit jumped.                      ### enable pull-up resistors on IO24 and IO25
+    The rabbit jumped.                      ### enable pull-up resistors on IO24 and 
+                                            ### IO25
 
     Alice discovered x through door 24.     ### x = 0 or 1, depending on IO24's value
 
@@ -82,9 +83,9 @@ closed
 
 Certain Raspberry PI IO pins have internal pull-up resistors, which can be enabled on request. This means that an input switch can be connected directly from ground, with no need for an external pull-up resistor to 3.3V. The \texttt{The rabbit jumped} command enables these internal pull-up resistors on pins IO24 and IO25.
 
-The implementation of these new commands required changes to almost every element of the compiler. This is where our design choices came into play, as it took minimal effort to add the commands to the language and output their ARM assembly code. The majority of time allocated to the extension was spent getting to grips with the Raspberry Pi's (somewhat undocumented) GPIO controller.
+The implementation of these new commands required changes to almost every element of the compiler. However, thanks to our good design choices earlier on in the project, it took minimal effort to add the commands to the language and output their ARM assembly code. The majority of time allocated to the extension was spent getting to grips with the Raspberry Pi's (somewhat undocumented) GPIO controller.
 
-Initially, we hooked our Pi up to a simple LED circuit and used a pre-written Python library to blink the LED. We did this to confirm that the LED was wired up correctly, and were then ready to try hardware IO at a lower level.$  $
+Initially, we hooked our Pi up to a simple LED circuit and used a pre-written Python library to blink the LED. We did this to confirm that the LED was wired up correctly, and were then ready to try hardware IO at a lower level.
 
 We used C's \texttt{mmap} function to map from Linux virtual addresses to the physical hardware address of the Pi's GPIO controller. From here, hardware IO was a case of using integer division/modulo arithmetic and bitwise operations to manipulate the correct pin (pins are stored in blocks of 10, and each pin is represented by 3 bits). For programs that use IO commands, the C file which controls memory mapping and other IO utils is compiled and linked with the program's generated assembly at compile time. This is why \texttt{\#\#\#include io} is required as the first line of the file, to tell the preprocessor to change the assemble command.
 
