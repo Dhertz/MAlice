@@ -21,23 +21,7 @@ foreach (@ARGV) {
 
         my $arch = `uname -a`;
         if($arch !~ /.*armv6.*/) {
-            push(@args, "arm-elf-gcc -o $filename.run");
-
-            open SCRIPT, ">", $filename;
-            
-            if($? != 0) {
-                print "Failed to create file. $!\n";
-            }
-
-            my $str = "#!/bin/bash\nqemu-arm $filename.run";
-            print SCRIPT $str;
-            close SCRIPT;
-
-            system("chmod +rx $filename");
-            if($? != 0) {
-                print "Failed to execute. $!\n";
-            }
-
+            push(@args, "arm-linux-gnueabi-gcc-4.6 -o $filename");
         } else {
             push(@args, "gcc -o $filename");
         }
